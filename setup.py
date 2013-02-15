@@ -3,13 +3,8 @@ from setuptools import setup, find_packages
 requires = [
     'pyramid',
     'waitress',
-    'SQLAlchemy',
-    'transaction',
-    'pyramid_tm',
     'pyramid_debugtoolbar',
-    'zope.sqlalchemy',
-    'redis',
-    'psycopg2',
+    'celery-with-redis',
     'rpy2',
 ]
 

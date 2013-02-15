@@ -3,47 +3,9 @@ from pyramid.httpexceptions import HTTPFound
 from celery.result import AsyncResult
 from celery import current_app as celery
 import logging
-from .tasks import Plot, PlotR, PlotMatLab
+from .scripts import scripts
 
 logger = logging.getLogger(__package__)
-
-class Script(object):
-    def __init__(self, id, name, description, authors, task):
-        self.id = id
-        self.name = name
-        self.description = description
-        self.authors = authors
-        self.task = task
-        self.args = {
-                     'username': 'me',
-                     'password': 'pw'
-                     }
-
-scripts = {}
-
-def add_script(script):
-    scripts[script.id] = script
-
-add_script(Script(id='plot',
-                  name='Plot overview',
-                  description='Plots tracker measurements over time',
-                  authors='Willem Bouten',
-                  task=Plot,
-                  ))
-
-add_script(Script(id='plotr',
-                  name='Plot overview using R',
-                  description='Plots tracker measurements over time',
-                  authors='Willem Bouten',
-                  task=PlotR,
-                  ))
-
-add_script(Script(id='plotMatlab',
-                  name='Plot overview using Matlab',
-                  description='Plots tracker measurements over time',
-                  authors='Willem Bouten',
-                  task=PlotMatLab,
-                  ))
 
 
 @view_config(route_name='index', renderer='index.mak')
