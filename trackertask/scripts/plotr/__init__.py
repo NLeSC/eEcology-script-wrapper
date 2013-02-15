@@ -1,6 +1,8 @@
+import logging
+import tempfile
+import os.path
 from celery import Task
 from celery import current_task
-import logging
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from trackertask.scripts import add_script
@@ -18,10 +20,10 @@ class PlotR(Task):
         if self._trackertask is None:
             # TODO read from R file and make configurable
             r_string = """
-            plotr <- function(output_file) {
+            plotr <- function(output_file, title, start, end) {
                 library(RSvgDevice)
                 devSVG(file=output_file)
-                plot(1:11,(-5:5)^2, type='b', main='Simple')
+                plot(start:end,(-5:5)^2, type='b', main=title)
                 dev.off()
             }
             """
@@ -29,8 +31,10 @@ class PlotR(Task):
         return self._trackertask
 
     def run(self, start, end, id, username, password):
-        self.trackertask.plotr(id)
-        return id
+        taskid = current_task.request.id
+        output_fn = os.path.join(tempfile.gettempdir(), taskid+'.svg')
+        self.trackertask.plotr(output_fn, id, int(start), int(end))
+        return {'outputs': [{'text/svg': output_fn}]}
 
 
 add_script(Script(id='plotr',

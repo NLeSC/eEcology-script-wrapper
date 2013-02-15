@@ -1,6 +1,6 @@
+import time
 from celery import Task
 from celery import current_task
-import time
 from trackertask.scripts import add_script
 from trackertask.scripts import Script
 

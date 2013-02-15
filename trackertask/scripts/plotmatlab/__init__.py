@@ -1,6 +1,6 @@
+import subprocess
 from celery import Task
 from celery import current_task
-import subprocess
 from trackertask.scripts import add_script
 from trackertask.scripts import Script
 
