@@ -31,13 +31,15 @@ Script requirements
 Script types
 ------------
 
-R, Matlab, python etc.
+R, Matlab, Octave, python etc.
 
 R options:
 - .R file location
 
 Matlab options:
-- Matlab Compile Runtime location
+- Matlab Compile Runtime location (global)
 - shell script to run executable
 
+Octave options:
+- .m file location
 

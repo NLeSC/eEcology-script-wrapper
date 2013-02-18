@@ -4,8 +4,12 @@ requires = [
     'pyramid',
     'waitress',
     'pyramid_debugtoolbar',
-    'celery-with-redis',
+    'celery',
+    'redis',
     'rpy2',
+    'oct2py',
+    'numpy',  # required by scipy
+    'scipy',  # required by oct2py
 ]
 
 setup(name='trackertask',
