@@ -12,4 +12,6 @@ class PlotMatLab(MatlabTask):
 
     def run(self, start, end, trackers, dsn):
             super(PlotMatLab, self).run([self.output_dir, dsn, start, end, trackers])
-            return {'output': os.path.join(self.output_dir, '/plot.png')}
+            return {'path': os.path.join(self.output_dir, '/plot.png'),
+                    'content_type': 'image/png',
+                    }

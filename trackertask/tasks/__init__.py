@@ -1,9 +1,14 @@
 import os
+import sys
 import subprocess
 from celery import Task
 from celery import current_app
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from oct2py import octave
+
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 class PythonTask(Task):
     """Abstract task to run Python code"""
@@ -28,6 +33,10 @@ class PythonTask(Task):
         os.makedirs(directory)
         return directory
 
+    @property
+    def task_dir(self):
+        return os.path.dirname(os.path.abspath(sys.modules[self.__module__].__file__))
+
     def formfields2taskargs(self, fields):
         """Validate and serialize form fields to dict.
 
@@ -49,7 +58,7 @@ class RTask(PythonTask):
     def r(self):
         """self.r_script is imported into R and it's functions are available as self.r.<function>"""
         if self._r is None:
-            f = open(self.r_script)
+            f = open(os.path.join(self.task_dir, self.r_script))
             r_string = f.read()
             f.close()
             self._r = SignatureTranslatedAnonymousPackage(r_string, 'r')
@@ -74,7 +83,7 @@ class OctaveTask(PythonTask):
     octave_script = None
 
     def load_mfile(self):
-        octave.addpath(self.octave_script)
+        octave.addpath(os.path.join(self.task_dir, self.octave_script))
 
 
 class SubProcessTask(PythonTask):
@@ -137,7 +146,7 @@ class MatlabTask(PythonTask):
     def pargs(self):
         """Prepend the deployment script and matlab location"""
         return ['/bin/sh',
-                self.deploy_script,
+                os.path.join(self.task_dir, self.deploy_script),
                 self.matlab,
                 ]
 
