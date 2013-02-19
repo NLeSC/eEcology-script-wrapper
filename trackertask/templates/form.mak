@@ -2,20 +2,17 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Script - ${task.name}</title>
+<title>Script - ${task.label}</title>
+<link rel="stylesheet"
+        href="https://extjs.cachefly.net/ext-4.1.0-gpl/resources/css/ext-all.css" type="text/css"></link>
+<script type="text/javascript" src="https://extjs.cachefly.net/ext-4.1.0-gpl/ext-all-dev.js"></script>
+<script type="text/javascript" src="${request.route_path('jsform',script=task.name)}"></script>
 </head>
 <body>
-	<h1>${task.name}</h1>
+	<h1>${task.label}</h1>
 	<div>
 	${task.description}
 	</div>
-	<form method="POST">
-		<label for="id">Tracker id</label> <input type="text" name="id">
-		<label for="start">Start</label> <input type="datetime" name="start">
-		<label for="end">End</label> <input type="datetime" name="end">
-		<input type="submit"> <input type="reset">
-	</form>
-Form fields:
-<pre>${task.formfields()}</pre>
+	<div id="form"></div>
 </body>
 </html>

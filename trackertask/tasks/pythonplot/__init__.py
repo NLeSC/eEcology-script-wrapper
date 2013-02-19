@@ -12,12 +12,8 @@ class PythonPlotTask(PythonTask):
     description='Plots tracker measurements over time. By Stefan Verhoeven'
 
     """Perform a simple python task"""
-    def run(self, start, end, tracker_id, username, password):
-        for i in xrange(int(end)):
-            current_task.update_state(state='PROGRESS',
-                meta={'current': i, 'total': end})
-            time.sleep(float(start))
-        msg = 'fancy plot of {} from {} to {}'.format(tracker_id, start, end)
+    def run(self, start, end, trackers, username, password):
+        msg = 'fancy plot of {} from {} to {}'.format(json.dumps(trackers), start, end)
         fn = os.path.join(self.output_dir, 'plot.txt')
         with open(fn, 'w') as f:
             f.write(msg)
@@ -28,7 +24,7 @@ class PythonPlotTask(PythonTask):
     def formfields2taskargs(self, fields):
         return {'start': fields['start'],
                 'end': fields['end'],
-                'tracker_id': fields['id'],
+                'trackers': fields['trackers'],
                 # below example of adding argument values
                 'username': 'someuser',
                 'password': 'somepw',

@@ -22,6 +22,8 @@ class PythonTask(Task):
     label = None
     """Description of task"""
     description = None
+    """Filename of javascript form"""
+    js_form = 'form.js'
     _db = None
 
     @property
@@ -108,6 +110,10 @@ class PythonTask(Task):
 
     @property
     def task_dir(self):
+        """Directory in which Task is defined
+
+        Can be used to find location of Task resources like executables or javascript files.
+        """
         return os.path.dirname(os.path.abspath(sys.modules[self.__module__].__file__))
 
     def formfields2taskargs(self, fields):
@@ -116,9 +122,10 @@ class PythonTask(Task):
         Used as kwargs for Task.run()"""
         return fields
 
-    def formfields(self):
-        """ExtJS form items list"""
-        return []
+    @property
+    def js_form_location(self):
+        """Javascript to render ExtJS form to div with 'form' id"""
+        return os.path.join(self.task_dir, self.js_form)
 
 
 class RTask(PythonTask):
