@@ -36,14 +36,14 @@ def submit(request):
     task = tasks()[scriptid]
     kwargs = task.formfields2taskargs(request.json_body)
     taskresp = task.apply_async(kwargs=kwargs)
-    status_url = request.route_path('status',
+    state_url = request.route_path('state',
                                     script=scriptid,
                                     taskid=taskresp.id)
-    return {'success': True, 'status': status_url}
+    return {'success': True, 'state': state_url}
 
-@view_config(route_name='status.json', renderer='json')
-@view_config(route_name='status', renderer='status.mak')
-def status(request):
+@view_config(route_name='state.json', renderer='json')
+@view_config(route_name='state', renderer='state.mak')
+def state(request):
     scriptid = request.matchdict['script']
     taskid = request.matchdict['taskid']
     result = AsyncResult(taskid)

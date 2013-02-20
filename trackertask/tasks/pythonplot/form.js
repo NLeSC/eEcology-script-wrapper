@@ -503,8 +503,8 @@ Ext.onReady(function() {
                 	   jsonData: data,
                        success: function(response, opts) {
                     	   var obj = Ext.decode(response.responseText);
-                    	   // TODO ? change to polling for status.json route inside form
-                    	   window.location = obj.status;
+                    	   // TODO ? change to polling for state.json route inside form
+                    	   window.location = obj.state;
                        },
                        failure: function(response, opts) {
                            Ext.Msg.alert('Failed', response.status);

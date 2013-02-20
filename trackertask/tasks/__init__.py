@@ -24,6 +24,7 @@ class PythonTask(Task):
     description = None
     """Filename of javascript form"""
     js_form = 'form.js'
+    autoregister = True  # Change to False to hide this task
     _db = None
 
     @property
