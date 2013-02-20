@@ -1,5 +1,6 @@
 .project
 .pydevproject
+development.ini
 env/
 *.egg-info/
 *.pyc
