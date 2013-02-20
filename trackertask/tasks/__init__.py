@@ -3,6 +3,7 @@ import sys
 import subprocess
 from celery import Task
 from celery import current_app
+from celery.utils.log import get_task_logger
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
 from sqlalchemy import MetaData
@@ -10,8 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from oct2py import octave
-
-from celery.utils.log import get_task_logger
+import trackertask.models as models
 
 logger = get_task_logger(__name__)
 
@@ -90,15 +90,10 @@ class PythonTask(Task):
 
         """
         if self._db is None:
-            engine = engine_from_config(current_app.conf)
-            Session = scoped_session(sessionmaker(bind=engine))
-
-            meta = MetaData()
-            if current_app.conf.has_key('sqlalchemy.schema'):
-                meta.reflect(bind=engine, schema=current_app.conf['sqlalchemy.schema'])
-            else:
-                meta.reflect(bind=engine)
-            self._db = (Session, meta,)
+            engine = engine_from_config(current_app.conf, 'sqlalchemy.')
+            models.DBSession.configure(bind=engine)
+            models.reflect(bind=engine, schema=current_app.conf.get('reflect.schema'))
+            self._db = (models.DBSession, models.meta,)
         return self._db
 
     @property

@@ -1,9 +1,10 @@
+import logging
+from celery.result import AsyncResult
+from celery import current_app as celery
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
-from celery.result import AsyncResult
-from celery import current_app as celery
-import logging
+import models
 
 logger = logging.getLogger(__package__)
 
@@ -67,14 +68,4 @@ def result(request):
 
 @view_config(route_name='trackers', renderer='json')
 def trackers(request):
-    # TODO replace hardcoded list with db queries
-    trackers = [
-      {'id': 1, 'species': 'Gull'},
-      {'id': 2, 'species': 'Gull'},
-      {'id': 3, 'species': 'Gull'},
-      {'id': 4, 'species': 'Gull'},
-      {'id': 5, 'species': 'Gull'},
-      {'id': 6, 'species': 'Gull'},
-      {'id': 7, 'species': 'Gull'},
-    ]
-    return { 'trackers': trackers, 'total': len(trackers)}
+    return models.trackers()

@@ -277,6 +277,10 @@ Ext.onReady(function() {
            },
            writer: 'json'
        },
+       sorters: [{
+    	    property: 'id',
+    	    direction: 'ASC'
+       }],
        autoLoad: true,
 //           listeners: {
 //               bulkremove: function(s, rs) {
@@ -317,7 +321,11 @@ Ext.onReady(function() {
     	   return this.data.items.map(function(r) {
      		  return r.data;
      	   });
-       }
+       },
+       sorters: [{
+   	     property: 'id',
+   	     direction: 'ASC'
+       }]
 //           listeners: {
 //        	   add: function(s, rs) {
 //        		   console.log(['Add', rs]);
