@@ -35,9 +35,8 @@ class PythonPlotTask(PythonTask):
         fn = os.path.join(self.output_dir, 'plot.txt')
         with open(fn, 'w') as f:
             f.write(msg)
-        return {'path': fn,
-                'content_type': 'text/plain'
-                }
+        return { 'files': [{'path': fn, 'name': 'plot.txt', 'content_type': 'text/plain'
+                }]}
 
     def formfields2taskargs(self, fields):
         return {'start': iso8601parse(fields['start']),

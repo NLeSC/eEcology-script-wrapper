@@ -11,7 +11,9 @@ class PlotMatLab(MatlabTask):
     deploy_script = 'run_plot.sh'
 
     def run(self, start, end, trackers, dsn):
-            super(PlotMatLab, self).run([self.output_dir, dsn, start, end, trackers])
-            return {'path': os.path.join(self.output_dir, '/plot.png'),
+            result = super(PlotMatLab, self).run([self.output_dir, dsn, start, end, trackers])
+            result['files'].append({'files': [{'path': os.path.join(self.output_dir, '/plot.png'),
+                               'name': 'plot.png',
                     'content_type': 'image/png',
-                    }
+                    }]})
+            return result

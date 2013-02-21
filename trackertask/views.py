@@ -65,13 +65,40 @@ def statehtml(request):
         return HTTPFound(location=response['result'])
     return response
 
-@view_config(route_name='result')
+def output_url(request, fileindex):
+    return request.route_path('output',
+                              script=request.matchdict['script'],
+                              taskid=request.matchdict['taskid'],
+                              fileindex=fileindex,
+                              )
+
+@view_config(route_name='result', renderer='result.mak')
 def result(request):
     taskid = request.matchdict['taskid']
     aresult = AsyncResult(taskid)
     result = aresult.result
     if aresult.failed():
         raise result
+
+    if len(result['files']) == 1:
+        return HTTPFound(location=output_url(request, 0))
+
+    for fileindex in range(len(result['files'])):
+        file = result['files'][fileindex]
+        file['url'] = output_url(request, fileindex)
+
+    logger.info(result)
+
+    return result
+
+@view_config(route_name='output')
+def output(request):
+    taskid = request.matchdict['taskid']
+    fileindex = int(request.matchdict['fileindex'])
+    aresult = AsyncResult(taskid)
+
+    logger.info(aresult.result)
+    result = aresult.result['files'][fileindex]
     return FileResponse(result['path'],
                         request,
                         content_type=result['content_type'],
