@@ -42,9 +42,9 @@ def submit(request):
                                     taskid=taskresp.id)
     return {'success': True, 'state': state_url}
 
+
 @view_config(route_name='state.json', renderer='json')
-@view_config(route_name='state', renderer='state.mak')
-def state(request):
+def statejson(request):
     scriptid = request.matchdict['script']
     taskid = request.matchdict['taskid']
     result = AsyncResult(taskid)
@@ -54,13 +54,24 @@ def state(request):
                                     )
     return {'state': result.state,
             'success': result.successful(),
-            'result': result_url
+            'failure': result.failed(),
+            'result': result_url,
             }
+
+@view_config(route_name='state', renderer='state.mak')
+def statehtml(request):
+    response = statejson(request)
+    if response['success'] or response['failure']:
+        return HTTPFound(location=response['result'])
+    return response
 
 @view_config(route_name='result')
 def result(request):
     taskid = request.matchdict['taskid']
-    result = AsyncResult(taskid).result
+    aresult = AsyncResult(taskid)
+    result = aresult.result
+    if aresult.failed():
+        raise result
     return FileResponse(result['path'],
                         request,
                         content_type=result['content_type'],
