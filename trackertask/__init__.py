@@ -9,12 +9,12 @@ def main(global_config, **settings):
 
     config.add_route('index', '/')
     config.add_route('trackers', '/trackers.json')
-    config.add_route('jsform', '/form/{script}.js')
-    config.add_route('apply', '/apply/{script}')
-    config.add_route('state.json', '/state/{script}/{taskid}.json')
-    config.add_route('state', '/state/{script}/{taskid}')
-    config.add_route('result', '/result/{script}/{taskid}')
-    config.add_route('output', '/result/{script}/{taskid}/{fileindex}')
+    config.add_route('jsform', '/tool/{script}/form.js')
+    config.add_route('apply', '/tool/{script}')
+    config.add_route('state.json', '/tool/{script}/{taskid}/state.json')
+    config.add_route('state', '/tool/{script}/{taskid}/state')
+    config.add_route('result', '/tool/{script}/{taskid}/result')
+    config.add_route('output', '/tool/{script}/{taskid}/file/{fileindex}')
 
     config.scan()
 

@@ -15,10 +15,8 @@ class PlotR(RTask):
     r_script = 'plot.r'
 
     def run(self, start, end, tracker_id, username, password):
-        print(start, end, tracker_id, username, password)
         output_fn = os.path.join(self.output_dir, 'plot.svg')
-        print(output_fn)
-        self.r.plotr(output_fn, tracker_id, int(start), int(end))
+        self.r.plotr(output_fn, tracker_id, start, end)
         return {'files': [{'path': output_fn,
                            'name': 'plot.svg',
                 'content_type': 'image/svg+xml',
