@@ -192,7 +192,7 @@ class SubProcessTask(PythonTask):
 
     def run(self, *args):
         pargs = self.pargs() + list(args)
-        logger.info(pargs)
+        logger.warn(pargs)
         stdout_fn = os.path.join(self.output_dir, 'stdout.txt')
         stdout = open(stdout_fn, 'w')
         stderr_fn = os.path.join(self.output_dir, 'stderr.txt')
@@ -233,12 +233,15 @@ class MatlabTask(SubProcessTask):
             super(PlotTask, self).run([output_dir, dsn, start, end, trackers])
             return {'output': output_dir+'/plot.png'}
 
+    Important!! Passing arguments containing spaces will fail.
+    To fix in run_*.sh comment out the lines from args= to done
+    and use "$@" instead of $args.
     """
     abstract = True
     _matlab = None
     """Matlab deployment script.
-    During `mbuild` an executable and deployment script is build.
-    The executable is deployed using the deployment script.
+    During `mcc -vm -p googleearth script.m helper.m` an executable and deployment script is build.
+    The executable is deployed or executed using the deployment script.
     """
     deploy_script = None
 

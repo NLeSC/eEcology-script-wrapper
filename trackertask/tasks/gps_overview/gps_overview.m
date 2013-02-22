@@ -12,15 +12,23 @@ function gps_overview(username, password, dbname, dburl, KDevice)
 
 % display(username);
 % display(password);
-% display(KDevice);
+
+if ischar(KDevice)
+  KDevice = eval(KDevice);
+end
+
+display('KDevice');
+display(KDevice);
+display('DB_PASSWORD');
+display(getenv('DB_PASSWORD'));
 
 % dbname = 'flysafe';
 % dburl = 'jdbc:postgresql://localhost:5432/flysafe';
 
 conn = database(dbname, username, password, 'org.postgresql.Driver',dburl);
 sql1 = 'SELECT device_info_serial, date_time FROM gps.uva_device_limited';
-curs1 = exec(conn,sql1);
-curs1 = fetch(curs1);
-display(curs1.Data)
+results = fetch(conn,sql1);
+display(sql1);
+display(results)
 
 

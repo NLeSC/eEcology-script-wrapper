@@ -347,8 +347,8 @@ Ext.define('Esc.ee.form.Panel', {
             var form = this.up('form').getForm();
             if (form.isValid()) {
                 form.submit({
-                    success: function(response, opts) {
-                        var obj = Ext.decode(response.responseText);
+                    success: function(f, action) {
+                      var obj = Ext.decode(action.response.responseText);
                         // TODO ? change to polling for state.json route inside form
                       window.location = obj.state;
                     },
