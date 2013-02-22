@@ -6,6 +6,8 @@
 <link rel="stylesheet"
         href="https://extjs.cachefly.net/ext-4.1.0-gpl/resources/css/ext-all.css" type="text/css"></link>
 <script type="text/javascript" src="https://extjs.cachefly.net/ext-4.1.0-gpl/ext-all-dev.js"></script>
+<script type="text/javascript"
+        src="${request.static_url('trackertask:static/components.js')}"></script>
 <script type="text/javascript" src="${request.route_path('jsform',script=task.name)}"></script>
 </head>
 <body>

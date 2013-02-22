@@ -15,6 +15,7 @@ def main(global_config, **settings):
     config.add_route('state', '/tool/{script}/{taskid}/state')
     config.add_route('result', '/tool/{script}/{taskid}/result')
     config.add_route('output', '/tool/{script}/{taskid}/file/{fileindex}')
+    config.add_static_view('static', 'trackertask:static', cache_max_age=3600)
 
     config.scan()
 
