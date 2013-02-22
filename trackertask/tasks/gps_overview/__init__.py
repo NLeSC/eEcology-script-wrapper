@@ -12,7 +12,7 @@ class GpsOverview(MatlabTask):
 
     def run(self, trackers):
             # prepare arguments
-            tracker_ids = str([t['id'] for t in trackers])
+            tracker_ids = str(trackers)
             # TODO pass tracker_ids as '[1 2]' and in Matlab eval
             # See http://blogs.mathworks.com/loren/2011/01/06/matlab-data-types-as-arguments-to-standalone-applications/
             u = self.db_url

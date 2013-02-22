@@ -4,8 +4,19 @@
 <meta charset="UTF-8">
 <title>Script - ${task.label}</title>
 <link rel="stylesheet"
-        href="https://extjs.cachefly.net/ext-4.1.0-gpl/resources/css/ext-all.css" type="text/css"></link>
-<script type="text/javascript" src="https://extjs.cachefly.net/ext-4.1.0-gpl/ext-all-dev.js"></script>
+        href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
+<link rel="stylesheet"
+        href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
+<script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all-dev.js"></script>
+<script type="text/javascript">
+Ext.Loader.setConfig({
+    enabled: true,
+  //  disableCaching: false, // uncomment to use firebug breakpoints
+    paths: {
+      'Ext.ux': 'http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux'
+    }
+  });
+</script>
 <script type="text/javascript"
         src="${request.static_url('trackertask:static/components.js')}"></script>
 <script type="text/javascript" src="${request.route_path('jsform',script=task.name)}"></script>
