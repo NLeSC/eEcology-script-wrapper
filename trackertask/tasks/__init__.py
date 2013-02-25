@@ -174,8 +174,6 @@ class SubProcessTask(PythonTask):
 
     """
     abstract = True
-    return_stdout = True
-    return_stderr = True
 
     def pargs(self):
         """Arguments prepended to run(*args) which are used as Popen args"""
@@ -191,6 +189,13 @@ class SubProcessTask(PythonTask):
         return os.environ
 
     def run(self, *args):
+        """
+        Perform subprocess with self.pargs() and *args as arguments.
+
+        Returns dict with following keys:
+        - files, a dict of base-filenames and absolute paths.
+        - return_code
+        """
         pargs = self.pargs() + list(args)
         logger.warn(pargs)
         stdout_fn = os.path.join(self.output_dir, 'stdout.txt')
@@ -206,17 +211,9 @@ class SubProcessTask(PythonTask):
                                  )
         return_code = popen.wait()
 
-        files = []
-        if self.return_stdout:
-            files.append({'name': 'stdout.txt',
-                          'path': stdout_fn,
-                          'content_type': 'text/plain',
-                          })
-        if self.return_stderr:
-            files.append({'name': 'stderr.txt',
-                          'path': stderr_fn,
-                          'content_type': 'text/plain',
-                          })
+        files = {}
+        files['stdout.txt'] = stdout_fn
+        files['stderr.txt'] = stderr_fn
 
         return { 'files': files, 'return_code': return_code}
 

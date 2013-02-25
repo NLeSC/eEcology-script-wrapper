@@ -7,8 +7,8 @@
 <body>
 <h1>Output files:</h1>
 <ol>
-% for file in files:
-<li><a href=${file['url']}>${file['name']}</a>
+% for filename, url in files.items():
+<li><a href=${url}>${filename}</a>
 % endfor
 </ol>
 </body>

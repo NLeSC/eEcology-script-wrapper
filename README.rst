@@ -43,3 +43,21 @@ Matlab options:
 Octave options:
 - .m file location
 
+Deployment
+----------
+
+  cp development.ini-dist development.ini
+  python setup.py develop
+  pserve developement.ini
+  # in other shell
+  pceleryd development.ini
+
+TODO
+----
+
+- connect to flysafe db using logged user priveleges
+-- Use username keyed sqlalchemy pool for example https://pypi.python.org/pypi/litex.cxpool/1.0.2
+- have eager tasks aka syncronous tasks
+- Use sqlite as broker/resultstore, if works no need for redis server
+
+

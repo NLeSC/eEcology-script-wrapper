@@ -12,8 +12,5 @@ class PlotMatLab(MatlabTask):
 
     def run(self, start, end, trackers, dsn):
             result = super(PlotMatLab, self).run([self.output_dir, dsn, start, end, trackers])
-            result['files'].append({'files': [{'path': os.path.join(self.output_dir, '/plot.png'),
-                               'name': 'plot.png',
-                    'content_type': 'image/png',
-                    }]})
+            result['files']['plot.png'] = os.path.join(self.output_dir, '/plot.png')
             return result

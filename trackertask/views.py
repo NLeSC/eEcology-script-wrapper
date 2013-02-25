@@ -65,11 +65,11 @@ def statehtml(request):
         return HTTPFound(location=response['result'])
     return response
 
-def output_url(request, fileindex):
-    return request.route_path('output',
+def result_file_url(request, filename):
+    return request.route_path('result_file',
                               script=request.matchdict['script'],
                               taskid=request.matchdict['taskid'],
-                              fileindex=fileindex,
+                              filename=filename,
                               )
 
 @view_config(route_name='result', renderer='result.mak')
@@ -81,28 +81,24 @@ def result(request):
         raise result
 
     if len(result['files']) == 1:
-        return HTTPFound(location=output_url(request, 0))
+        first_fn = result['files'].keys()[0]
+        return HTTPFound(location=result_file_url(request, first_fn))
 
-    for fileindex in range(len(result['files'])):
-        file = result['files'][fileindex]
-        file['url'] = output_url(request, fileindex)
+    # replace local filesystem paths with urls to files
+    files = {}
+    for filename in result['files']:
+        files[filename] = result_file_url(request, filename)
 
-    logger.info(result)
+    return {'files': files}
 
-    return result
-
-@view_config(route_name='output')
+@view_config(route_name='result_file')
 def output(request):
     taskid = request.matchdict['taskid']
-    fileindex = int(request.matchdict['fileindex'])
+    filename = request.matchdict['filename']
     aresult = AsyncResult(taskid)
-
-    logger.info(aresult.result)
-    result = aresult.result['files'][fileindex]
-    return FileResponse(result['path'],
-                        request,
-                        content_type=result['content_type'],
-                        )
+    # results has files dict with key=base filename and value is absolute path to file
+    path = aresult.result['files'][filename]
+    return FileResponse(path, request)
 
 @view_config(route_name='trackers', renderer='json')
 def trackers(request):

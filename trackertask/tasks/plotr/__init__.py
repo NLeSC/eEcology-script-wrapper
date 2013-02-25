@@ -17,10 +17,7 @@ class PlotR(RTask):
     def run(self, start, end, tracker_id, username, password):
         output_fn = os.path.join(self.output_dir, 'plot.svg')
         self.r.plotr(output_fn, tracker_id, start, end)
-        return {'files': [{'path': output_fn,
-                           'name': 'plot.svg',
-                'content_type': 'image/svg+xml',
-                }]}
+        return {'files': { 'plot.svg': output_fn}}
 
     def formfields2taskargs(self, fields):
         return {'start': fields['start'],
