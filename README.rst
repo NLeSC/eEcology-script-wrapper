@@ -55,9 +55,12 @@ Deployment
 TODO
 ----
 
-- connect to flysafe db using logged user priveleges
--- Use username keyed sqlalchemy pool for example https://pypi.python.org/pypi/litex.cxpool/1.0.2
+- query db using priveleges of user logged into webapp
+-- Basic authenticaton header contains for username and password
+-- Make connection for each user
+--- Use username keyed sqlalchemy pool for example https://pypi.python.org/pypi/litex.cxpool/1.0.2
+-- use application user to connect to db and in db use views which require username
 - have eager tasks aka syncronous tasks
 - Use sqlite as broker/resultstore, if works no need for redis server
-
+- make tracker selection (with settings) save-able/load-able by label using browser storage.
 
