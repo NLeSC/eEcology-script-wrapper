@@ -50,7 +50,12 @@ Ext.onReady(function() {
            text: "Color", flex: 1, sortable: true, dataIndex: 'color',
            editor: {
                xtype: 'combo',
-               store: colorlist
+               store: colorlist,
+               listConfig: {
+                   getInnerTpl: function(displayField) {
+                       return '<span style="background: {field1}">{field2}</span>';
+                   }
+               }
            },
            renderer: function(v, m) {
                m.style = 'cursor: pointer;background: '+v;
@@ -78,7 +83,6 @@ Ext.onReady(function() {
    };
 
    var form = Ext.create('Esc.ee.form.Panel', {
-	   url: 'pythonplot',
 	   id:'myform',
        items: [{
     	   xtype: 'xdatetimestart'

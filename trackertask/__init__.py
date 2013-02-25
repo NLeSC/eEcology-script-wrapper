@@ -10,7 +10,7 @@ def main(global_config, **settings):
     config.add_route('index', '/')
     config.add_route('trackers', '/trackers.json')
     config.add_route('jsform', '/tool/{script}/form.js')
-    config.add_route('apply', '/tool/{script}')
+    config.add_route('apply', '/tool/{script}/')
     config.add_route('state.json', '/tool/{script}/{taskid}/state.json')
     config.add_route('state', '/tool/{script}/{taskid}/state')
     config.add_route('result', '/tool/{script}/{taskid}/result')

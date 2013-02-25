@@ -4,7 +4,6 @@ Ext.onReady(function() {
 	var store = Ext.create('Esc.ee.store.TrackerIds');
 
 	var form = Ext.create('Esc.ee.form.Panel', {
-		url: 'plotr',
         items: [{
         	xtype: 'xdatetimestart'
         }, {

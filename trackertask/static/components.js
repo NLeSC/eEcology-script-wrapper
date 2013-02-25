@@ -1,6 +1,6 @@
 var colorlist = [
     ["#0000FF"  , "Red"]
-    ,["#FF000"   , "Blue"]
+    ,["#FF0000"   , "Blue"]
     ,["#00FF00"  , "Green"]
     ,["#00FFFF"  , "Yellow"]
     ,["#FF00FF"  , "Purple"]
@@ -291,10 +291,10 @@ Ext.define('Esc.ee.form.field.DateTimeEnd', {
 
 Ext.define('Esc.ee.store.TrackerIds', {
     extend: 'Ext.data.Store',
-    fields: [{name: 'id', type: 'int', }],
+    fields: [{name: 'id', type: 'int'}],
     proxy: {
         type: 'ajax',
-        url : '../trackers.json',
+        url : '../../trackers.json',
         reader: {
             root: 'trackers',
             type: 'json'
@@ -334,6 +334,7 @@ Ext.define('Esc.ee.form.TrackerIdSelector', {
 
 Ext.define('Esc.ee.form.Panel', {
     extend: 'Ext.form.Panel',
+    url: '.',
     renderTo: 'form',
     width: 800,
     autoHeight: true,
