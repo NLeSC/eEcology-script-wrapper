@@ -1,3 +1,7 @@
+Ext.require([
+    'Esc.ee.form.Panel',
+]);
+
 Ext.onReady(function() {
 	Ext.QuickTips.init();
 

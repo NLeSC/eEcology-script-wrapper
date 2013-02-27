@@ -1,9 +1,13 @@
 Ext.require([
-             'Ext.grid.*',
-             'Ext.data.*',
-             'Ext.form.*',
-             'Ext.dd.*',
-             'Esc.ee.*'
+'Esc.ee.store.TrackerIds',
+'Esc.ee.form.Panel',
+'Esc.ee.form.field.DateTimeStart',
+'Esc.ee.form.field.DateTimeEnd',
+'Esc.ee.form.field.Color',
+'Esc.ee.form.field.TrackerGridSelector',
+'Ext.grid.plugin.CellEditing',
+'Ext.form.RadioGroup',
+'Ext.form.field.Radio'
          ]);
 
 Ext.onReady(function() {
@@ -13,7 +17,8 @@ Ext.onReady(function() {
         extend: 'Ext.data.Model',
         fields: ['id',
                  'species',
-                 {name: 'color', defaultValue: 'red'},
+                 'leader',
+                 {name: 'color', defaultValue: 'FF0000'},
                  {name: 'size', defaultValue: 'small'},
                  {name: 'speed', defaultValue: 4},
                  ]
@@ -28,9 +33,11 @@ Ext.onReady(function() {
        title            : 'Available',
        store            : astore,
        columns          : [{
-           text: "ID", flex: 1, sortable: true, dataIndex: 'id'
+           text: "ID", sortable: true, dataIndex: 'id'
        }, {
            text: "Species", flex: 1, sortable: true, dataIndex: 'species'
+       }, {
+           text: "Project leader", flex: 1, sortable: true, dataIndex: 'leader'
        }],
    };
 
@@ -44,21 +51,18 @@ Ext.onReady(function() {
        columns          : [{
            text: "ID", flex: 1, sortable: true, dataIndex: 'id'
        }, {
-           text: "Species", flex: 1, sortable: true, dataIndex: 'species'
-           ,hidden: true
+           text: "Species", flex: 1, sortable: true, dataIndex: 'species',
+           hidden: true
+       }, {
+           text: "Project leader", flex: 1, sortable: true, dataIndex: 'leader',
+           hidden: true
        }, {
            text: "Color", flex: 1, sortable: true, dataIndex: 'color',
            editor: {
-               xtype: 'combo',
-               store: colorlist,
-               listConfig: {
-                   getInnerTpl: function(displayField) {
-                       return '<span style="background: {field1}">{field2}</span>';
-                   }
-               }
+               xtype: 'colorfield'
            },
            renderer: function(v, m) {
-               m.style = 'cursor: pointer;background: '+v;
+               m.style = 'cursor: pointer;background: #'+v;
                return v;
            }
        }, {
@@ -80,6 +84,9 @@ Ext.onReady(function() {
         	   triggerEvent: 'cellclick'
            })
        ],
+       viewConfig: {
+           markDirty: false
+       }
    };
 
    var form = Ext.create('Esc.ee.form.Panel', {
