@@ -15,8 +15,15 @@ pyramid.includes = pyramid_celery
 
 mako.directories = trackertask:templates
 
+# Use redis as broker+resultstore
 BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+# Use sqlite as broker+resultstore
+#BROKER_URL = "sqla+sqlite:///%(here)s/data/celery.broker.db"
+#CELERY_RESULT_BACKEND = database
+#CELERY_RESULT_DBURI = sqlite:///%(here)s/data/celery.results.db
+
 CELERY_IMPORTS = ("trackertask.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
 
