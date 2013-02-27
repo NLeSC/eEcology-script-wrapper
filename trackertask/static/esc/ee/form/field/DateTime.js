@@ -37,9 +37,9 @@ Ext.define('Esc.ee.form.field.DateTime', {
     /**
      * @cfg {String} dateTimeFormat
      * The format used when submitting the combined value.
-     * Defaults to 'Y-m-d H:i:s'
+     * Defaults to 'c' (ISO8601 format)
      */
-    dateTimeFormat : 'Y-m-d H:i:s',
+    dateTimeFormat : 'c',
     labelAttrTpl : 'data-qtip="Format YYYY-MM-DD HH:MM:SS"',
     /**
      * @cfg {Object} dateConfig
@@ -76,6 +76,12 @@ Ext.define('Esc.ee.form.field.DateTime', {
                     flex : 1,
                     allowBlank : me.allowBlank,
                     reset : Ext.emptyFn,
+                    getSubmitData: function(){
+                        return null;
+                    },
+                    getModelData: function(){
+                        return null;
+                    },
                     submitValue : false
                 }, me.dateConfig));
         me.items.push(me.dateField);
@@ -86,6 +92,12 @@ Ext.define('Esc.ee.form.field.DateTime', {
                     flex : 1,
                     allowBlank : me.allowBlank,
                     reset : Ext.emptyFn,
+                    getSubmitData: function(){
+                        return null;
+                    },
+                    getModelData: function(){
+                        return null;
+                    },
                     submitValue : false
                 }, me.timeConfig));
         me.items.push(me.timeField);
@@ -172,6 +184,7 @@ Ext.define('Esc.ee.form.field.DateTime', {
         me.blurTask = new Ext.util.DelayedTask(function() {
             me.fireEvent('blur', me);
         });
+        me.syncValue();
         me.blurTask.delay(100);
     },
 
@@ -197,6 +210,11 @@ Ext.define('Esc.ee.form.field.DateTime', {
         return value ? Ext.Date.format(value,
                 this.dateTimeFormat) : null;
     },
+    // Synchronizes the submit value with the current state of the toStore
+    syncValue: function() {
+        var me = this;
+        me.mixins.field.setValue.call(me, me.getValue());
+    },
 
     setValue : function(value) {
         if (Ext.isString(value)) {
@@ -204,6 +222,7 @@ Ext.define('Esc.ee.form.field.DateTime', {
         }
         this.dateField.setValue(value);
         this.timeField.setValue(value);
+        this.syncValue();
     },
 
     getFormat : function() {
