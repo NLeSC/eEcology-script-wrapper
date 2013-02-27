@@ -7,6 +7,8 @@
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
 <link rel="stylesheet"
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
+<link rel="stylesheet"
+        href="${request.static_url('trackertask:static/style.css')}" type="text/css"></link>
 <script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all-dev.js"></script>
 <script type="text/javascript">
 Ext.Loader.setConfig({

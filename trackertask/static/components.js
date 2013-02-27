@@ -13,48 +13,19 @@ var colorlist = [
     ,["aquamarine"  , "Aquamarine range"]
 ];
 
-Ext.apply(Ext.form.field.VTypes, {
-	daterange : function(val, field) {
-		var date = val;
-
-		if (!date) {
-			return false;
-		}
-		if (field.startDateField
-				&& (!this.dateRangeMax || (date.getTime() != this.dateRangeMax
-						.getTime()))) {
-			var start = field.up('form').down('#' + field.startDateField);
-			start.setMaxValue(date);
-			this.dateRangeMax = date;
-		} else if (field.endDateField
-				&& (!this.dateRangeMin || (date.getTime() != this.dateRangeMin
-						.getTime()))) {
-			var end = field.up('form').down('#' + field.endDateField);
-			end.setMinValue(date);
-			this.dateRangeMin = date;
-		}
-		/*
-		 * Always return true since we're only using this vtype to set the
-		 * min/max allowed values (these are tested for after the vtype test)
-		 */
-		return true;
-	},
-	daterangeText : 'Start date must be less than end date',
-});
-
 /**
- * @class Ext.ux.form.field.DateTime
- * @extends Ext.form.FieldContainer
  * @author atian25 (http://www.sencha.com/forum/member.php?51682-atian25)
  * @author ontho (http://www.sencha.com/forum/member.php?285806-ontho)
  * @author jakob.ketterl (http://www.sencha.com/forum/member.php?25102-jakob.ketterl)
+ * @author <a href="mailto:s.verhoeven@esciencecenter.nl">Stefan Verhoeven</a>
  * @see http://www.sencha.com/forum/showthread.php?134345-Ext.ux.form.field.DateTime
  */
-Ext.define('Ext.ux.form.field.DateTime', {
+Ext.define('Esc.ee.form.field.DateTime', {
 	extend : 'Ext.form.FieldContainer',
 	mixins : {
 		field : 'Ext.form.field.Field'
 	},
+	requires: ['Ext.form.field.VTypes'],
 	alias : 'widget.xdatetime',
 
 	//configurables
@@ -151,6 +122,35 @@ Ext.define('Ext.ux.form.field.DateTime', {
 										field, event);
 							});
 		}
+
+		Ext.apply(Ext.form.field.VTypes, {
+		    daterange : function(val, field) {
+		        var date = val;
+
+		        if (!date) {
+		            return false;
+		        }
+		        if (field.startDateField
+		                && (!this.dateRangeMax || (date.getTime() != this.dateRangeMax
+		                        .getTime()))) {
+		            var start = field.up('form').down('#' + field.startDateField);
+		            start.setMaxValue(date);
+		            this.dateRangeMax = date;
+		        } else if (field.endDateField
+		                && (!this.dateRangeMin || (date.getTime() != this.dateRangeMin
+		                        .getTime()))) {
+		            var end = field.up('form').down('#' + field.endDateField);
+		            end.setMinValue(date);
+		            this.dateRangeMin = date;
+		        }
+		        /*
+		         * Always return true since we're only using this vtype to set the
+		         * min/max allowed values (these are tested for after the vtype test)
+		         */
+		        return true;
+		    },
+		    daterangeText : 'Start date must be less than end date',
+		});
 
 		me.callParent();
 
@@ -266,7 +266,7 @@ Ext.define('Ext.ux.form.field.DateTime', {
 });
 
 Ext.define('Esc.ee.form.field.DateTimeStart', {
-    extend: 'Ext.ux.form.field.DateTime',
+    extend: 'Esc.ee.form.field.DateTime',
     alias: 'widget.xdatetimestart',
     fieldLabel: 'Start',
     name: 'start',
@@ -278,7 +278,7 @@ Ext.define('Esc.ee.form.field.DateTimeStart', {
 });
 
 Ext.define('Esc.ee.form.field.DateTimeEnd', {
-    extend: 'Ext.ux.form.field.DateTime',
+    extend: 'Esc.ee.form.field.DateTime',
     alias: 'widget.xdatetimeend',
     name: 'end',
     fieldLabel: 'End',
@@ -332,6 +332,12 @@ Ext.define('Esc.ee.form.TrackerIdSelector', {
     toTitle: 'Selected'
 });
 
+/**
+ * @author <a href="mailto:s.verhoeven@esciencecenter.nl">Stefan Verhoeven</a>
+ *
+ * Form which can save the form values by user supplied name and restore form values later.
+ *
+ */
 Ext.define('Esc.ee.form.Panel', {
     extend: 'Ext.form.Panel',
     url: '.',
@@ -340,7 +346,97 @@ Ext.define('Esc.ee.form.Panel', {
     autoHeight: true,
     border: false,
     jsonSubmit: true,
+    requires: [
+        'Ext.data.Store',
+        'Ext.window.Window',
+        'Ext.grid.Panel',
+        'Ext.window.MessageBox'
+    ],
+    initComponent : function() {
+        var me = this;
+        this.callParent();
+
+        this.persistentStore = Ext.create('Ext.data.Store', {
+            fields: ['name', 'query'],
+            proxy: {
+                type: 'localstorage',
+                // Each task should have it own selection storage
+                // Each task has it's own path so use that as selection storage identifier
+                id: window.location.pathname
+            },
+            autoLoad: true,
+            listeners: {
+                datachanged: function(store) {
+                    var isEmpty = store.count() == 0;
+                    me.down('button[action=load]').setDisabled(isEmpty);
+                    if (isEmpty) me.persistentGrid.hide();
+                }
+            }
+        });
+
+        this.persistentGrid = Ext.create('Ext.window.Window', {
+            title: 'Saved selections',
+            closeAction: 'hide',
+            layout: 'fit',
+            width: 400,
+            height: 200,
+            items: {
+                xtype: 'grid',
+                store: this.persistentStore,
+                columns: [{
+                    text: 'Name', dataIndex: 'name', flex:1
+                }, {
+                    xtype: 'actioncolumn', width: 50,
+                    items: [{
+                        iconCls: 'icon-load',
+                        tooltip: 'Load',
+                        handler: function(grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            var form = me.getForm();
+                            var values = Ext.JSON.decode(rec.data.query);
+                            form.setValues(values);
+                            this.up('window').hide();
+                        }
+                    }, {
+                        iconCls: 'icon-delete',
+                        tooltip: 'Delete',
+                        handler: function(grid, rowIndex, colIndex) {
+                            var rec = grid.getStore().getAt(rowIndex);
+                            rec.destroy();
+                        }
+                    }]
+                }]
+            }
+        });
+    },
     buttons: [{
+        text: 'Save selection',
+        formBind: true,
+        disabled: true,
+        handler: function() {
+            var form = this.up('form');
+            Ext.Msg.prompt('Save selection', 'Name:', function(btn, name) {
+                var query = Ext.JSON.encode(form.getForm().getFieldValues());
+                form.persistentStore.add({'name': name, 'query': query});
+                form.persistentStore.sync();
+            }, form, false, Ext.Date.format(new Date(), 'c'));
+        }
+    }, {
+        disabled: true,
+        action: 'load',
+        text: 'Restore saved selection',
+        handler: function() {
+            var form = this.up('form');
+            form.persistentStore.load();
+            form.persistentGrid.show();
+        }
+    }, {
+        text: 'Reset',
+        handler: function() {
+            var form = this.up('form').getForm();
+            form.reset();
+        }
+    }, {
         text: 'Submit',
         formBind: true,
         disabled: true,
@@ -358,12 +454,6 @@ Ext.define('Esc.ee.form.Panel', {
                     },
                 });
             }
-        }
-    }, {
-        text: 'Reset',
-        handler: function() {
-            var form = this.up('form').getForm();
-            form.reset();
         }
     }]
 });
