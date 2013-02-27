@@ -56,11 +56,18 @@ TODO
 ----
 
 - query db using priveleges of user logged into webapp
--- Basic authenticaton header contains for username and password
--- Make connection for each user
---- Use username keyed sqlalchemy pool for example https://pypi.python.org/pypi/litex.cxpool/1.0.2
--- use application user to connect to db and in db use views which require username
+-- [x] Basic authenticaton header contains for username and password
+-- [x] Make connection for each user for each request
+-- webapp and scripts should use *_limited views.
 - have eager tasks aka syncronous tasks
-- Use sqlite as broker/resultstore, if works no need for redis server
-- make tracker selection (with settings) save-able/load-able by label using browser storage.
+- [x] Use sqlite as broker/resultstore, if works no need for redis server
+- [x] make tracker selection (with settings) save-able/load-able by label using browser storage.
+- use openearth to connect to db
+-- ??? Undefined variable "java" or class "java.util.Properties".
+
+Error in ==> pg_connectdb at 112
+
+
+
+Error in ==> test at 12
 
