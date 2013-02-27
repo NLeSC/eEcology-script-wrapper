@@ -1,20 +1,21 @@
 Ext.require([
-'Esc.ee.store.TrackerIds',
-'Esc.ee.form.Panel',
-'Esc.ee.form.field.DateTimeStart',
-'Esc.ee.form.field.DateTimeEnd',
-'Esc.ee.form.field.Color',
-'Esc.ee.form.field.TrackerGridSelector',
-'Ext.grid.plugin.CellEditing',
-'Ext.form.RadioGroup',
-'Ext.form.field.Radio'
-         ]);
+    'Esc.ee.store.TrackerIds',
+    'Esc.ee.form.Panel',
+    'Esc.ee.form.field.DateTimeStart',
+    'Esc.ee.form.field.DateTimeEnd',
+    'Esc.ee.form.field.Color',
+    'Esc.ee.form.field.TrackerGridSelector',
+    'Ext.grid.plugin.CellEditing',
+    'Ext.form.RadioGroup',
+    'Ext.form.field.Radio'
+]);
 
 Ext.onReady(function() {
 	Ext.QuickTips.init();
 
     Ext.define('Esc.eEcology.model.Tracker', {
         extend: 'Ext.data.Model',
+        idProperty: 'id',
         fields: ['id',
                  'species',
                  'leader',
@@ -69,12 +70,14 @@ Ext.onReady(function() {
            text: "Size", flex: 1, sortable: true, dataIndex: 'size',
            editor: {
                xtype: 'combo',
+               forceSelection: true,
                store: ['small', 'medium', 'large']
            }
        }, {
            text: "Speed class", flex: 1, sortable: true, dataIndex: 'speed',
            editor: {
                xtype: 'combo',
+               forceSelection: true,
                store: [1,2,3,4]
            }
        }],
@@ -98,17 +101,21 @@ Ext.onReady(function() {
        }, {
            xtype      : 'radiogroup',
            fieldLabel : 'Altitude',
-           columns: 2,
+           columns: 3,
            items: [
                {
-                   boxLabel  : '3D',
+                   boxLabel  : 'Relative to ground',
                    name      : 'alt',
-                   inputValue: '3D',
+                   inputValue: 'relativeToGround',
                    checked: true
                }, {
-                   boxLabel  : '2D',
+                   boxLabel  : 'Absolute',
                    name      : 'alt',
-                   inputValue: '2D',
+                   inputValue: 'absolute',
+               }, {
+                   boxLabel  : 'Clamp to ground',
+                   name      : 'alt',
+                   inputValue: 'clampToGround',
                }
            ]
        }, {

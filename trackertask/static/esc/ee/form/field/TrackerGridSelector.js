@@ -5,6 +5,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     name: 'trackers',
     labelAttrTpl : 'data-qtip="Selected tracker identifiers with additional data"',
     mixins: {
+        bindable: 'Ext.util.Bindable',
         field: 'Ext.form.field.Field'
     },
     requires: [
@@ -27,6 +28,17 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
      * form if there is more than 1 item.
      */
     dragText: '{0} Tracker{1}',
+    msgTarget: 'under',
+    value: [],
+    /**
+     * @cfg {Boolean} [allowBlank=false] `false` to require at least one item in the list to be selected, `true` to allow no
+     * selection.
+     */
+    allowBlank: false,
+    /**
+     * @cfg {String} [blankText="This field is required"] Default text displayed when the control contains no items.
+     */
+    blankText: 'One or more selected trackers are required',
     /**
      * @cfg {Boolean} [hideNavIcons=false] True to hide the navigation icons
      */
@@ -55,12 +67,6 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     layout: {
         type: 'hbox',
         align: 'stretch'
-    },
-    initComponent: function() {
-        var me = this;
-
-        me.ddGroup = me.id + '-dd';
-        me.callParent();
     },
     autoWidth: true,
     height: 300,
@@ -94,6 +100,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
 
         var field = Ext.create('Ext.grid.Panel', grid);
         field.addListener('itemdblclick', me.onItemDblClick, me);
+        field.getView().addListener('drop', me.syncValue, me);
 
         return field;
     },
@@ -120,7 +127,13 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     setupItems: function() {
         var me = this;
 
-        me.ddGroup = 'TrackerGridSelectorDD-'+Ext.id()
+        me.ddGroup = 'TrackerGridSelectorDD-'+Ext.id();
+
+        if (!me.toGrid.viewConfig) {
+            me.toGrid.viewConfig = {}
+        }
+        me.toGrid.viewConfig.emptyText = me.blankText;
+        me.toGrid.viewConfig.deferEmptyText = false;
 
         me.fromField = me.createList(me.fromGrid);
         me.toField = me.createList(me.toGrid);
@@ -174,6 +187,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         store.insert(0, selected);
         store.resumeEvents();
         list.getSelectionModel().select(selected);
+        this.syncValue();
     },
 
     onBottomBtnClick : function() {
@@ -186,6 +200,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         store.add(selected);
         store.resumeEvents();
         list.getSelectionModel().select(selected);
+        this.syncValue();
     },
 
     onUpBtnClick : function() {
@@ -207,6 +222,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         }
         store.resumeEvents();
         list.getSelectionModel().select(selected);
+        this.syncValue();
     },
 
     onDownBtnClick : function() {
@@ -227,6 +243,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         }
         store.resumeEvents();
         list.getSelectionModel().select(selected);
+        this.syncValue();
     },
 
     onAddBtnClick : function() {
@@ -258,6 +275,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         toStore.add(recs);
 //        fromStore.resumeEvents();
 //        toStore.resumeEvents();
+        me.syncValue();
     },
 
     onItemDblClick: function(view, rec) {
@@ -265,7 +283,42 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     },
 
     setValue: function(value) {
-        console.log('Setting value');
+        var me = this;
+        var fromStore = this.fromField.store;
+
+        // Store not loaded yet - we cannot set the value
+        if (!fromStore.getCount()) {
+            fromStore.on({
+                load: Ext.Function.bind(me.setValue, me, [value]),
+                single: true
+            });
+            return;
+        }
+
+        var toStore = this.toField.store;
+        // move all previously selected items back to available
+        Ext.Array.forEach(toStore.getRange(), function(rec){
+            toStore.remove(rec);
+            fromStore.add(rec);
+        });
+        // add value items to selected
+        Ext.Array.forEach(value, function(rec){
+            if (!(rec.$className)) {
+                // convert data to record
+                rec = Ext.create(Ext.ModelManager.getModel(toStore.model), rec);
+            }
+            // In the from store, move it over
+            if (fromStore.indexOf(rec) > -1) {
+                fromStore.remove(rec);
+            }
+            toStore.add(rec);
+        });
+        this.syncValue();
+    },
+    // Synchronizes the submit value with the current state of the toStore
+    syncValue: function() {
+        var me = this;
+        me.mixins.field.setValue.call(me, me.setupValue(me.toField.store.getRange()));
     },
 
     onBindStore: function(store, initial) {
@@ -340,5 +393,65 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     getSubmitValue: function() {
         return Ext.JSON.encode(this.getValue());
     },
+    isValid : function() {
+        var me = this,
+            disabled = me.disabled,
+            validate = me.forceValidation || !disabled;
+
+        return validate ? me.validateValue(me.value) : disabled;
+    },
+
+    validateValue: function(value) {
+        var me = this,
+            errors = me.getErrors(value),
+            isValid = Ext.isEmpty(errors);
+
+        if (!me.preventMark) {
+            if (isValid) {
+                me.clearInvalid();
+            } else {
+                me.markInvalid(errors);
+            }
+        }
+        return isValid;
+    },
+
+    markInvalid : function(errors) {
+        // Save the message and fire the 'invalid' event
+        var me = this,
+            oldMsg = me.getActiveError();
+        me.setActiveErrors(Ext.Array.from(errors));
+        if (oldMsg !== me.getActiveError()) {
+            me.updateLayout();
+        }
+    },
+    /**
+     * Clear any invalid styles/messages for this field.
+     *
+     * __Note:__ this method does not cause the Field's {@link #validate} or {@link #isValid} methods to return `true`
+     * if the value does not _pass_ validation. So simply clearing a field's errors will not necessarily allow
+     * submission of forms submitted with the {@link Ext.form.action.Submit#clientValidation} option set.
+     */
+    clearInvalid : function() {
+        // Clear the message and fire the 'valid' event
+        var me = this,
+            hadError = me.hasActiveError();
+        me.unsetActiveError();
+        if (hadError) {
+            me.updateLayout();
+        }
+    },
+
+    getErrors: function(value) {
+        var me = this;
+        var errors = [];
+        value = Ext.Array.from(value || me.getValue());
+        numSelected = value.length;
+
+        if (!me.allowBlank && numSelected < 1) {
+            errors.push(me.blankText);
+        }
+        return errors;
+    }
 });
 
