@@ -73,3 +73,17 @@ Error in ==> pg_connectdb at 112
 
 Error in ==> test at 12
 
+Matlab compile runtime
+----------------------
+
+Install same version as used to compile.
+
+Add postgresql jdbc (/usr/share/java/postgresql-jdbc3.jar) to
+~/MATLAB/MATLAB_Compiler_Runtime/v717/toolbox/local/classpath.txt
+
+Java is missing, add by:
+
+   cd /home/stefanv/MATLAB/MATLAB_Compiler_Runtime/v711/sys/
+   mkdir -p java/jre
+   ln -s /usr/lib/jvm/java-6-openjdk-amd64 java/jre/glnxa64
+
