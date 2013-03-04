@@ -17,5 +17,5 @@ class KmzGen(MatlabTask):
         result['files']['out.kmz'] = os.path.join(self.output_dir, 'out.kmz')
         return result
 
-    def formfields2taskargs(self, fields):
+    def formfields2taskargs(self, fields, db_url):
         return {}

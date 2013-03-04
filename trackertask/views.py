@@ -4,7 +4,9 @@ from celery import current_app as celery
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
-from models import Devices, make_session_from_request, Individuals, TrackSession
+from pyramid.security import unauthenticated_userid
+from models import Devices, make_session_from_request, db_url_from_request
+from models import Devices, Individuals, TrackSession, Projects
 
 logger = logging.getLogger(__package__)
 
@@ -31,7 +33,8 @@ class Views(object):
     @view_config(route_name='apply', request_method='GET', renderer='form.mak')
     def form(self):
         task = tasks()[self.scriptid]
-        return {'task': task}
+        userid = unauthenticated_userid(self.request)
+        return {'task': task, 'unauthenticated_userid': userid}
 
     @view_config(route_name='jsform')
     def jsform(self):
@@ -44,7 +47,8 @@ class Views(object):
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
         task = tasks()[self.scriptid]
-        kwargs = task.formfields2taskargs(self.request.json_body)
+        db_url = db_url_from_request(self.request)
+        kwargs = task.formfields2taskargs(self.request.json_body, db_url)
         taskresp = task.apply_async(kwargs=kwargs)
         state_url = self.request.route_path('state',
                                         script=self.scriptid,
@@ -111,12 +115,14 @@ class Views(object):
         Session = make_session_from_request(self.request)
 
         q = Session().query(Devices.device_info_serial,
-                                   Individuals.project_leader,
-                                   Individuals.species).join(TrackSession)
-        q = q.join(Individuals).order_by(Devices.device_info_serial)
+                            Projects.common_name,
+                            Individuals.species,
+                            )
+        q = q.join(Projects).join(TrackSession).join(Individuals)
+        q = q.order_by(Devices.device_info_serial)
         trackers = []
-        for tid, leader, species in q:
-            trackers.append({'id': tid, 'leader': leader, 'species': species})
+        for tid, project, species in q:
+            trackers.append({'id': tid, 'project': project, 'species': species})
 
         Session.close_all()
 

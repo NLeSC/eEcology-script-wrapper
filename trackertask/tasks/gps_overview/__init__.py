@@ -4,6 +4,7 @@ from celery import Task
 from celery import current_task
 from celery.utils.log import get_task_logger
 from trackertask.tasks import MatlabTask
+from trackertask.models import make_url
 
 logger = get_task_logger(__name__)
 
@@ -18,12 +19,12 @@ class GpsOverview(MatlabTask):
         env['DB_PASSWORD'] = self.db_url.password
         return env
 
-    def run(self, trackers):
+    def run(self, db_url, trackers):
         # prepare arguments
         tracker_ids = '[{}]'.format(' '.join([str(x) for x in trackers]))
         # TODO pass tracker_ids as '[1 2]' and in Matlab eval
         # See http://blogs.mathworks.com/loren/2011/01/06/matlab-data-types-as-arguments-to-standalone-applications/
-        u = self.db_url
+        self.db_url = u = make_url(db_url)
         username = u.username
         password = u.password
         instance = u.database
@@ -41,3 +42,8 @@ class GpsOverview(MatlabTask):
                                               )
 
         return result
+
+    def formfields2taskargs(self, fields, db_url):
+        return {'db_url':  db_url,
+                'trackers': fields['trackers'],
+                }

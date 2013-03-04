@@ -18,7 +18,7 @@ Ext.onReady(function() {
         idProperty: 'id',
         fields: ['id',
                  'species',
-                 'leader',
+                 'project',
                  {name: 'color', defaultValue: 'FF0000'},
                  {name: 'size', defaultValue: 'small'},
                  {name: 'speed', defaultValue: 4},
@@ -38,7 +38,7 @@ Ext.onReady(function() {
        }, {
            text: "Species", flex: 1, sortable: true, dataIndex: 'species'
        }, {
-           text: "Project leader", flex: 1, sortable: true, dataIndex: 'leader'
+           text: "Project", flex: 1, sortable: true, dataIndex: 'project'
        }],
    };
 
@@ -55,7 +55,7 @@ Ext.onReady(function() {
            text: "Species", flex: 1, sortable: true, dataIndex: 'species',
            hidden: true
        }, {
-           text: "Project leader", flex: 1, sortable: true, dataIndex: 'leader',
+           text: "Project", flex: 1, sortable: true, dataIndex: 'project',
            hidden: true
        }, {
            text: "Color", flex: 1, sortable: true, dataIndex: 'color',
@@ -104,11 +104,6 @@ Ext.onReady(function() {
            columns: 3,
            items: [
                {
-                   boxLabel  : 'Relative to ground',
-                   name      : 'alt',
-                   inputValue: 'relativeToGround',
-                   checked: true
-               }, {
                    boxLabel  : 'Absolute',
                    name      : 'alt',
                    inputValue: 'absolute',
@@ -116,6 +111,11 @@ Ext.onReady(function() {
                    boxLabel  : 'Clamp to ground',
                    name      : 'alt',
                    inputValue: 'clampToGround',
+               }, {
+                   boxLabel  : 'Relative to ground',
+                   name      : 'alt',
+                   inputValue: 'relativeToGround',
+                   checked: true
                }
            ]
        }, {

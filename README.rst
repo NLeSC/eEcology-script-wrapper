@@ -52,6 +52,8 @@ Deployment
   # in other shell
   pceleryd development.ini
 
+Requires a http reverse proxy which does basic authentication and passes HTTP_AUTHENTICATION and HTTP_REMOTE_USER environment variables.
+
 TODO
 ----
 

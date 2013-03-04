@@ -28,5 +28,7 @@ Ext.Loader.setConfig({
 	${task.description}
 	</div>
 	<div id="form"></div>
+	<hr>
+	Logged in: ${unauthenticated_userid}, close browser to logout
 </body>
 </html>

@@ -29,7 +29,7 @@ def main(global_config, **settings):
     config.add_route('result_file', '/tool/{script}/{taskid}/result/{filename}')
     config.add_static_view('static', 'trackertask:static', cache_max_age=3600)
 
-    config.set_authentication_policy(RemoteUserAuthenticationPolicy())
+    config.set_authentication_policy(RemoteUserAuthenticationPolicy('HTTP_REMOTE_USER'))
     config.set_authorization_policy(ACLAuthorizationPolicy())
 
     config.scan()

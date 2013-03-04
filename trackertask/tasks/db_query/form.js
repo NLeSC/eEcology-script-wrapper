@@ -11,7 +11,7 @@ Ext.onReady(function() {
     	   name: 'query',
     	   width: '100%',
     	   height: 300,
-    	   value: 'SELECT device_info_serial FROM gps.uva_device_limited'
+    	   value: 'SELECT device_info_serial FROM gps.ee_device_limited'
        }],
    });
 });

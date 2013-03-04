@@ -25,76 +25,6 @@ class PythonTask(Task):
     """Filename of javascript form"""
     js_form = 'form.js'
     autoregister = True  # Change to False to hide this task
-    _db = None
-
-    @property
-    def db_url(self):
-        """Instance of :class:`~sqlalchemy.engine.url.URL`
-
-        Can be used to create database connection in another language by using URL's properties.
-
-        eg. For Matlab the SQLAlchemy URL has to be converted to JDBC
-        In Python::
-
-            u = self.db_url
-            username = u.username
-            password = u.password
-            instance = u.database
-            drivers = {'postgresql': 'org.postgresql.Driver'}
-            driver = drivers[u.drivername]
-            jdbc_url = 'jdbc:{drivername}://{host}:{port}/{database}'.format(drivername=u.drivername,
-                                                                             host=u.host,
-                                                                             port=u.port or 5432,
-                                                                             database=u.database)
-            if u.query.has_key('sslmode') and u.query['sslmode'] == 'require':
-                jdbc_url += '?ssl=true'
-
-        In Matlab::
-
-            conn = database(instance, username, password, driver, jdbc_url)
-
-
-        eg. For R
-        In Python::
-            u = self.db_url
-            drivers = {'postgresql': 'PostgreSQL'}
-            driver = drivers[u.drivername]
-            dbname=u.database
-            host = u.host
-            port = u.port or 5432
-            username = u.username
-            password = u.password
-
-        In R::
-            drv <- dbDriver(driver)
-            # TODO how to use sslmode=require in R, possibly via PGSSLMODE environment variable?
-            con <- dbConnect(drv, dbname=dbname, host=host, port=port, user=username, password=password)
-
-        """
-        return make_url(current_app.conf['sqlalchemy.url'])
-
-    @property
-    def db(self):
-        """Connects to database and performs reflection on all available tables.
-
-        Uses current_app.conf for sqlalchemy.* configuration.
-        Performs reflection on default schema or if 'sqlalchemy.schema' config is set reflects on that schema.
-
-        Returns tuple with :class:`sqlalchemy.orm.session.Session` and :class:`sqlalchemy.MetaData`.
-
-        Usage example::
-
-            Session, meta = self.db
-            tracking = meta.tables['gps.uva_tracking_speed']
-            results = Session().query(tracking).all()
-
-        """
-        if self._db is None:
-            engine = engine_from_config(current_app.conf, 'sqlalchemy.')
-            models.DBSession.configure(bind=engine)
-            models.reflect(bind=engine, schema=current_app.conf.get('reflect.schema'))
-            self._db = (models.DBSession, models.meta,)
-        return self._db
 
     @property
     def output_dir(self):
@@ -117,10 +47,62 @@ class PythonTask(Task):
         """
         return os.path.dirname(os.path.abspath(sys.modules[self.__module__].__file__))
 
-    def formfields2taskargs(self, fields):
+    def formfields2taskargs(self, fields, db_url):
         """Validate and serialize form fields to dict.
 
-        Used as kwargs for Task.run()"""
+        Used as kwargs for Task.run()
+
+        If task requires db access it can add db_url to the task arguments.
+        The db_url can be parsed and used to connect to db.
+
+        eg. Python using sqlalchemy models::
+
+            from trackertask.models import DBSession, Devices
+            Session = DBSession(db_url)
+            res = Session().query(Devices).all()
+            Session.close_all()
+
+        eg. For Matlab the SQLAlchemy URL has to be converted to JDBC
+        In Python::
+
+            from trackertask.models import make_url
+            u = make_url(db_url)
+            username = u.username
+            password = u.password
+            instance = u.database
+            drivers = {'postgresql': 'org.postgresql.Driver'}
+            driver = drivers[u.drivername]
+            jdbc_url = 'jdbc:{drivername}://{host}:{port}/{database}'.format(drivername=u.drivername,
+                                                                             host=u.host,
+                                                                             port=u.port or 5432,
+                                                                             database=u.database)
+            if u.query.has_key('sslmode') and u.query['sslmode'] == 'require':
+                jdbc_url += '?ssl=true'
+
+        In Matlab::
+
+            conn = database(instance, username, password, driver, jdbc_url)
+
+
+        eg. For R
+        In Python::
+
+            from trackertask.models import make_url
+            u = make_url(db_url)
+            drivers = {'postgresql': 'PostgreSQL'}
+            driver = drivers[u.drivername]
+            dbname=u.database
+            host = u.host
+            port = u.port or 5432
+            username = u.username
+            password = u.password
+
+        In R::
+
+            drv <- dbDriver(driver)
+            # TODO how to use sslmode=require in R, possibly via PGSSLMODE environment variable?
+            con <- dbConnect(drv, dbname=dbname, host=host, port=port, user=username, password=password)
+        """
         return fields
 
     @property
