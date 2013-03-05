@@ -1,7 +1,7 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
-Script wrapper
+Home
 </%block>
 
 <h2>Available scripts</h2>

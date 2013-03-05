@@ -1,7 +1,7 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
-Script wrapper &raquo; Results
+Results
 </%block>
 
 <h2>Output files:</h2>

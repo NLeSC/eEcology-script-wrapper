@@ -1,7 +1,7 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
-Script wrapper &raquo; ${task.label}
+${task.label}
 </%block>
 
 <%block name="header">

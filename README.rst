@@ -87,3 +87,10 @@ Java is missing, add by:
    mkdir -p java/jre
    ln -s /usr/lib/jvm/java-6-openjdk-amd64 java/jre/glnxa64
 
+
+Add cert for postgresql jdbc ssl connection
+-------------------------------------------
+
+See http://jdbc.postgresql.org/documentation/91/ssl-client.html
+
+

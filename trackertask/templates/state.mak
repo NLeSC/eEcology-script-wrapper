@@ -1,7 +1,7 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
-Script wrapper &raquo; State
+State
 </%block>
 
 <%block name="header">
