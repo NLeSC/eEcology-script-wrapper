@@ -8,7 +8,7 @@ Ext.define('Esc.ee.form.Panel', {
     extend: 'Ext.form.Panel',
     url: '.',
     renderTo: 'form',
-    width: 800,
+    width: 911,
     autoHeight: true,
     border: false,
     jsonSubmit: true,

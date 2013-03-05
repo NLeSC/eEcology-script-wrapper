@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Script - ${task.label}</title>
+<%inherit file="base.mak"/>
+
+<%block name="title">
+Script wrapper &raquo; ${task.label}
+</%block>
+
+<%block name="header">
 <link rel="stylesheet"
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
 <link rel="stylesheet"
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
-<link rel="stylesheet"
-        href="${request.static_url('trackertask:static/style.css')}" type="text/css"></link>
-<script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all-dev.js"></script>
+<script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all.js"></script>
 <script type="text/javascript">
 Ext.Loader.setConfig({
     enabled: true,
@@ -21,14 +21,11 @@ Ext.Loader.setConfig({
   });
 </script>
 <script type="text/javascript" src="${request.route_path('jsform',script=task.name)}"></script>
-</head>
-<body>
-	<h1>${task.label}</h1>
-	<div>
-	${task.description}
-	</div>
-	<div id="form"></div>
-	<hr>
-	Logged in: ${unauthenticated_userid}, close browser to logout
-</body>
-</html>
+</%block>
+
+
+<h2>${task.label}</h2>
+<div>
+${task.description}
+</div>
+<div id="form"></div>

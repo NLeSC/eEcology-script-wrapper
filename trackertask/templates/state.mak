@@ -1,14 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Script wrapper - State</title>
+<%inherit file="base.mak"/>
+
+<%block name="title">
+Script wrapper &raquo; State
+</%block>
+
+<%block name="header">
 % if success:
 <meta http-equiv="refresh" content="0;url=${result}" />
 % else:
-<meta http-equiv="refresh" content="10" />
+<meta http-equiv="refresh" content="5" />
 % endif
-</head>
-<body>Script is in '${state}' state. This page will reload every 10 seconds.
-</body>
-</html>
+</%block>
+
+Script is in '${state}' state. This page will reload every 5 seconds.
