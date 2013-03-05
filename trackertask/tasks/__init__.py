@@ -10,7 +10,6 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-from oct2py import octave
 import trackertask.models as models
 
 logger = get_task_logger(__name__)
@@ -138,15 +137,19 @@ class OctaveTask(PythonTask):
 
         def run(self, output_dir, dsn, start, end, trackers):
             self.load_mfile()
-            octave.plot(output_dir, dsn, start, end, trackers)
+            self.octave.plot(output_dir, dsn, start, end, trackers)
             return {'output': '<output_dir>/plot.png'}
 
     """
     abstract = True
     octave_script = None
 
+    def __init__(self):
+        from oct2py import octave
+        self.octave = octave
+
     def load_mfile(self):
-        octave.addpath(os.path.join(self.task_dir, self.octave_script))
+        self.octave.addpath(os.path.join(self.task_dir, self.octave_script))
 
 
 class SubProcessTask(PythonTask):
