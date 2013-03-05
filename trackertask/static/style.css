@@ -12,3 +12,8 @@
 .icon-load {
   background-image: url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/application_go.png) !important;
 }
+
+#header {
+	width: 984px !important;
+}
+

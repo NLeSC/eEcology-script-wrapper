@@ -8,6 +8,11 @@
     type="text/css"></link>
 <link rel="stylesheet"
     href="http://www.uva-bits.nl/wp-content/themes/flysafe/style.css">
+<link rel="stylesheet"
+        href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
+<link rel="stylesheet"
+        href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
+<script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all.js"></script>
 <%block name="header"/>
 </head>
 <body>
@@ -18,8 +23,7 @@
             </a>
             <div class="menu-header">
                 <ul id="menu-hoofdmenu" class="menu">
-                    <li id="menu-item-287"
-                        class="menu-item menu-item-type-post_type current-menu-item page_item page-item-2 current_page_item menu-item-287"><a
+                    <li class="current_page_item"><a
                         href="${request.route_path('index')}"><%block name="title"/></a></li>
                 </ul>
             </div>
