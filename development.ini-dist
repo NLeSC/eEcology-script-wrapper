@@ -20,6 +20,7 @@ BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 # Use sqlite as broker+resultstore
+# !!! DO NOT USE sqlite broker as it has memory leak !!!
 #BROKER_URL = "sqla+sqlite:///%(here)s/data/celery.broker.db"
 #CELERY_RESULT_BACKEND = database
 #CELERY_RESULT_DBURI = sqlite:///%(here)s/data/celery.results.db
