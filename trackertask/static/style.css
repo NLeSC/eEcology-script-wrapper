@@ -1,19 +1,27 @@
 /* shared styles for the ActionColumn icons */
 .x-action-col-cell img {
-        height: 16px;
-        width: 16px;
-        cursor: pointer;
+	height: 16px;
+	width: 16px;
+	cursor: pointer;
 }
 
 .icon-delete {
-  background-image: url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/delete.gif) !important;
+	background-image:
+		url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/delete.gif)
+		!important;
 }
 
 .icon-load {
-  background-image: url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/application_go.png) !important;
+	background-image:
+		url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/application_go.png)
+		!important;
+}
+
+#description {
+	padding-bottom: 10px;
+	padding-top: 10px;
 }
 
 #header {
 	width: 984px !important;
 }
-
