@@ -9,11 +9,10 @@ class KmzGen(MatlabTask):
     label = "Generate KMZ file"
     description = """Uses Matlab google earth toolkit"""
     deploy_script = 'run_kmz_gen.sh'
-    return_stderr = False
-    return_stdout = False
 
     def run(self):
         result = super(KmzGen, self).run()
+        result['files'] = {}  # Hide stderr.txt and stdout.txt
         result['files']['out.kmz'] = os.path.join(self.output_dir, 'out.kmz')
         return result
 

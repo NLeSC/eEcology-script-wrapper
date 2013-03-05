@@ -8,7 +8,7 @@ from celery import current_app
 from celery.utils.log import get_task_logger
 from sqlalchemy import func
 from trackertask.tasks import PythonTask
-import trackertask.models as models
+from trackertask.models import DBSession, Tracking
 
 logger = get_task_logger(__name__)
 
@@ -21,10 +21,9 @@ class PythonPlotTask(PythonTask):
     def run(self, db_url, start, end, trackers):
         ids = [tracker['id'] for tracker in trackers]
         msg = 'fancy plot of {} from {} to {}'.format(json.dumps(trackers), start, end)
-        s = models.DBSession(db_url)
-        tr = models.Trackings
-        tid = tr.device_info_serial
-        dt = tr.date_time
+        s = DBSession(db_url)
+        tid = Tracking.device_info_serial
+        dt = Tracking.date_time
         q = s().query(tid, func.count(tid))
         q = q.filter(tid.in_(ids))
         q = q.filter(dt.between(start, end))
