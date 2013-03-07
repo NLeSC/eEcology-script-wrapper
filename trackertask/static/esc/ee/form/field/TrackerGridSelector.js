@@ -10,6 +10,10 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     },
     requires: [
         'Ext.button.Button',
+        'Esc.ee.store.Projects',
+        'Esc.ee.store.Species',
+        'Esc.ee.store.TrackerIds',
+        'Ext.ux.grid.FiltersFeature'
     ],
     uses: ['Ext.grid.plugin.DragDrop'],
     /**
@@ -124,10 +128,43 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         }
         return buttons;
     },
+    createFromGrid: function() {
+    	var fromStore = Ext.create('Esc.ee.store.TrackerIds', {
+    		model: this.toGrid.store.model
+        });
+
+    	var project_store = Ext.create('Esc.ee.store.Projects');
+
+    	var species_store = Ext.create('Esc.ee.store.Species');
+
+    	return {
+	       multiSelect: true,
+	       title            : 'Available',
+	       store            : fromStore,
+	       features         : [{
+	            ftype: 'filters',
+	            local: true
+	       }],
+	       columns          : [{
+	           text: "ID", sortable: true, dataIndex: 'id',
+	           filter: {type: 'numeric'}
+	       }, {
+	           text: "Species", flex: 1, sortable: true, dataIndex: 'species',
+	           filter: {type: 'list', store: species_store}
+	       }, {
+	           text: "Project", flex: 1, sortable: true, dataIndex: 'project',
+	           filter: {type: 'list', store: project_store}
+	       }]
+	   };
+    },
     setupItems: function() {
         var me = this;
 
         me.ddGroup = 'TrackerGridSelectorDD-'+Ext.id();
+
+        if (!me.fromGrid) {
+        	me.fromGrid = me.createFromGrid();
+        }
 
         if (!me.toGrid.viewConfig) {
             me.toGrid.viewConfig = {}

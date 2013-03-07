@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Script Wrapper &raquo; ${self.title()}</title>
+<title>Script Wrapper - ${self.title()}</title>
 <link rel="stylesheet"
     href="${request.static_url('trackertask:static/style.css')}"
     type="text/css"></link>
@@ -26,7 +26,7 @@
 <li id="menu-item-1236" class="menu-item menu-item-type-post_type current-menu-item page_item page-item-293 current_page_item menu-item-1236"><a href="http://www.uva-bits.nl/virtual-lab/">Virtual Lab</a>
 <ul>
 <li class="app-item"><a href="${request.route_path('index')}">Script Wrapper</a>
-&raquo;
+-
 <a href="."><%block name="title"/></a>
 </li>
 </ul>
