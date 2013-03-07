@@ -12,6 +12,8 @@
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
 <link rel="stylesheet"
         href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
+<link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/grid/css/GridFilters.css" />
+<link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/grid/css/RangeMenu.css" />
 <script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all.js"></script>
 <%block name="header"/>
 </head>

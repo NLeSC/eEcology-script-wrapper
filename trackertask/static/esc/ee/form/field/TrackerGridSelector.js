@@ -323,15 +323,6 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         var me = this;
         var fromStore = this.fromField.store;
 
-        // Store not loaded yet - we cannot set the value
-        if (!fromStore.getCount()) {
-            fromStore.on({
-                load: Ext.Function.bind(me.setValue, me, [value]),
-                single: true
-            });
-            return;
-        }
-
         var toStore = this.toField.store;
         // move all previously selected items back to available
         Ext.Array.forEach(toStore.getRange(), function(rec){
@@ -344,9 +335,10 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
                 // convert data to record
                 rec = Ext.create(Ext.ModelManager.getModel(toStore.model), rec);
             }
-            // In the from store, move it over
-            if (fromStore.indexOf(rec) > -1) {
-                fromStore.remove(rec);
+            // If in the from store, move it over
+            var fromId = fromStore.indexOfId(rec.getId());
+            if (fromId > -1) {
+                fromStore.removeAt(fromId);
             }
             toStore.add(rec);
         });
