@@ -127,3 +127,29 @@ class Views(object):
         Session.close_all()
 
         return trackers
+
+    @view_config(route_name='species', renderer='json')
+    def species(self):
+        Session = make_session_from_request(self.request)
+
+        q = Session().query(Individual.species).distinct()
+        species = []
+        for speci in q:
+            species.append({'id': speci, 'text': speci})
+
+        Session.close_all()
+
+        return species
+
+    @view_config(route_name='projects', renderer='json')
+    def projects(self):
+        Session = make_session_from_request(self.request)
+
+        q = Session().query(Project.key_name, Project.common_name).join(Device)
+        projects = []
+        for pid, text in q:
+            projects.append({'id': pid, 'text': text})
+
+        Session.close_all()
+
+        return projects

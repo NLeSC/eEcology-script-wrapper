@@ -21,6 +21,8 @@ def main(global_config, **settings):
     config.set_root_factory(RootFactory)
     config.add_route('index', '/')
     config.add_route('trackers', '/trackers.json')
+    config.add_route('species', '/species.json')
+    config.add_route('projects', '/projects.json')
     config.add_route('jsform', '/tool/{script}/form.js')
     config.add_route('apply', '/tool/{script}/')
     config.add_route('state.json', '/tool/{script}/{taskid}/state.json')

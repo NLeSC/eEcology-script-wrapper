@@ -5,7 +5,10 @@ Ext.require([
     'Esc.ee.form.field.DateTimeEnd',
     'Esc.ee.form.field.Color',
     'Esc.ee.form.field.TrackerGridSelector',
+    'Esc.ee.store.Projects',
+    'Esc.ee.store.Species',
     'Ext.grid.plugin.CellEditing',
+    'Ext.ux.grid.FiltersFeature',
     'Ext.form.RadioGroup',
     'Ext.form.field.Radio'
 ]);
@@ -21,28 +24,39 @@ Ext.onReady(function() {
                  'project',
                  {name: 'color', defaultValue: 'FF0000'},
                  {name: 'size', defaultValue: 'small'},
-                 {name: 'speed', defaultValue: 4},
+                 {name: 'speed', defaultValue: 4}
                  ]
     });
 
-   var astore = new Ext.create('Esc.ee.store.TrackerIds', {
-       model: 'Esc.eEcology.model.Tracker',
+   var astore = Ext.create('Esc.ee.store.TrackerIds', {
+       model: 'Esc.eEcology.model.Tracker'
    });
+
+   var project_store = Ext.create('Esc.ee.store.Projects');
+
+   var species_store = Ext.create('Esc.ee.store.Species');
 
    var available_trackers = {
        multiSelect: true,
        title            : 'Available',
        store            : astore,
+       features         : [{
+            ftype: 'filters',
+            local: true
+       }],
        columns          : [{
-           text: "ID", sortable: true, dataIndex: 'id'
+           text: "ID", sortable: true, dataIndex: 'id',
+           filter: {type: 'numeric'}
        }, {
-           text: "Species", flex: 1, sortable: true, dataIndex: 'species'
+           text: "Species", flex: 1, sortable: true, dataIndex: 'species',
+           filter: {type: 'list', store: species_store}
        }, {
-           text: "Project", flex: 1, sortable: true, dataIndex: 'project'
+           text: "Project", flex: 1, sortable: true, dataIndex: 'project',
+           filter: {type: 'list', store: project_store}
        }],
    };
 
-   var sstore = new Ext.create('Ext.data.Store', {
+   var sstore = Ext.create('Ext.data.Store', {
        model: 'Esc.eEcology.model.Tracker'
    });
 
