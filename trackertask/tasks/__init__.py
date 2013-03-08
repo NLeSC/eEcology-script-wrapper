@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 from celery import Task
-from celery import current_app
 from celery.utils.log import get_task_logger
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
@@ -27,7 +26,7 @@ class PythonTask(Task):
 
     @property
     def output_dir(self):
-        directory = os.path.join(current_app.conf['task_output_directory'],
+        directory = os.path.join(self.app.conf['task_output_directory'],
                                  self.request.id,
                                  )
         try:
@@ -235,7 +234,7 @@ class MatlabTask(SubProcessTask):
         Fetched from celery config with 'matlab.location' key.
         """
         if self._matlab is None:
-            self._matlab = current_app.conf['matlab.location']
+            self._matlab = self.app.conf['matlab.location']
         return self._matlab
 
     def pargs(self):

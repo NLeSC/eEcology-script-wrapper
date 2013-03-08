@@ -10,13 +10,10 @@ from models import Device, Individual, TrackSession, Project
 
 logger = logging.getLogger(__package__)
 
-def tasks():
-    return {k : v for k, v in celery.tasks.iteritems()
-                if not k.startswith('celery.')}
-
 class Views(object):
     def __init__(self, request):
         self.request = request
+        self.celery = celery
 
     @property
     def scriptid(self):
@@ -26,27 +23,29 @@ class Views(object):
     def taskid(self):
         return self.request.matchdict['taskid']
 
+    def tasks(self):
+        return {k : v for k, v in self.celery.tasks.iteritems()
+                    if not k.startswith('celery.')}
+
     @view_config(route_name='index', renderer='index.mak')
     def index(self):
-        return {'tasks': tasks()}
+        return {'tasks': self.tasks()}
 
     @view_config(route_name='apply', request_method='GET', renderer='form.mak')
     def form(self):
-        task = tasks()[self.scriptid]
-        userid = unauthenticated_userid(self.request)
-        return {'task': task, 'unauthenticated_userid': userid}
+        task = self.tasks()[self.scriptid]
+        return {'task': task}
 
     @view_config(route_name='jsform')
     def jsform(self):
-        task = tasks()[self.scriptid]
+        task = self.tasks()[self.scriptid]
         return FileResponse(task.js_form_location,
                             self.request,
-                            content_type='application/x-javascript',
                             )
 
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
-        task = tasks()[self.scriptid]
+        task = self.tasks()[self.scriptid]
         db_url = db_url_from_request(self.request)
         kwargs = task.formfields2taskargs(self.request.json_body, db_url)
         taskresp = task.apply_async(kwargs=kwargs)
@@ -58,7 +57,7 @@ class Views(object):
 
     @view_config(route_name='state.json', renderer='json')
     def statejson(self):
-        result = AsyncResult(self.taskid)
+        result = self.celery.AsyncResult(self.taskid)
         result_url = self.request.route_path('result',
                                         script=self.scriptid,
                                         taskid=result.id,
@@ -85,7 +84,7 @@ class Views(object):
 
     @view_config(route_name='result', renderer='result.mak')
     def result(self):
-        aresult = AsyncResult(self.taskid)
+        aresult = self.celery.AsyncResult(self.taskid)
         result = aresult.result
         if aresult.failed():
             raise result
@@ -102,10 +101,12 @@ class Views(object):
         return {'files': files}
 
     @view_config(route_name='result_file')
-    def output(self):
-        filename = self.request.matchdict['filename']
-        aresult = AsyncResult(self.taskid)
+    def result_file(self):
+        aresult = self.celery.AsyncResult(self.taskid)
+        if aresult.failed():
+            raise aresult.result
         # results has files dict with key=base filename and value is absolute path to file
+        filename = self.request.matchdict['filename']
         path = aresult.result['files'][filename]
         return FileResponse(path, self.request)
 
@@ -133,6 +134,7 @@ class Views(object):
         Session = make_session_from_request(self.request)
 
         q = Session().query(Individual.species).distinct()
+        q = q.order_by(Individual.species)
         species = []
         for speci in q:
             species.append({'id': speci, 'text': speci})
@@ -145,7 +147,9 @@ class Views(object):
     def projects(self):
         Session = make_session_from_request(self.request)
 
-        q = Session().query(Project.key_name, Project.common_name).join(Device)
+        q = Session().query(Project.key_name, Project.common_name)
+        q = q.join(Device)
+        q = q.order_by(Project.common_name)
         projects = []
         for pid, text in q:
             projects.append({'id': pid, 'text': text})

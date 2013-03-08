@@ -10,6 +10,8 @@ requires = [
     'oct2py',
     'numpy',  # required by scipy
     'scipy',  # required by oct2py
+    'mock',
+    'nose',
 ]
 
 setup(name='trackertask',
