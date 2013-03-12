@@ -113,9 +113,9 @@ class Views(object):
     @view_config(route_name='trackers', renderer='json')
     def trackers(self):
 
-        Session = make_session_from_request(self.request)
+        Session = make_session_from_request(self.request)()
 
-        q = Session().query(Device.device_info_serial,
+        q = Session.query(Device.device_info_serial,
                             Project.common_name,
                             Individual.species,
                             )
@@ -125,35 +125,35 @@ class Views(object):
         for tid, project, species in q:
             trackers.append({'id': tid, 'project': project, 'species': species})
 
-        Session.close_all()
+        Session.close()
 
         return trackers
 
     @view_config(route_name='species', renderer='json')
     def species(self):
-        Session = make_session_from_request(self.request)
+        Session = make_session_from_request(self.request)()
 
-        q = Session().query(Individual.species).distinct()
+        q = Session.query(Individual.species).distinct()
         q = q.order_by(Individual.species)
         species = []
         for speci in q:
             species.append({'id': speci, 'text': speci})
 
-        Session.close_all()
+        Session.close()
 
         return species
 
     @view_config(route_name='projects', renderer='json')
     def projects(self):
-        Session = make_session_from_request(self.request)
+        Session = make_session_from_request(self.request)()
 
-        q = Session().query(Project.key_name, Project.common_name)
+        q = Session.query(Project.key_name, Project.common_name)
         q = q.join(Device)
         q = q.order_by(Project.common_name)
         projects = []
         for pid, text in q:
             projects.append({'id': pid, 'text': text})
 
-        Session.close_all()
+        Session.close()
 
         return projects

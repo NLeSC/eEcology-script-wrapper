@@ -7,6 +7,7 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema
 
 Base = declarative_base()
@@ -87,7 +88,7 @@ def DBSession(db_url):
 
 def make_session_from_request(request):
     db_url = db_url_from_request(request)
-    engine = create_engine(db_url)
+    engine = create_engine(db_url, poolclass=NullPool)
     Session = sessionmaker(bind=engine)
     return Session
 
