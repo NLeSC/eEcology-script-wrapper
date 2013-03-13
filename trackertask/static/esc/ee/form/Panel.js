@@ -73,7 +73,15 @@ Ext.define('Esc.ee.form.Panel', {
                             rec.destroy();
                         }
                     }]
-                }]
+                }],
+                listeners: {
+                    itemdblclick: function(grid, rec) {
+                        var form = me.getForm();
+                        var values = Ext.JSON.decode(rec.data.query);
+                        form.setValues(values);
+                        this.up('window').hide();
+                    }
+                }
             }
         });
     },
