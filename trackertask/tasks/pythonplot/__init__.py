@@ -47,4 +47,4 @@ class PythonPlotTask(PythonTask):
                 }
 
 def iso8601parse(datetime_string):
-    return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S"),
+    return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S")

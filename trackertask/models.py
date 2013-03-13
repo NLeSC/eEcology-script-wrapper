@@ -109,7 +109,7 @@ class Speed(Base):
     direction = Column(Float)
 
 class Acceleration(Base):
-    __tablename__ = 'ee_tracking_acceleration_limited'  # uva_acceleration101
+    __tablename__ = 'ee_acceleration_limited'  # uva_acceleration101
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -192,6 +192,7 @@ def populate(session):
         GRANT SELECT ON TABLE gps.ee_tracking_acceleration_limited TO public;
         GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
 
+        -- Create elevation schema
     """
     engine = session.get_bind()
     # Create schema

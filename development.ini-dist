@@ -28,8 +28,8 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 CELERY_IMPORTS = ("trackertask.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
 
-sqlalchemy.url = postgresql://stefan_verhoeven:mypw@db.e-ecology.sara.nl/flysafe?sslmode=require
-matlab.location = /home/stefanv/MATLAB/MATLAB_Compiler_Runtime/v717
+sqlalchemy.url = postgresql://db.e-ecology.sara.nl/flysafe?sslmode=require
+matlab.location = /home/stefanv/MATLAB/MATLAB_Compiler_Runtime/v711
 task_output_directory = %(here)s/data
 
 [server:main]
