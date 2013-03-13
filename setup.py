@@ -4,6 +4,9 @@ requires = [
     'pyramid',
     'waitress',
     'pyramid_debugtoolbar',
+    'sqlalchemy',
+    'geoalchemy',  # required for PostGIS geometry column type
+    'pyramid_celery',
     'celery',
     'redis',
     'rpy2',
