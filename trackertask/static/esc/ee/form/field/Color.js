@@ -12,7 +12,8 @@ Ext.define('Esc.ee.form.field.Color', {
          'FF0000', 'FF9900', '99CC00', '339966', '33CCCC', '3366FF', '800080', '969696',
          'FF00FF', 'FFCC00', 'FFFF00', '00FF00', '00FFFF', '00CCFF', '993366', 'C0C0C0',
          'FF99CC', 'FFCC99', 'FFFF99', 'CCFFCC', 'CCFFFF', '99CCFF', 'CC99FF', 'FFFFFF'
-     ],
+    ],
+    pickerCls: Ext.baseCSSPrefix + 'form-color-picker',
     createPicker: function() {
         var me = this;
 
@@ -24,6 +25,7 @@ Ext.define('Esc.ee.form.field.Color', {
             hidden: true,
             focusOnShow: true,
             colors: me.colors,
+            cls: me.pickerCls,
             listeners: {
                 select: me.onSelect,
                 scope: me
