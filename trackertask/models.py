@@ -193,6 +193,24 @@ def populate(session):
         GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
 
         -- Create elevation schema
+        CREATE SCHEMA elevation AUTHORIZATION stefanv;
+        GRANT USAGE ON SCHEMA elevation TO public;
+        CREATE OR REPLACE FUNCTION elevation.srtm_getvalue(IN my_point geometry, OUT altitude numeric)
+  RETURNS numeric AS
+$BODY$
+
+--Usage: select elevation.srtm_getvalue (pointfromtext('POINT(90 90)',4326))
+--When srtm3 does not give an elevation, srtm30 is used
+--On borders between cells the south and/or east  cell is selected, also between tiles!
+select -9999.0
+$BODY$
+  LANGUAGE sql IMMUTABLE STRICT
+  COST 100;
+ALTER FUNCTION elevation.srtm_getvalue(geometry)
+  OWNER TO stefanv;
+
+
+
     """
     engine = session.get_bind()
     # Create schema
@@ -220,13 +238,19 @@ def populate(session):
                                  ring_number=rn,
                                  ))
         dt = datetime.datetime.now()
-        loc = WKTSpatialElement('POINT({} {})'.format(4.830617+(tid*0.1), 52.979970+(tid*0.1)))
+        long = 4.830617
+        lat = 52.979970
+        loc = WKTSpatialElement('POINT({} {})'.format(long+(tid*0.1), lat+(tid*0.1)))
         session.add(Tracking(device_info_serial=tid,
                              date_time=dt,
+                             longitude=long,
+                             latitude=lat,
                              location=loc,
                              ))
         session.add(Speed(device_info_serial=tid,
                           date_time=dt,
+                          longitude=long,
+                          latitude=lat,
                           location=loc,
                           ))
         session.add(Acceleration(device_info_serial=tid,
@@ -235,5 +259,8 @@ def populate(session):
                                  ))
         session.add(Energy(device_info_serial=tid,
                            date_time=dt,
+                           vsll=0.009,
+                           vbat=3.929,
+                           ssw=63,
                            ))
     session.commit()
