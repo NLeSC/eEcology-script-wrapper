@@ -4,17 +4,15 @@
 <meta charset="UTF-8">
 <title>Script Wrapper - ${self.title()}</title>
 <link rel="stylesheet"
-    href="${request.static_url('trackertask:static/style.css')}"
+    href="${request.static_path('trackertask:static/style.css')}"
     type="text/css"></link>
 <link rel="stylesheet"
-    href="http://www.uva-bits.nl/wp-content/themes/flysafe/style.css">
+        href="${request.static_path('trackertask:static/ext/resources/css/ext-all.css')}" type="text/css"></link>
 <link rel="stylesheet"
-        href="http://cdn.sencha.com/ext/beta/4.2.0.489/resources/css/ext-all.css" type="text/css"></link>
-<link rel="stylesheet"
-        href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/css/ItemSelector.css" type="text/css"></link>
-<link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/grid/css/GridFilters.css" />
-<link rel="stylesheet" type="text/css" href="http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux/grid/css/RangeMenu.css" />
-<script type="text/javascript" src="http://cdn.sencha.com/ext/beta/4.2.0.489/ext-all.js"></script>
+        href="${request.static_path('trackertask:static/ext/examples/ux/css/ItemSelector.css')}" type="text/css"></link>
+<link rel="stylesheet" type="text/css" href="${request.static_path('trackertask:static/ext/examples/ux/grid/css/GridFilters.css')}" />
+<link rel="stylesheet" type="text/css" href="${request.static_path('trackertask:static/ext/examples/ux/grid/css/RangeMenu.css')}" />
+<script type="text/javascript" src="${request.static_path('trackertask:static/ext/ext-all.js')}"></script>
 <%block name="header"/>
 </head>
 <body>
@@ -37,12 +35,12 @@
             </div>
             <div id="lifewatch">
                 <a href="http://www.lifewatch.eu" target="_new"><img
-                    src="http://www.uva-bits.nl/wp-content/themes/flysafe/images/lifewatch4.png"
+                    src="${request.static_path('trackertask:static/images/lifewatch4.png')}"
                     id="lifewatch" alt="Lifewatch" /></a>
             </div>
             <div id="uva">
                 <a href="http://www.science.uva.nl" target="_new"><img
-                    src="http://www.uva-bits.nl/wp-content/themes/flysafe/images/uva4.png"
+                    src="${request.static_path('trackertask:static/images/uva4.png')}"
                     id="uva" alt="UvA" /></a>
             </div>
         </div>

@@ -1,3 +1,1171 @@
+/*
+Theme Name: FlySafe theme
+Theme URI: http://aartjan.com/
+Description: Custom theme for FlySafe website (UvA).
+Version: 1.0
+Author: Aart Jan van der Linden
+Author URI: http://aartjan.com/
+
+*/
+
+
+
+/* Begin Typography & Colors */
+body {
+    font-size: 62.5%; /* Resets 1em to 10px */
+    font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    background: #d5d6d7;
+    color: #333;
+
+    }
+
+#page {
+    background-color: white;
+    border: 1px solid #959596;
+    text-align: left;
+    }
+
+#header {
+    background: #fff url('images/headerblauw.jpg') no-repeat top center;
+    }
+
+#headerimg 	{
+    margin: 7px 9px 0;
+    height: 369px;
+    width: 9px;
+    }
+
+#content {
+    font-size: 1.2em;
+    margin-top:10px;
+    }
+
+.widecolumn .entry p {
+    font-size: 1.05em;
+    }
+
+.narrowcolumn .entry, .widecolumn .entry {
+    line-height: 1.4em;
+    }
+
+.widecolumn {
+    line-height: 1.6em;
+    }
+
+.narrowcolumn .postmetadata {
+    text-align: center;
+    }
+
+.thread-alt {
+    background-color: #f8f8f8;
+}
+.thread-even {
+    background-color: white;
+}
+.depth-1 {
+border: 1px solid #ddd;
+}
+
+.even, .alt {
+
+    border-left: 1px solid #ddd;
+}
+
+#footer {
+    border: none;
+    }
+
+small {
+    font-family: Arial, Helvetica, Sans-Serif;
+    font-size: 0.9em;
+    line-height: 1.5em;
+    }
+
+h1, h2, h3 {
+    font-family: 'Trebuchet MS', 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    font-weight: bold;
+    }
+
+h1 {
+    font-size: 4em;
+    text-align: center;
+    }
+
+#headerimg .description {
+    font-size: 1.2em;
+    text-align: center;
+    }
+
+h2 {
+    font-size: 2.2em;
+    color:#074669;
+    }
+
+h2.pagetitle {
+    font-size: 1.6em;
+    }
+
+#sidebar h2 {
+    font-family: 'Lucida Grande', Verdana, Sans-Serif;
+    font-size: 1.2em;
+    }
+
+h3 {
+    font-size: 1.3em;
+    }
+
+h1, h1 a, h1 a:hover, h1 a:visited, #headerimg .description {
+    text-decoration: none;
+    /*color: white;*/
+    }
+
+h2, h2 a, h2 a:visited, h3, h3 a, h3 a:visited {
+    /*color: #5a85c1;*/
+    }
+
+h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar h2, #wp-calendar caption, cite {
+    text-decoration: none;
+    }
+
+    p{
+        margin:0 0 10px 0;
+    }
+
+.entry p a:visited {
+    color: #b85b5a;
+    }
+
+.sticky {
+    background: #f7f7f7;
+    padding: 0 10px 10px;
+    }
+.sticky h2 {
+    padding-top: 10px;
+    }
+
+.commentlist li, #commentform input, #commentform textarea {
+    font: 0.9em 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    }
+.commentlist li ul li {
+    font-size: 1em;
+}
+
+.commentlist li {
+    font-weight: bold;
+}
+
+.commentlist li .avatar {
+    float: right;
+    border: 1px solid #eee;
+    padding: 2px;
+    background: #fff;
+    }
+
+.commentlist cite, .commentlist cite a {
+    font-weight: bold;
+    font-style: normal;
+    font-size: 1.1em;
+    }
+
+.commentlist p {
+    font-weight: normal;
+    line-height: 1.5em;
+    text-transform: none;
+    }
+
+#commentform p {
+    font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    }
+
+.commentmetadata {
+    font-weight: normal;
+    }
+
+#sidebar {
+    font: 1em 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    }
+
+small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, strike {
+    color: #777;
+    }
+
+code {
+    font: 1.1em 'Courier New', Courier, Fixed;
+    }
+
+acronym, abbr, span.caps
+{
+    font-size: 0.9em;
+    letter-spacing: .07em;
+    }
+
+a, h2 a:hover, h3 a:hover {
+    color: #074669;
+    text-decoration: underline;
+    }
+
+a:hover {
+    color: #147;
+    text-decoration: none;
+    }
+
+#wp-calendar #prev a, #wp-calendar #next a {
+    font-size: 9pt;
+    }
+
+#wp-calendar a {
+    text-decoration: none;
+    }
+
+#wp-calendar caption {
+    font: bold 1.3em 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    text-align: center;
+    }
+
+#wp-calendar th {
+    font-style: normal;
+    text-transform: capitalize;
+    }
+/* End Typography & Colors */
+
+
+
+/* Begin Structure */
+body {
+    margin: 0 0 20px 0;
+    padding: 0;
+    }
+
+#page {
+    background-color: white;
+    margin: 00px auto;
+    padding: 0;
+    width: 986px;
+    border: 1px solid #959596;
+    }
+
+#header {
+    background-color: #fff;
+    margin: 0 0 0 0px;
+    padding: 0;
+    height: 176px;
+    width: 986px;
+    }
+
+#headerimg {
+    margin: 0;
+    height: 114px;
+    width: 100%;
+    }
+
+.narrowcolumn {
+    float: left;
+    padding: 0 0 20px 45px;
+    margin: -70px 0 0;
+    width: 450px;
+    }
+
+.widecolumn {
+    padding: 10px 0 20px 0;
+    margin: 0;
+    width: 986px;
+    }
+
+.post {
+    margin: 0 0 40px;
+    text-align: justify;
+    }
+
+.post hr {
+    display: block;
+    }
+
+.widecolumn .post {
+    margin: 0;
+    }
+
+.narrowcolumn .postmetadata {
+    padding-top: 5px;
+    }
+
+.widecolumn .postmetadata {
+    margin: 30px 0;
+    }
+
+.widecolumn .smallattachment {
+    text-align: center;
+    float: left;
+    width: 128px;
+    margin: 5px 5px 5px 0px;
+}
+
+.widecolumn .attachment {
+    text-align: center;
+    margin: 5px 0px;
+}
+
+.postmetadata {
+    clear: both;
+}
+
+.clear {
+    clear: both;
+}
+
+#footer {
+    padding: 0;
+    margin: 0 auto;
+    width: 990px;
+    clear: both;
+    }
+
+#footer p {
+    margin: 0;
+    padding: 20px 0;
+    text-align: center;
+    }
+/* End Structure */
+
+
+
+/*	Begin Headers */
+h1 {
+    padding-top: 70px;
+    margin: 0;
+    }
+
+h2 {
+    margin: 0px 0 10px 0;
+    }
+
+h2.pagetitle {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#sidebar h2 {
+    margin: 5px 0 0;
+    padding: 0;
+    }
+
+h3 {
+    padding: 0;
+    margin: 30px 0 10px 0;
+    }
+
+h3.comments {
+    padding: 0;
+    margin: 40px auto 20px ;
+    }
+/* End Headers */
+
+
+
+/* Begin Images */
+p img {
+    padding: 0;
+    max-width: 100%;
+    }
+
+/*	Using 'class="alignright"' on an image will (who would've
+    thought?!) align the image to the right. And using 'class="centered',
+    will of course center the image. This is much better than using
+    align="center", being much more futureproof (and valid) */
+
+img.centered {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    }
+
+img.alignright {
+    padding: 4px;
+    margin: 0 0 2px 7px;
+    display: inline;
+    }
+
+img.alignleft {
+    padding: 4px;
+    margin: 0 7px 2px 0;
+    display: inline;
+    }
+
+.alignright {
+    float: right;
+    }
+
+.alignleft {
+    float: left;
+    }
+/* End Images */
+
+
+
+/* Begin Lists
+
+    Special stylized non-IE bullets
+    Do not work in Internet Explorer, which merely default to normal bullets. */
+
+html>body .entry ul {
+    margin-left: 0px;
+    padding: 0 0 0 30px;
+    list-style: none;
+    padding-left: 10px;
+    text-indent: -10px;
+    }
+
+html>body .entry li {
+    margin: 7px 0 8px 10px;
+    }
+
+.entry ul li:before, #sidebar ul ul li:before {
+    content: "\00BB \0020";
+    }
+
+.entry ol {
+    padding: 0 0 0 35px;
+    margin: 0;
+    }
+
+.entry ol li {
+    margin: 0;
+    padding: 0;
+    }
+
+.postmetadata ul, .postmetadata li {
+    display: inline;
+    list-style-type: none;
+    list-style-image: none;
+    }
+
+#sidebar ul, #sidebar ul ol {
+    margin: 0;
+    padding: 0;
+    }
+
+#sidebar ul li {
+    list-style-type: none;
+    list-style-image: none;
+    margin-bottom: 15px;
+    }
+
+#sidebar ul p, #sidebar ul select {
+    margin: 5px 0 8px;
+    }
+
+#sidebar ul ul, #sidebar ul ol {
+    margin: 5px 0 0 10px;
+    }
+
+#sidebar ul ul ul, #sidebar ul ol {
+    margin: 0 0 0 10px;
+    }
+
+ol li, #sidebar ul ol li {
+    list-style: decimal outside;
+    }
+
+#sidebar ul ul li, #sidebar ul ol li {
+    margin: 3px 0 0;
+    padding: 0;
+    }
+/* End Entry Lists */
+
+
+
+/* Begin Form Elements */
+#searchform {
+    margin: 10px auto;
+    padding: 5px 3px;
+    text-align: center;
+    }
+
+#sidebar #searchform #s {
+    width: 108px;
+    padding: 2px;
+    }
+
+#sidebar #searchsubmit {
+    padding: 1px;
+    }
+
+.entry form { /* This is mainly for password protected posts, makes them look better. */
+    text-align:center;
+    }
+
+select {
+    width: 130px;
+    }
+
+#commentform input {
+    width: 170px;
+    padding: 2px;
+    margin: 5px 5px 1px 0;
+    }
+
+#commentform {
+    margin: 5px 10px 0 0;
+    }
+#commentform textarea {
+    width: 100%;
+    padding: 2px;
+    }
+#respond:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+#commentform #submit {
+    margin: 0 0 5px auto;
+    float: right;
+    }
+/* End Form Elements */
+
+
+
+/* Begin Comments*/
+.alt {
+    margin: 0;
+    padding: 10px;
+    }
+
+.commentlist {
+    padding: 0;
+    text-align: justify;
+    }
+
+.commentlist li {
+    margin: 15px 0 10px;
+    padding: 5px 5px 10px 10px;
+    list-style: none;
+
+    }
+.commentlist li ul li {
+    margin-right: -5px;
+    margin-left: 10px;
+}
+
+.commentlist p {
+    margin: 10px 5px 10px 0;
+}
+.children { padding: 0; }
+
+#commentform p {
+    margin: 5px 0;
+    }
+
+.nocomments {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    }
+
+.commentmetadata {
+    margin: 0;
+    display: block;
+    }
+/* End Comments */
+
+
+
+/* Begin Sidebar */
+#sidebar
+{
+    padding: 20px 0 10px 0;
+    margin-left: 545px;
+    width: 190px;
+    }
+
+#sidebar form {
+    margin: 0;
+    }
+/* End Sidebar */
+
+
+
+/* Begin Calendar */
+#wp-calendar {
+    empty-cells: show;
+    margin: 10px auto 0;
+    width: 155px;
+    }
+
+#wp-calendar #next a {
+    padding-right: 10px;
+    text-align: right;
+    }
+
+#wp-calendar #prev a {
+    padding-left: 10px;
+    text-align: left;
+    }
+
+#wp-calendar a {
+    display: block;
+    }
+
+#wp-calendar caption {
+    text-align: center;
+    width: 100%;
+    }
+
+#wp-calendar td {
+    padding: 3px 0;
+    text-align: center;
+    }
+
+#wp-calendar td.pad:hover { /* Doesn't work in IE */
+    background-color: #fff; }
+/* End Calendar */
+
+
+
+/* Begin Various Tags & Classes */
+acronym, abbr, span.caps {
+    cursor: help;
+    }
+
+acronym, abbr {
+    border-bottom: 1px dashed #999;
+    }
+
+blockquote {
+    margin: 15px 30px 0 10px;
+    padding-left: 20px;
+    border-left: 5px solid #ddd;
+    }
+
+blockquote cite {
+    margin: 5px 0 0;
+    display: block;
+    }
+
+.center {
+    text-align: center;
+    }
+
+.hidden {
+    display: none;
+    }
+
+.screen-reader-text {
+     position: absolute;
+     left: -1000em;
+}
+
+hr {
+    display: none;
+    }
+
+a img {
+    border: none;
+    }
+
+.navigation {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 60px;
+    }
+/* End Various Tags & Classes*/
+
+
+
+/* Captions */
+.aligncenter,
+div.aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.wp-caption {
+    border: 1px solid #ddd;
+    text-align: center;
+    background-color: #f3f3f3;
+    padding-top: 4px;
+    margin: 10px;
+    -moz-border-radius: 3px;
+    -khtml-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.wp-caption img {
+    margin: 0;
+    padding: 0;
+    border: 0 none;
+}
+
+.wp-caption p.wp-caption-text {
+    font-size: 11px;
+    line-height: 17px;
+    padding: 0 4px 5px;
+    margin: 0;
+}
+/********************** FlySafe objects *****************************/
+#flysafe{
+    width: 600px; /*deze ook?*/
+    height: 500px;
+
+    }
+
+    #map{
+        font-size:9px;
+        line-height:14px;
+    }
+
+.singlecontentrow #flysafe{
+    width: 288px;
+    height: 500px;
+
+    }
+
+
+#flysafe #map{
+    width:288px; /*was600*/
+     height:500px;
+}
+.singlecontentrow #flysafe #map{
+    width:288px;
+    height:500px;
+}
+.doublecontentrow #flysafe #map{
+    width:585px;
+    height:500px;
+}
+#flysafe #controls{
+    position:relative;
+    margin-top:10px;
+    margin-left:300px;
+    width: 600px;
+    height:100px;
+    border:1px solid black;
+}
+
+#flysafe #controls #slider{
+    width: 500px;
+    height:10px;
+    background-color:#ccc;
+    margin: 10px;
+    margin-top: 30px;
+    margin-left: 50px;
+}
+#flysafe #begintijd{
+    position:absolute;
+    left: 10px;
+    top: 60px;
+    text-align:center;
+
+}
+#flysafe #eindtijd{
+    position:absolute;
+    left: 490px;
+    top: 60px;
+    text-align:center;
+}
+
+#flysafe #slider #ruitertje{
+
+}
+
+#flysafe #speed{
+    margin-left:200px;
+    width: 300px;
+}
+
+.ui-slider .ui-slider-handle{
+width: 50px !important;
+text-align:center;
+}
+
+.maphalf{
+    width:288px;
+    height:500px;
+}
+.highlightmap{
+    float:right;
+    margin-left:20px;
+}
+/******************* PAGINA'S ************************/
+.flysafehomewidgetkop{
+    margin-top:-20px;
+    height:82px;
+}
+.flysafehomewidgetkop.withoutimage{
+    margin-top:13px;
+    height:50px;
+}
+.flysafehomewidgetkop img{
+    vertical-align:middle;
+}
+
+.uitleg{
+    line-height: 1.4em;
+
+}
+.flysafe_home, .flysafe_project, .flysafe_projects {
+    line-height: 1.4em;
+    /*float: left;*/
+    padding: 0 0 20px 20px;
+    margin: 0px 0 0;
+    }
+ .flysafe_content {
+    line-height: 1.4em;
+    padding: 0 30px 20px 45px;
+    margin: 0px 0 0;
+    }
+.flysafe_home hr, .flysafe_project hr, .flysafe_content hr{
+    border-color:#DDDDDD;
+    border-style:solid;
+    border-width:0 0 1px;
+    clear:both;
+    color:#DDDDDD;
+    display:block !important;
+    height:20px;
+    margin-left:60px;
+    width:800px;
+    }
+
+.singlecontentrow{
+    width:275px;
+    padding-left:20px;
+    padding-right:20px;
+    float:left;
+    }
+
+.doublecontentrow{
+    width:597px;
+    min-height:700px;
+    padding-left:20px;
+    padding-right:20px;
+    float:left;
+    }
+
+.separator_right{
+    background-image: url(images/separator_vertical.jpg);
+    background-position:100% 60px;
+    background-repeat:no-repeat;
+}
+
+.separator_bottom{
+    background-image: url(images/separator_horizontal.jpg);
+    background-position:10px 100%;
+    background-repeat:no-repeat;
+}
+
+.separator_left{
+    background-image: url(images/separator_vertical.jpg);
+    background-position:0% 60px;
+    background-repeat:no-repeat;
+    padding-left:35px;
+}
+
+.flysafe_home #introcontent, .flysafe_project .uitleg{
+    padding-top:10px;
+    padding-right:10px;
+    border-right:1px solid #ddd;
+}
+
+#content #maps{
+    padding-left:20px;
+    float:left;
+    width:260px;
+}
+    #content #mapscontent{
+    padding-top:10px;
+        border-right:1px solid #ddd;
+
+    }
+    #content #birds{
+    width:260px;
+    float:left;
+    }
+
+.flysafe_home #mapworld{
+    float:left;
+    margin-bottom:15px;
+    width:275px;
+    height:436px;
+    }
+.flysafe_projects #mapworld{
+    float:left;
+    margin-bottom:15px;
+    width:575px;
+    height:436px;
+    }
+
+#mapworld h3{
+    margin:0;
+    padding:0;
+}
+
+    .multicolumn{
+        clear:both;
+    }
+    .column{
+        padding: 10px;
+        border-right:1px solid #ddd;
+    }
+
+    .last.column{
+        border-right:0;
+    }
+    #maps h3{
+    margin: 0;
+    }
+
+
+#menu-hoofdmenu {
+    position:absolute;
+    top: 108px;
+    font-size: 17px;
+    margin-left:235px;
+}
+#menu-hoofdmenu {
+    list-style: none;
+    }
+#menu-hoofdmenu li {
+    float:left;
+    position: relative;
+}
+#menu-hoofdmenu li a{
+    margin-right: 14px;
+    color:#a3a4a4;
+    text-decoration:none;
+}
+#menu-hoofdmenu li a:hover{
+    text-decoration:underline;
+}
+#menu-hoofdmenu li.current_page_item a{
+    color:#074669;
+}
+#projectmap{
+    width:288px; /*was 600*/
+    float:left;
+    margin-top:0px;
+}
+
+#projectmap.singlecontentrow{
+    width:288px;
+    float:left;
+    margin-top:60px;
+}
+
+#projectmap.doublecontentrow{
+    width:597px;
+}
+
+.uitleg{
+    float:left;
+}
+
+.msg_list {
+margin: 0px;
+padding: 0px;
+}
+.msg_head {
+padding: 5px 10px;
+cursor: pointer;
+position: relative;
+background-color:#FFCCCC;
+margin:1px;
+}
+.msg_body {
+padding: 5px 10px 15px;
+background-color:#F4F4F8;
+}
+.birdlist{
+    padding-left:0;
+    margin-top:0px;
+}
+.birdlist li{
+    list-style-type:none;
+    height:80px;
+    padding:0;
+    margin:0;
+}
+.birdlist li h3, .birdlist li p{
+margin:0;
+}
+
+.birdlist li img{
+    float:left;
+    margin-right:10px;
+}
+
+.updateslist, .specieslist, .projectslist{
+    padding-left:0;
+    margin-top:0px;
+}
+.updateslist li, .specieslist li, .projectslist li{
+    list-style-type:none;
+    height:80px;
+    padding:0;
+    margin:0;
+}
+.updateslist li h3, .updateslist li p,
+.specieslist li h3, .specieslist li p,
+.projectslist li h3, .projectslist li p{
+margin:0;
+}
+
+.updateslist li img, .specieslist li img, .projectslist li img{
+    float:left;
+    margin-right:10px;
+}
+
+.nobirdicon, .noprojecticon, .noupdateicon{
+    padding:4px;
+    border:1px solid #d8d8d8;
+}
+
+.flysafe_species #projecten li{
+    list-style-type:none;
+}
+.flysafe_species .project {
+    clear:both;
+}
+.flysafe_species .project a h3
+{
+    padding-top:10px;
+    color: #074669
+}
+.flysafe_species .project a{
+    color:#000;
+}
+
+.flysafe_species .project img{
+    float:left;
+    margin:5px;
+}
+
+.pageintroductioncontent{
+    padding-bottom:50px;
+}
+#legenda{
+    margin-top:10px;
+}
+.legendaItem{
+    height:32px;
+    width:135px;
+    float:left;
+
+}
+
+.legendaItem.breed{
+    width:270px;
+    margin-bottom:5px;
+    height:inherit;
+}
+.legendaItem  p{
+    margin:0;
+}
+.legendaItem  .imgHolder{
+    float:left;
+    height:14px;
+    margin:2px;
+
+}
+#uva, #lifewatch{
+    float:right;
+}
+#lifewatch{
+    margin-right:2px;
+    margin-top:2px;
+}
+#uva{
+    margin-top:2px;
+}
+
+/****************************************/
+/*********** wp_pagenavi overrides ******/
+.wp-pagenavi{
+    text-align:center;
+}
+.wp-pagenavi a, .wp-pagenavi span{
+    border:0px !important;
+}
+
+.download{
+    padding-left:20px;
+    background-image:url(images/icon_download.gif);
+    background-position:left;
+    background-repeat:no-repeat;
+}
+.popup{
+    padding-left:20px;
+    background-image:url(images/icon_popup.gif);
+    background-position:left;
+    background-repeat:no-repeat;
+}
+.kader{
+    float:right;
+    width:340px;
+    margin-bottom:30px;
+}
+.pngicon{
+    float:left;
+    margin-top:20px;
+    margin-left:-64px;
+}
+#progressindicator{
+    position:absolute;
+    margin-top:-300px;
+    background:#fff;
+    border: 1px solid #000;
+    width: 170px;
+    padding:5px;
+    margin-left:50px;
+}
+
+#legenda input{
+    margin-left:29px;
+}
+#legendaDot{
+    position:absolute;
+    margin-top:-25px;
+    margin-left:-3px;
+}
+.virtuallab{
+    display:inline-block;
+    text-align:center;
+    width:224px;
+    margin-bottom:30px;
+}
+.virtuallab h4{
+    margin:0;
+}
+.virtuallab img{
+    margin:0;
+    padding:0;
+
+}
+sup{
+    line-height:0.4;
+}
+.devicedataholder{
+    float: left;
+      margin-right: 14px;
+}
+.devicedataimgholder{
+    height: 80px;
+    overflow: hidden;
+    width: 123px;
+}
+.devicedata {
+    height: 450px;
+    margin-left: -171px;
+    margin-top: -226px;
+    width: 588px;
+}
+
+.content2_block {
+    list-style-type: none;
+    padding-top: 550px;
+}
 /* shared styles for the ActionColumn icons */
 .x-action-col-cell img {
 	height: 16px;
@@ -7,13 +1175,13 @@
 
 .icon-delete {
 	background-image:
-		url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/delete.gif)
+		url(ext/examples/shared/icons/fam/delete.gif)
 		!important;
 }
 
 .icon-load {
 	background-image:
-		url(http://cdn.sencha.com/ext/beta/4.2.0.489/examples/shared/icons/fam/application_go.png)
+		url(ext/examples/shared/icons/fam/application_go.png)
 		!important;
 }
 
