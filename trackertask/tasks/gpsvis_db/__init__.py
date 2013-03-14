@@ -50,10 +50,14 @@ class GpsVisDB(MatlabTask):
         # See http://blogs.mathworks.com/loren/2011/01/06/matlab-data-types-as-arguments-to-standalone-applications/
         self.db_url = u = make_url(db_url)
 
+        db_name = u.database
+        if 'sslmode' in u.params and u.params['sslmode'] in ['require', 'verify', 'verify-full']:
+            db_name+='?ssl=true'
+
         # execute
         result = super(GpsVisDB, self).run(u.username,
                                            u.password,
-                                           u.database,
+                                           db_name,
                                            u.host,
                                            self.vectorize(tracker_ids),
                                            self.vectorize(colors),
@@ -64,6 +68,8 @@ class GpsVisDB(MatlabTask):
                                            self.vectorize(speeds),
                                            )
 
+        for fn in os.listdir(self.output_dir):
+            result['files'][fn] = os.path.join(self.output_dir, fn)
         return result
 
     def vectorize(self, mylist):

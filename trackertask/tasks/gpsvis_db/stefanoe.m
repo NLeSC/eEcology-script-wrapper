@@ -7,7 +7,7 @@ function GPSvis_database(username, password, db_name, host, KDevice, Colors, sta
 % SizeChoice is a vector (length n) with 'small', 'medium' , 'large'
 % This function uses the Matlab2GoogleEarth toolbox
 
-% mcc -mv -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun -I googleearth stefanoe.m distWB.m
+% mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun -I googleearth stefanoe.m distWB.m
 
 %KDevice =[620 800];%[620 629 632 639 766 769 772 775 777 800];
 
@@ -36,7 +36,7 @@ if ischar(SpeedClasses)
   SpeedClasses = eval(SpeedClasses);
 end
 % is not used so display
-display(SizeChoice)
+display(SpeedClasses)
 
 %% add path Matlab2GoogleEarth toolbox
 % added during compilation
@@ -109,7 +109,9 @@ for k=1:length(KDevice)
     % 'cursor' that can be used to retreive the data in the table.
 
     % this fetch command actually transfers the data from database table to matlab
-    curs1 = pg_fetch(conn, sql2);
+    display(sql1);
+    display(sql2);
+    curs1 = pg_fetch(conn, sql1);
     curs2 = pg_fetch(conn, sql2);
     %% get the data from the cursor
     % because previously setdbprefs is set to 'structure' devices
@@ -117,29 +119,37 @@ for k=1:length(KDevice)
     % database columns.  to get the column device_info_serial from
     % the table as an matlab array type tracks.device_info_serial
     tracks = curs1;
+
+    % display(curs2);
+
     % ener = curs2;
-    ener.('date_time') = {curs2{:,2}};
-    ener.('ssw') = {curs2{:,11}};
-    ener.('vsll') = {curs2{:,9}};
-    ener.('vbat') = {curs2{:,10}};
+    ener.('date_time') = pg_datenum({curs2{:,2}});
+    ener.('ssw') = [curs2{:,11}];
+    ener.('vsll') = [curs2{:,9}];
+    ener.('vbat') = [curs2{:,10}];
+
+    % display(ener)
+
+    % display(tracks)
 
     %% copy data
     ID=tracks{:,1}; % .device_info_serial;
-    Year=tracks{:,2}; % .year;
-    Month=tracks{:,3}; % .month;
-    Day=tracks{:,4}; % .day;
-    Hour=tracks{:,5}; % .hour;
-    Minute=tracks{:,6}; % .minute;
-    Second=tracks{:,7}; % .second;
-    Long=tracks{:,8}; % .longitude;
-    Lat=tracks{:,9}; % .latitude;
-    Alt=tracks{:,10}; % .altitude;
-    Temperature=tracks{:,11}; % .temperature;
-    AGL=tracks{:,17}; % .agl;
-    ISpeed=tracks{:,15}*3.6; % .speed*3.6; %convert speed from m/s to km/hr
-    nrAcc=tracks{:,16}; % .n_acc_points;
-    satellites_used = tracks{:,14};
-    gps_fixtime = tracks{:,12};
+    Year=tracks{:,4}; % .year;
+    Month=tracks{:,5}; % .month;
+    Day=tracks{:,6}; % .day;
+    Hour=tracks{:,8}; % .hour;
+    Minute=tracks{:,8}; % .minute;
+    Second=tracks{:,9}; % .second;
+    Long=tracks{:,10}; % .longitude;
+    Lat=tracks{:,11}; % .latitude;
+    Alt=tracks{:,12}; % .altitude;
+    Temperature=tracks{:,13}; % .temperature;
+    AGL=tracks{:,19}; % .agl;
+    ISpeed=tracks{:,17};
+    ISpeed =ISpeed*3.6; % .speed*3.6; %convert speed from m/s to km/hr
+    nrAcc=tracks{:,18}; % .n_acc_points;
+    satellites_used = tracks{:,16};
+    gps_fixtime = tracks{:,14};
 
     ETime=datenum(ener.date_time)-734868; %datenum('2012-01-01 00:00:00')=734869
 
@@ -234,8 +244,10 @@ for k=1:length(KDevice)
         end
     toc
     tic
-    scrsz = get(0,'ScreenSize');
-    figure('Position',[30 scrsz(4)/20 scrsz(3)-50 scrsz(4)/1.2]);
+    % On server there is no display
+    % scrsz = get(0,'ScreenSize');
+    % figure('Position',[30 scrsz(4)/20 scrsz(3)-50 scrsz(4)/1.2]);
+    figure('visible','off');
         subplot(4,4,1)
         plot(Time,Long,'k.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','longitude']),TITLE (['\fontsize{12}','sensor :', num2str(ID(1))]); grid on
         subplot(4,4,2)
