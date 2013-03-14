@@ -51,7 +51,7 @@ class GpsVisDB(MatlabTask):
         self.db_url = u = make_url(db_url)
 
         db_name = u.database
-        if 'sslmode' in u.params and u.params['sslmode'] in ['require', 'verify', 'verify-full']:
+        if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
             db_name+='?ssl=true'
 
         # execute

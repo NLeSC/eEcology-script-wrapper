@@ -7,6 +7,6 @@ Results
 <h2>Output files:</h2>
 <ol>
 % for filename, url in files.items():
-<li><a href=${url}>${filename}</a>
+<li><a target="_new" href="${url}">${filename}</a>
 % endfor
 </ol>

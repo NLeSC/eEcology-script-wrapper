@@ -5,16 +5,23 @@ function GPSvis_database(username, password, db_name, host, KDevice, Colors, sta
 % AltChoice is a vector (length n) with for each device 'clampToGround', 'relativeToGround', 'absolute'
 % SpeedClasses is a matrix (nx3) with three threshold values for speed
 % SizeChoice is a vector (length n) with 'small', 'medium' , 'large'
-% This function uses the Matlab2GoogleEarth toolbox
+% This function uses the Matlab2GoogleEarth toolbox 
+% SV: Do not clear function arguments
+% clear all
+close all
 
+% Command to compile:
 % mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun -I googleearth stefanoe.m distWB.m
 
-%KDevice =[620 800];%[620 629 632 639 766 769 772 775 777 800];
-
+% Sometimes required to find postgresql driver
 % pg_settings()
 
 conn = pg_connectdb(db_name, 'host', host, 'user', username, 'pass', password, 'database_toolbox', 0);
 
+% SV: Use function argument
+% KDevice =[620 800];%[620 629 632 639 766 769 772 775 777 800];
+
+% SV: Command line arguments are strings, use eval to convert them into matlab variable types.
 if ischar(KDevice)
   KDevice = eval(KDevice);
 end
@@ -39,7 +46,7 @@ end
 display(SpeedClasses)
 
 %% add path Matlab2GoogleEarth toolbox
-% added during compilation
+% SV: Added during compilation
 % addpath('c:\Program Files\MATLAB\googleearth\')
 
 % image width and height
@@ -57,8 +64,10 @@ tic
 for k=1:length(KDevice)
     clear Time doy Dist ISpeed TSpeed TotNrAcc
     device = num2str(KDevice(k));
+    % SV: Use function argument
     % starttime = '2013-02-01 00:00:00';
     start = strcat('''',starttime,''''); % put the single quotes around it.
+    % SV: Use function argument
     % stoptime  = '2013-02-10 00:00:00';
     stop = strcat('''',stoptime,'''');
 
@@ -67,8 +76,10 @@ for k=1:length(KDevice)
     % set database pref. this determines how the results are returned.
     % 'structure' means you can reference the fields by the same names as the
     % database tables use. ( see doc setdbprefs )
+    % SV: Openearth database fetch has no setdbprefs
     % setdbprefs('DataReturnFormat','structure');
 
+	% SV: Only use ee_*_limited views, so everyone using scripts wrapper can execute queries
     % sql queries
     sql1 = strcat('select t.device_info_serial, t.date_time, a.date_time, ', ...
                ' date_part(''year''::text, t.date_time) AS year, ',...
@@ -109,8 +120,7 @@ for k=1:length(KDevice)
     % 'cursor' that can be used to retreive the data in the table.
 
     % this fetch command actually transfers the data from database table to matlab
-    display(sql1);
-    display(sql2);
+    % SV: Openearth database combines exec and fetch into pg_fetch
     curs1 = pg_fetch(conn, sql1);
     curs2 = pg_fetch(conn, sql2);
     %% get the data from the cursor
@@ -119,63 +129,61 @@ for k=1:length(KDevice)
     % database columns.  to get the column device_info_serial from
     % the table as an matlab array type tracks.device_info_serial
     tracks = curs1;
-
-    % display(curs2);
-
-    % ener = curs2;
+    % SV: Openearth returns columns by position and not by name
+    % SV: So map position to names
     ener.('date_time') = pg_datenum({curs2{:,2}});
     ener.('ssw') = [curs2{:,11}];
     ener.('vsll') = [curs2{:,9}];
     ener.('vbat') = [curs2{:,10}];
 
-    % display(ener)
-
-    % display(tracks)
-
+    %% close the database connection
+    % ( unless running more queries )
+    % SV: Openearth has no close 
+    % close(conn); 
     %% copy data
-    ID=tracks{:,1}; % .device_info_serial;
-    Year=tracks{:,4}; % .year;
-    Month=tracks{:,5}; % .month;
-    Day=tracks{:,6}; % .day;
-    Hour=tracks{:,8}; % .hour;
-    Minute=tracks{:,8}; % .minute;
-    Second=tracks{:,9}; % .second;
-    Long=tracks{:,10}; % .longitude;
-    Lat=tracks{:,11}; % .latitude;
-    Alt=tracks{:,12}; % .altitude;
-    Temperature=tracks{:,13}; % .temperature;
-    AGL=tracks{:,19}; % .agl;
-    ISpeed=tracks{:,17};
+    ID=[tracks{:,1}]; % .device_info_serial;
+    Year=[tracks{:,4}]; % .year;
+    Month=[tracks{:,5}]; % .month;
+    Day=[tracks{:,6}]; % .day;
+    Hour=[tracks{:,8}]; % .hour;
+    Minute=[tracks{:,8}]; % .minute;
+    Second=[tracks{:,9}]; % .second;
+    Long=[tracks{:,10}]; % .longitude;
+    Lat=[tracks{:,11}]; % .latitude;
+    Alt=[tracks{:,12}]; % .altitude;
+    Temperature=[tracks{:,13}]; % .temperature;
+    AGL=[tracks{:,19}]; % .agl;
+    ISpeed=[tracks{:,17}];
     ISpeed =ISpeed*3.6; % .speed*3.6; %convert speed from m/s to km/hr
-    nrAcc=tracks{:,18}; % .n_acc_points;
-    satellites_used = tracks{:,16};
-    gps_fixtime = tracks{:,14};
+    nrAcc=[tracks{:,18}]; % .n_acc_points;
+    satellites_used = [tracks{:,16}];
+    gps_fixtime = [tracks{:,14}];
 
     ETime=datenum(ener.date_time)-734868; %datenum('2012-01-01 00:00:00')=734869
 
     Filename=[num2str(ID(1)) '_'];
     if Day(1) < 10
-        Filename=[Filename '0' num2str(Day(1))];
+        Filename=[Filename '0' num2str(Day(1))]; 
     else
-        Filename=[Filename num2str(Day(1))];
+        Filename=[Filename num2str(Day(1))]; 
     end
     if Month(1) < 10
-        Filename=[Filename '0' num2str(Month(1))];
+        Filename=[Filename '0' num2str(Month(1))]; 
     else
-        Filename=[Filename num2str(Month(1))];
-    end
-    Filename=[Filename num2str(Year(1)) '_'];
+        Filename=[Filename num2str(Month(1))]; 
+    end    
+    Filename=[Filename num2str(Year(1)) '_']; 
     if Day(end) < 10
-        Filename=[Filename '0' num2str(Day(end))];
+        Filename=[Filename '0' num2str(Day(end))]; 
     else
-        Filename=[Filename num2str(Day(end))];
+        Filename=[Filename num2str(Day(end))]; 
     end
     if Month(end) < 10
-        Filename=[Filename '0' num2str(Month(end))];
+        Filename=[Filename '0' num2str(Month(end))]; 
     else
-        Filename=[Filename num2str(Month(end))];
-    end
-    Filename=[Filename num2str(Year(end))];
+        Filename=[Filename num2str(Month(end))]; 
+    end    
+    Filename=[Filename num2str(Year(end))]; 
 
 
     dom=[0 31 59 90 120 151 181 212 243 273 304 334]; %doy of first of the month
@@ -189,7 +197,7 @@ for k=1:length(KDevice)
          LY=0;
          doy(i)=dom(Month(i))+Day(i);
        end
-       Time(i)=doy(i)+(Hour(i)+(Minute(i)+Second(i)/60)/60)/24;
+       Time(i)=doy(i)+(Hour(i)+(Minute(i)+Second(i)/60)/60)/24; 
        Dist(i) = distWB([Lat(i) Long(i)],[42.719741  11.517136]);
        if i>1
               Period=Time(i)-Time(i-1);
@@ -213,19 +221,19 @@ for k=1:length(KDevice)
         for u=1:length(ener.ssw)
             SC(u,1:4)=NaN;
             if (SSW(u)==1)|(SSW(u)==3)|(SSW(u)==5)|(SSW(u)==7)|(SSW(u)==9) ...
-                    |(SSW(u)==11)|(SSW(u)==13)|(SSW(u)==15)
+                    |(SSW(u)==11)|(SSW(u)==13)|(SSW(u)==15) 
                  SC(u,1)=1;
             end
             if (SSW(u)==2)|(SSW(u)==3)|(SSW(u)==6)|(SSW(u)==7)|(SSW(u)==10) ...
-                    |(SSW(u)==11)|(SSW(u)==14)|(SSW(u)==15)
+                    |(SSW(u)==11)|(SSW(u)==14)|(SSW(u)==15) 
                  SC(u,2)=1;
             end
             if (SSW(u)==4)|(SSW(u)==5)|(SSW(u)==6)|(SSW(u)==7)|(SSW(u)==12) ...
-                    |(SSW(u)==13)|(SSW(u)==14)|(SSW(u)==15)
+                    |(SSW(u)==13)|(SSW(u)==14)|(SSW(u)==15) 
                  SC(u,3)=1;
             end
             if (SSW(u)==8)|(SSW(u)==9)|(SSW(u)==10)|(SSW(u)==11)|(SSW(u)==12) ...
-                    |(SSW(u)==13)|(SSW(u)==14)|(SSW(u)==15)
+                    |(SSW(u)==13)|(SSW(u)==14)|(SSW(u)==15) 
                  SC(u,4)=1;
             end
         end
@@ -233,10 +241,10 @@ for k=1:length(KDevice)
         Times=length(Time);
         for u=2:Times
            if TSpeed(u)>2
-             HisTSpeed=[HisTSpeed; TSpeed(u)];
+             HisTSpeed=[HisTSpeed; TSpeed(u)]; 
            end
            if ISpeed(u)>2
-             HisISpeed=[HisISpeed; ISpeed(u)];
+             HisISpeed=[HisISpeed; ISpeed(u)]; 
            end
            if AGL(u)>10
                HisAGL=[HisAGL ; AGL(u)];
@@ -253,9 +261,9 @@ for k=1:length(KDevice)
         subplot(4,4,2)
         plot(Time,Lat,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','latitude']); grid on
         subplot(4,4,3)
-        plot(Time,Alt,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','altitude [m ASL]']); grid on
+        plot(Time,Alt,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','altitude [m ASL]']); grid on   
         subplot(4,4,4)
-        plot(Long,Lat,'k.');xlabel(['\fontsize{12}','longitude']); ylabel(['\fontsize{12}','latitude']); grid on
+        plot(Long,Lat,'k.');xlabel(['\fontsize{12}','longitude']); ylabel(['\fontsize{12}','latitude']); grid on   
         subplot(4,4,5)
         plot(Time,TSpeed,'r.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','Speed[km/h] I=blue,T=red']); grid on
         hold on
@@ -263,18 +271,18 @@ for k=1:length(KDevice)
         subplot(4,4,6)
         plot(Time,nrAcc,'k.-');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','nr acc. samples'])
         subplot(4,4,7)
-        plot(Time,satellites_used,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','nr Satellites'])
+        plot(Time,tracks.satellites_used,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','nr Satellites'])
         subplot(4,4,8)
-        plot(Time,gps_fixtime,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','TimeToFix'])
-        subplot(4,4,9)
-        plot(ETime, ener.vsll, 'k.'); ylabel(['\fontsize{12}','SolVoltage [V]']); ylim([-0.8 3]); grid on; title (['\fontsize{12}','sensor :', num2str(ID(1))]);
+        plot(Time,tracks.gps_fixtime,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','TimeToFix'])
+        subplot(4,4,9)    
+        plot(ETime, ener.vsll, 'k.'); ylabel(['\fontsize{12}','SolVoltage [V]']); ylim([-0.8 3]); grid on; title (['\fontsize{12}','sensor :', num2str(ID(1))]); 
         hold on
         plot(ETime, -0.8+0.1*SC(:,1), 'r.');
         plot(ETime, -0.8+0.3*SC(:,2), 'b.');
         plot(ETime, -0.8+0.5*SC(:,3), 'k.');
         plot(ETime, -0.8+0.7*SC(:,4), 'g.');
         subplot(4,4,10)
-        plot(ETime, ener.vbat, 'k.'); ylabel(['\fontsize{12}','BatteryVoltage [V]']); ylim([3.2 4.2]); grid on
+        plot(ETime, ener.vbat, 'k.'); ylabel(['\fontsize{12}','BatteryVoltage [V]']); ylim([3.2 4.2]); grid on        
         subplot(4,4,11)
         plot(Time,Temperature,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','Temperature'])
         subplot(4,4,12)
@@ -318,7 +326,7 @@ for k=1:length(KDevice)
      kmlStr = '';
 
 
-    % set the icontype
+    % set the icontype   
     iconStr = ['http://maps.google.com/','mapfiles/kml/pal2/icon26.png'];
 
     % Set the Colortables (these are some examples that you can use)
@@ -330,14 +338,15 @@ for k=1:length(KDevice)
     Colortable(:,:,6)=['ff8cff8c';'ff00ff00';'ff00b900'; 'ff004b00']; % fel groen
     Colortable(:,:,7)=['ffff8cff';'ffff00ff';'ffa500a5'; 'ff4b004b']; % OK paars
     Colortable(:,:,8)=['ffAADD96';'ff60C659';'ff339E35'; 'ff3A7728']; %OK groen
-    Colortable(:,:,9)=['ffFFD3AA';'ffF9BA82';'ffF28411'; 'ffBF5B00']; %OK
-    Colortable(:,:,10)=['ffC6C699';'ffAAAD75';'ff6B702B'; 'ff424716']; %OK
+    Colortable(:,:,9)=['ffFFD3AA';'ffF9BA82';'ffF28411'; 'ffBF5B00']; %OK 
+    Colortable(:,:,10)=['ffC6C699';'ffAAAD75';'ff6B702B'; 'ff424716']; %OK 
     Colortable(:,:,11)=['ffE5BFC6';'ffD39EAF';'ffA05175'; 'ff7F284F']; %OK  roze-paars
     Colortable(:,:,12)=['ffdadada';'ffc3c3c3';'ff999999'; 'ff3c3c3c']; % van wit naar donkergrijs
     Colortable(:,:,13)=['ffC6B5C4';'ffA893AD';'ff664975'; 'ff472B59']; %OK blauwpaars
     Colortable(:,:,14)=['ffC1D1BF';'ff7FA08C';'ff5B8772'; 'ff21543F']; %OK grijsgroen
     Colortable(:,:,15)=['ff000000';'ff000000';'7d000000'; '10000000']; %black
 
+	% SV: Colors variable contains indices of ColorTable
     colortable1 = Colortable(:,:,Colors(k));
 
     %This is the line that connects the points
@@ -463,5 +472,5 @@ for k=1:length(KDevice)
     kmlStr=[];
     fh=[];
 end
-toc
+toc 
 
