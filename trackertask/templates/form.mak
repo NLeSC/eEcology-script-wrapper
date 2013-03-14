@@ -10,8 +10,8 @@ Ext.Loader.setConfig({
     enabled: true,
   //  disableCaching: false, // uncomment to use firebug breakpoints
     paths: {
-      'Ext.ux': 'http://cdn.sencha.com/ext/beta/4.2.0.489/examples/ux',
-      'Esc': '${request.static_url('trackertask:static/esc')}'
+      'Ext.ux': '${request.static_path('trackertask:static/ext/examples/ux')}',
+      'Esc': '${request.static_path('trackertask:static/esc')}'
     }
   });
 </script>
