@@ -20,7 +20,7 @@ class PythonPlotTask(PythonTask):
     """Perform a simple python task"""
     def run(self, db_url, start, end, trackers):
         ids = [tracker['id'] for tracker in trackers]
-        msg = 'fancy plot of {} from {} to {}'.format(json.dumps(trackers), start, end)
+        msg = 'fancy plot of {0} from {1} to {2}'.format(json.dumps(trackers), start, end)
         s = DBSession(db_url)
         tid = Tracking.device_info_serial
         dt = Tracking.date_time

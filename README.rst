@@ -54,6 +54,12 @@ Deployment
 
 Requires a http reverse proxy which does basic authentication and passes HTTP_AUTHENTICATION and HTTP_REMOTE_USER environment variables.
 
+To run as deamons:
+
+pserve --daemon --log-file=error.log development.ini
+nohup pceleryd development.ini --pidfile=$PWD/worker.pid -f worker.log &
+
+
 TODO
 ----
 
