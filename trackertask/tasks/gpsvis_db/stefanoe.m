@@ -291,7 +291,7 @@ for k=1:length(KDevice)
         subplot(4,4,13)
         plot(Time(2:end),log10((Time(2:end)-Time(1:end-1 ))*24*60),'k.');
         xlabel(['\fontsize{12}','dataNr']); ylabel(['\fontsize{12}','interval log[min]'])
-        plot(Time, 1:length(Long),'k.');ylabel(['\fontsize{12}','Nr datapoint GPS=black,Acc=red']); xlabel(['\fontsize{12}','time doy']); grid on
+        plot(Time, 1:length(Long),'k.');ylabel(['\fontsize{12}','Nr datapoint GPS=black,Acc=red']); xlabel(['\fontsize{12}','time doy']); grid on 
         hold on
         plot(Time, TotNrAcc,'r.');
         Bins=[2.5:5:122.5];
@@ -313,7 +313,7 @@ for k=1:length(KDevice)
     %% Make kmz-file
     numTime = datenum(Year,Month,Day,Hour,Minute,Second);
     Ix = find(Year<1900|Year>2015);
-    numTime(Ix)=NaN;
+    numTime(Ix)=NaN; 
     clear Ix;
 
     dateTimeFormat = 'yyyy-mm-ddTHH:MM:SSZ';
