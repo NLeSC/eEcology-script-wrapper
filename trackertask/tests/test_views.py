@@ -104,8 +104,7 @@ class TestViews(unittest.TestCase):
         expected_result = {'state': 'PENDING',
                            'success': False,
                            'failure': False,
-                           'result': result_url,
-                           }
+                           'result': result_url}
         self.assertDictEqual(result, expected_result)
 
     def testStateHtmlPending(self):
@@ -114,10 +113,13 @@ class TestViews(unittest.TestCase):
                  'success': False,
                  'failure': False,
                  'result': result_url,
+                 'task': 'pythontask',
                  }
         request = testing.DummyRequest()
+        request.matchdict['script'] = 'plot'
         views = Views(request)
         views.statejson = Mock(return_value=state)
+        views.celery.tasks = {'plot': 'pythontask'}
 
         result = views.statehtml()
 
@@ -129,10 +131,13 @@ class TestViews(unittest.TestCase):
                  'success': True,
                  'failure': False,
                  'result': result_url,
+                 'task': 'pythontask',
                  }
         request = testing.DummyRequest()
+        request.matchdict['script'] = 'plot'
         views = Views(request)
         views.statejson = Mock(return_value=state)
+        views.celery.tasks = {'plot': 'pythontask'}
 
         result = views.statehtml()
 
@@ -152,13 +157,16 @@ class TestViews(unittest.TestCase):
                                          'stderr.txt': '/tmp/stderr.txt',
                                          }}
         views.celery.AsyncResult = Mock(return_value=task_result)
+        views.celery.tasks = {'plot': 'pythontask'}
 
         result = views.result()
 
         efiles = {'stderr.txt': '/plot/mytaskid/result/stderr.txt',
                   'stdout.txt': '/plot/mytaskid/result/stdout.txt',
                   }
-        self.assertDictEqual(result, {'files': efiles})
+        self.assertDictEqual(result, {'files': efiles,
+                                      'task': 'pythontask',
+                                      })
 
     def testResultSingleFiles(self):
         self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')

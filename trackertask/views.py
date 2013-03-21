@@ -71,6 +71,8 @@ class Views(object):
     @view_config(route_name='state', renderer='state.mak')
     def statehtml(self):
         response = self.statejson()
+        response['task'] = self.tasks()[self.scriptid]
+
         if response['success'] or response['failure']:
             return HTTPFound(location=response['result'])
         return response
@@ -98,7 +100,9 @@ class Views(object):
         for filename in result['files']:
             files[filename] = self.result_file_url(filename)
 
-        return {'files': files}
+        return {'files': files,
+                'task': self.tasks()[self.scriptid],
+                }
 
     @view_config(route_name='result_file')
     def result_file(self):

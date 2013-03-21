@@ -1,7 +1,7 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
-State
+<a href="${request.route_path('apply',script=task.name)}">${task.label}</a> - State
 </%block>
 
 <%block name="header">

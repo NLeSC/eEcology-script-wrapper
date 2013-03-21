@@ -27,7 +27,7 @@
 <ul>
 <li class="app-item"><a href="${request.route_path('index')}">Script Wrapper</a>
 -
-<a href="."><%block name="title"/></a>
+<%block name="title"/>
 </li>
 </ul>
 </li>
