@@ -107,15 +107,15 @@ Ext.onReady(function() {
                    boxLabel  : 'Absolute',
                    name      : 'alt',
                    inputValue: 'absolute',
+                   checked: true
                }, {
                    boxLabel  : 'Clamp to ground',
                    name      : 'alt',
-                   inputValue: 'clampToGround',
+                   inputValue: 'clampToGround'
                }, {
                    boxLabel  : 'Relative to ground',
                    name      : 'alt',
-                   inputValue: 'relativeToGround',
-                   checked: true
+                   inputValue: 'relativeToGround'
                }
            ]
        }, {
