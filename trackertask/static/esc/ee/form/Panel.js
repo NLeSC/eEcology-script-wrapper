@@ -38,6 +38,15 @@ Ext.define('Esc.ee.form.Panel', {
                     var isEmpty = store.count() == 0;
                     me.down('button[action=load]').setDisabled(isEmpty);
                     if (isEmpty) me.persistentGrid.hide();
+                },
+                load: function(store) {
+                	var rowIndex = store.find('name', 'Last used');
+                	if (rowIndex > -1) {
+                		var rec = store.getAt(rowIndex);
+                        var form = me.getForm();
+                        var values = Ext.JSON.decode(rec.data.query);
+                        form.setValues(values);
+                	}
                 }
             }
         });
@@ -117,8 +126,16 @@ Ext.define('Esc.ee.form.Panel', {
         formBind: true,
         disabled: true,
         handler: function() {
-            var form = this.up('form').getForm();
+    	    var formpanel = this.up('form');
+            var form = formpanel.getForm();
             if (form.isValid()) {
+            	var query = Ext.JSON.encode(form.getFieldValues());
+            	var last_used_rowIndex = formpanel.persistentStore.find('name', 'Last used');
+            	if (last_used_rowIndex > -1) {
+            		formpanel.persistentStore.removeAt(last_used_rowIndex);
+            	}
+            	formpanel.persistentStore.add({'name': 'Last used', 'query': query});
+                formpanel.persistentStore.sync();
                 form.submit({
                     success: function(f, action) {
                       var obj = Ext.decode(action.response.responseText);

@@ -322,8 +322,16 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     setValue: function(value) {
         var me = this;
         var fromStore = this.fromField.store;
-
         var toStore = this.toField.store;
+
+        if (fromStore.getTotalCount()+toStore.getTotalCount() == 0) {
+        	// fromStore isn't loaded yet, set value after load
+        	fromStore.addListener('load', function() {
+        		me.setValue(value);
+        	}, me, {single: true});
+        	return;
+        }
+
         // move all previously selected items back to available
         Ext.Array.forEach(toStore.getRange(), function(rec){
             toStore.remove(rec);
