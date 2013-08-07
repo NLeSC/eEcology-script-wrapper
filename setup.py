@@ -11,10 +11,11 @@ requires = [
     'redis',
     'rpy2',
     'oct2py',
-    'numpy',  # required by scipy
     'scipy',  # required by oct2py
+    'numpy',  # required by scipy
     'mock',
     'nose',
+    'psycopg2',  # required to connect to e-ecology database
 ]
 
 setup(name='trackertask',

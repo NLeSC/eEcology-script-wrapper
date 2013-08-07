@@ -9,6 +9,7 @@ from trackertask.models import make_url
 
 logger = get_task_logger(__name__)
 
+
 class GpsVisDB(MatlabTask):
     name = 'gpsvis_db'
     label = "GPSvis_database"
@@ -41,7 +42,7 @@ class GpsVisDB(MatlabTask):
         sizes = []
         for tracker in trackers:
             tracker_ids.append(tracker['id'])
-            colorid = valid_colors.index(tracker['color'])+1
+            colorid = valid_colors.index(tracker['color']) + 1
             colors.append(colorid)
             sizes.append(tracker['size'])
             speeds.append(tracker['speed'])
@@ -52,7 +53,7 @@ class GpsVisDB(MatlabTask):
 
         db_name = u.database
         if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
-            db_name+='?ssl=true'
+            db_name += '?ssl=true'
 
         # execute
         result = super(GpsVisDB, self).run(u.username,
@@ -78,7 +79,6 @@ class GpsVisDB(MatlabTask):
     def cell_array(self, mylist):
         return '{{}}'.format(",".join([str(i) for i in mylist]))
 
-
     def formfields2taskargs(self, fields, db_url):
         return {'db_url':  db_url,
                 'start': iso8601parse(fields['start']),
@@ -86,6 +86,7 @@ class GpsVisDB(MatlabTask):
                 'end': iso8601parse(fields['end']),
                 'trackers': fields['trackers'],
                 }
+
 
 def iso8601parse(datetime_string):
     return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S")

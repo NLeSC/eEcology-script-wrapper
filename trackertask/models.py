@@ -17,6 +17,7 @@ logger = logging.getLogger('trackertask')
 
 GPS_SCHEMA = 'gps'
 
+
 class Project(Base):
     __tablename__ = 'ee_project_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
@@ -56,6 +57,7 @@ class TrackSession(Base):
                          ForeignKey(Individual.ring_number),
                          primary_key=True,
                          )
+
 
 class Tracking(Base):
     __tablename__ = 'ee_tracking_limited'
@@ -108,6 +110,7 @@ class Speed(Base):
     speed3d = Column(Float)
     direction = Column(Float)
 
+
 class Acceleration(Base):
     __tablename__ = 'ee_acceleration_limited'  # uva_acceleration101
     __table_args__ = {'schema': GPS_SCHEMA}
@@ -136,6 +139,7 @@ def request_credentials(request):
     (username, password) = auth.strip().decode('base64').split(':', 1)
     return (username, password)
 
+
 def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
@@ -146,16 +150,19 @@ def db_url_from_request(request):
         db_url.password = password
     return str(db_url)
 
+
 def DBSession(db_url):
     engine = create_engine(db_url)
     Session = sessionmaker(bind=engine)
     return Session
+
 
 def make_session_from_request(request):
     db_url = db_url_from_request(request)
     engine = create_engine(db_url, poolclass=NullPool)
     Session = sessionmaker(bind=engine)
     return Session
+
 
 def populate(session):
     """
@@ -225,7 +232,7 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
     # Fill tables
     project = Project(key_name='TEST1', common_name='Test 1 project')
     session.add(project)
-    for tid in range(1,10):
+    for tid in range(1, 10):
         device = Device(device_info_serial=tid)
         project.devices.append(device)
         rn = 'C-{}'.format(tid)
