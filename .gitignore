@@ -5,3 +5,8 @@ env/
 *.egg-info/
 *.pyc
 data/
+/build
+/.settings
+/cover
+/.coverage
+trackertask/static/ext/

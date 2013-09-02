@@ -17,35 +17,24 @@ logger = logging.getLogger('trackertask')
 
 GPS_SCHEMA = 'gps'
 
-class Project(Base):
-    __tablename__ = 'ee_project_limited'
-    __table_args__ = {'schema': GPS_SCHEMA}
-
-    key_name = Column(String, primary_key=True)
-    common_name = Column(String)
-    devices = relationship("Device", backref=backref('project'))
-    individuals = relationship("Individual", backref=backref('project'))
-
 
 class Device(Base):
-    __tablename__ = 'ee_device_limited'
+    __tablename__ = 'uva_device_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
-    project_key_name = Column(String, ForeignKey(Project.key_name))
 
 
 class Individual(Base):
-    __tablename__ = 'ee_individual_limited'
+    __tablename__ = 'uva_individual_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     ring_number = Column(String, primary_key=True)
     species = Column(String)
-    project_key_name = Column(String, ForeignKey(Project.key_name))
 
 
 class TrackSession(Base):
-    __tablename__ = 'ee_track_session_limited'
+    __tablename__ = 'uva_track_session_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer,
@@ -56,9 +45,11 @@ class TrackSession(Base):
                          ForeignKey(Individual.ring_number),
                          primary_key=True,
                          )
+    project_leader = Column(String)
+
 
 class Tracking(Base):
-    __tablename__ = 'ee_tracking_limited'
+    __tablename__ = 'uva_tracking_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -81,7 +72,7 @@ class Tracking(Base):
 
 
 class Speed(Base):
-    __tablename__ = 'ee_tracking_speed_limited'  # uva_tracking_speed
+    __tablename__ = 'uva_tracking_speed_limited'  # uva_tracking_speed
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -109,7 +100,7 @@ class Speed(Base):
     direction = Column(Float)
 
 class Acceleration(Base):
-    __tablename__ = 'ee_acceleration_limited'  # uva_acceleration101
+    __tablename__ = 'uva_acceleration_limited'  # uva_acceleration101
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -118,7 +109,7 @@ class Acceleration(Base):
 
 
 class Energy(Base):
-    __tablename__ = 'ee_energy_limited'  # uva_energy101
+    __tablename__ = 'uva_energy_limited'  # uva_energy101
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -181,16 +172,15 @@ def populate(session):
     Grant other users select rights::
 
         GRANT USAGE ON SCHEMA gps TO public;
-        GRANT SELECT ON TABLE gps.ee_device_limited_device_info_serial_seq TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_limited_device_info_serial_seq TO public;
-        GRANT SELECT ON TABLE gps.ee_device_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_individual_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_project_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_track_session_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_speed_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_acceleration_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_device_limited_device_info_serial_seq TO public;
+        GRANT SELECT ON TABLE gps.uva_tracking_limited_device_info_serial_seq TO public;
+        GRANT SELECT ON TABLE gps.uva_device_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_individual_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_track_session_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_tracking_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_tracking_speed_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_tracking_acceleration_limited TO public;
+        GRANT SELECT ON TABLE gps.uva_energy_limited TO public;
 
         -- Create elevation schema
         CREATE SCHEMA elevation AUTHORIZATION stefanv;
@@ -223,33 +213,32 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     # Fill tables
-    project = Project(key_name='TEST1', common_name='Test 1 project')
-    session.add(project)
     for tid in range(1,10):
         device = Device(device_info_serial=tid)
-        project.devices.append(device)
+        session.add(device)
         rn = 'C-{}'.format(tid)
         individual = Individual(ring_number=rn,
                                 species='Lesser Black-backed Gull',
                                 )
-        project.individuals.append(individual)
+        session.add(individual)
         session.flush()
         session.add(TrackSession(device_info_serial=tid,
                                  ring_number=rn,
+                                 project_leader='Someone, someone@example.com'
                                  ))
         dt = datetime.datetime.now()
-        long = 4.830617
+        lon = 4.830617
         lat = 52.979970
-        loc = WKTSpatialElement('POINT({} {})'.format(long+(tid*0.1), lat+(tid*0.1)))
+        loc = WKTSpatialElement('POINT({} {})'.format(lon+(tid*0.1), lat+(tid*0.1)))
         session.add(Tracking(device_info_serial=tid,
                              date_time=dt,
-                             longitude=long,
+                             longitude=lon,
                              latitude=lat,
                              location=loc,
                              ))
         session.add(Speed(device_info_serial=tid,
                           date_time=dt,
-                          longitude=long,
+                          longitude=lon,
                           latitude=lat,
                           location=loc,
                           ))

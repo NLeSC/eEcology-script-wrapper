@@ -260,8 +260,8 @@ class TestViews(unittest.TestCase):
     @patch('trackertask.views.make_session_from_request')
     def testProjects(self, sm):
         session = Mock()
-        mock_projects = [(1, 'Project1')]
-        config = { 'return_value.query.return_value.join.return_value.order_by.return_value': mock_projects}
+        mock_projects = [('Project1')]
+        config = { 'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_projects}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()
@@ -269,7 +269,7 @@ class TestViews(unittest.TestCase):
 
         projects = views.projects()
 
-        self.assertEqual(projects, [{'id': 1,
+        self.assertEqual(projects, [{'id': 'Project1',
                                     'text': 'Project1',
                                     }])
 
@@ -277,7 +277,7 @@ class TestViews(unittest.TestCase):
     def testTrackers(self, sm):
         session = Mock()
         mock_trackers = [(1, 'Project1', 'Lesser Black-backed Gull')]
-        config = { 'return_value.query.return_value.join.return_value.join.return_value.join.return_value.order_by.return_value': mock_trackers}
+        config = { 'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value': mock_trackers}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()

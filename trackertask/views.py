@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
 from pyramid.security import unauthenticated_userid
 from models import make_session_from_request, db_url_from_request
-from models import Device, Individual, TrackSession, Project
+from models import Device, Individual, TrackSession
 
 logger = logging.getLogger(__package__)
 
@@ -120,10 +120,10 @@ class Views(object):
         Session = make_session_from_request(self.request)()
 
         q = Session.query(Device.device_info_serial,
-                            Project.common_name,
-                            Individual.species,
-                            )
-        q = q.join(Project).join(TrackSession).join(Individual)
+                          TrackSession.project_leader,
+                          Individual.species,
+                          )
+        q = q.join(TrackSession).join(Individual)
         q = q.order_by(Device.device_info_serial)
         trackers = []
         for tid, project, species in q:
@@ -151,12 +151,11 @@ class Views(object):
     def projects(self):
         Session = make_session_from_request(self.request)()
 
-        q = Session.query(Project.key_name, Project.common_name)
-        q = q.join(Device)
-        q = q.order_by(Project.common_name)
+        q = Session.query(TrackSession.project_leader).distinct()
+        q = q.order_by(TrackSession.project_leader)
         projects = []
-        for pid, text in q:
-            projects.append({'id': pid, 'text': text})
+        for pid in q:
+            projects.append({'id': pid, 'text': pid})
 
         Session.close()
 
