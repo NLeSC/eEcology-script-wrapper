@@ -9,5 +9,5 @@ data/
 /.settings
 /cover
 /.coverage
-trackertask/static/ext/
+script_wrapper/static/ext/
 docs/_build

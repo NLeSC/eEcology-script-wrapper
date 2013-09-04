@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 requires = [
     'pyramid',
     'waitress',
+    'Paste',
     'pyramid_debugtoolbar',
     'sqlalchemy',
     'geoalchemy',  # required for PostGIS geometry column type
@@ -11,13 +12,14 @@ requires = [
     'redis',
     'rpy2',
     'oct2py',
-    'numpy',  # required by scipy
     'scipy',  # required by oct2py
+    'numpy',  # required by scipy
     'mock',
     'nose',
+    'sphinx',
 ]
 
-setup(name='trackertask',
+setup(name='script_wrapper',
       version='0.0',
       description='Run Matlab, R scripts via web front-end',
       long_description="",
@@ -34,10 +36,10 @@ setup(name='trackertask',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='trackertask',
+      test_suite='script_wrapper',
       install_requires = requires,
       entry_points="""\
       [paste.app_factory]
-      main = trackertask:main
+      main = script_wrapper:main
       """,
       )

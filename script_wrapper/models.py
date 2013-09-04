@@ -13,7 +13,7 @@ from geoalchemy import GeometryColumn, Geometry, WKTSpatialElement
 
 Base = declarative_base()
 
-logger = logging.getLogger('trackertask')
+logger = logging.getLogger('script_wrapper')
 
 GPS_SCHEMA = 'gps'
 
@@ -162,7 +162,7 @@ def populate(session):
 
     In python shell::
 
-        import trackertask.models as m
+        import script_wrapper.models as m
         u = 'postgresql://localhost/eecology?sslmode=require'
         Session = m.DBSession(u)
         session = Session()

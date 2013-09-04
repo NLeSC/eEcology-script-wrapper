@@ -10,7 +10,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-import trackertask.models as models
+import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
 
@@ -58,7 +58,7 @@ class PythonTask(Task):
 
         eg. Python using sqlalchemy models::
 
-            from trackertask.models import DBSession, Devices
+            from script_wrapper.models import DBSession, Devices
             Session = DBSession(db_url)
             res = Session().query(Devices).all()
             Session.close_all()
@@ -66,7 +66,7 @@ class PythonTask(Task):
         eg. For Matlab the SQLAlchemy URL has to be converted to JDBC
         In Python::
 
-            from trackertask.models import make_url
+            from script_wrapper.models import make_url
             u = make_url(db_url)
             username = u.username
             password = u.password
@@ -88,7 +88,7 @@ class PythonTask(Task):
         eg. For R
         In Python::
 
-            from trackertask.models import make_url
+            from script_wrapper.models import make_url
             u = make_url(db_url)
             drivers = {'postgresql': 'PostgreSQL'}
             driver = drivers[u.drivername]

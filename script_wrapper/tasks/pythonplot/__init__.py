@@ -7,8 +7,8 @@ from celery import current_task
 from celery import current_app
 from celery.utils.log import get_task_logger
 from sqlalchemy import func
-from trackertask.tasks import PythonTask
-from trackertask.models import DBSession, Tracking
+from script_wrapper.tasks import PythonTask
+from script_wrapper.models import DBSession, Tracking
 
 logger = get_task_logger(__name__)
 

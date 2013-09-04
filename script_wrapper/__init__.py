@@ -30,7 +30,7 @@ def main(global_config, **settings):
     config.add_route('state', '/tool/{script}/{taskid}/state')
     config.add_route('result', '/tool/{script}/{taskid}/result')
     config.add_route('result_file', '/tool/{script}/{taskid}/result/{filename}')
-    config.add_static_view('static', 'trackertask:static', cache_max_age=3600)
+    config.add_static_view('static', 'script_wrapper:static', cache_max_age=3600)
 
     config.set_authentication_policy(RemoteUserAuthenticationPolicy('HTTP_REMOTE_USER'))
     config.set_authorization_policy(ACLAuthorizationPolicy())

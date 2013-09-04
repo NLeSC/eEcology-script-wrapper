@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Script Wrapper'
-copyright = u'2013, Stefan Verhoeven'
+copyright = u'2013, Netherlands eScience Center'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

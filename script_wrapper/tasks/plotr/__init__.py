@@ -3,7 +3,7 @@ import os.path
 from celery import Task
 from celery import current_task
 from celery.utils.log import get_task_logger
-from trackertask.tasks import RTask
+from script_wrapper.tasks import RTask
 
 logger = get_task_logger(__name__)
 

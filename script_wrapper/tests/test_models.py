@@ -1,7 +1,7 @@
 import unittest
 from pyramid.testing import DummyRequest
 from sqlalchemy.orm import Session
-from trackertask import models
+from script_wrapper import models
 
 class TestModels(unittest.TestCase):
 

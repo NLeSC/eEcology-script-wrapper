@@ -3,7 +3,7 @@ import os
 import sys
 from mock import patch, Mock
 from celery import Celery
-import trackertask.tasks as tasks
+import script_wrapper.tasks as tasks
 
 
 class TestPythonTask(unittest.TestCase):

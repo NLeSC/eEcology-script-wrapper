@@ -2,7 +2,7 @@ import os
 import subprocess
 from celery import Task
 from celery import current_task
-from trackertask.tasks import MatlabTask
+from script_wrapper.tasks import MatlabTask
 
 class KmzGen(MatlabTask):
     name = 'kmz_gen'

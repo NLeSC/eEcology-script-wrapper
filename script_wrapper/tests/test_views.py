@@ -4,8 +4,8 @@ from pyramid import testing
 from pyramid.response import FileResponse
 from pyramid.httpexceptions import HTTPFound
 from celery.result import AsyncResult
-from trackertask.views import Views
-from trackertask.tasks import PythonTask
+from script_wrapper.views import Views
+from script_wrapper.tasks import PythonTask
 
 class TestViews(unittest.TestCase):
 
@@ -63,7 +63,7 @@ class TestViews(unittest.TestCase):
 
         formjs.close()
 
-    @patch('trackertask.views.db_url_from_request')
+    @patch('script_wrapper.views.db_url_from_request')
     def testSubmit(self, dr):
         dr.return_value = 'sqlite:///'
         self.config.add_route('state', '/{taskid}/state')
@@ -241,7 +241,7 @@ class TestViews(unittest.TestCase):
         with self.assertRaises(TaskException):
             views.result_file()
 
-    @patch('trackertask.views.make_session_from_request')
+    @patch('script_wrapper.views.make_session_from_request')
     def testSpecies(self, sm):
         session = Mock()
         mock_species = ['Lesser Black-backed Gull']
@@ -257,7 +257,7 @@ class TestViews(unittest.TestCase):
                                     'text': 'Lesser Black-backed Gull',
                                     }])
 
-    @patch('trackertask.views.make_session_from_request')
+    @patch('script_wrapper.views.make_session_from_request')
     def testProjects(self, sm):
         session = Mock()
         mock_projects = [('Project1')]
@@ -273,7 +273,7 @@ class TestViews(unittest.TestCase):
                                     'text': 'Project1',
                                     }])
 
-    @patch('trackertask.views.make_session_from_request')
+    @patch('script_wrapper.views.make_session_from_request')
     def testTrackers(self, sm):
         session = Mock()
         mock_trackers = [(1, 'Project1', 'Lesser Black-backed Gull')]
