@@ -38,15 +38,6 @@ Ext.define('Esc.ee.form.Panel', {
                     var isEmpty = store.count() == 0;
                     me.down('button[action=load]').setDisabled(isEmpty);
                     if (isEmpty) me.persistentGrid.hide();
-                },
-                load: function(store) {
-                	var rowIndex = store.find('name', 'Last used');
-                	if (rowIndex > -1) {
-                		var rec = store.getAt(rowIndex);
-                        var form = me.getForm();
-                        var values = Ext.JSON.decode(rec.data.query);
-                        form.setValues(values);
-                	}
                 }
             }
         });

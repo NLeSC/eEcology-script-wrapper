@@ -67,14 +67,13 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
         down: "Move Down",
         bottom: "Move to Bottom"
     },
-    defaults     : { flex : 1 },
+    defaults: {flex: 1},
     layout: {
         type: 'hbox',
         align: 'stretch'
     },
     autoWidth: true,
     height: 300,
-    defaults: { flex : 1 },
     initComponent: function() {
         var me = this;
         me.items = me.setupItems();
@@ -344,7 +343,7 @@ Ext.define('Esc.ee.form.field.TrackerGridSelector', {
                 rec = Ext.create(Ext.ModelManager.getModel(toStore.model), rec);
             }
             // If in the from store, move it over
-            var fromId = fromStore.indexOfId(rec.getId());
+            var fromId = fromStore.data.indexOfKey(rec.getId());
             if (fromId > -1) {
                 fromStore.removeAt(fromId);
             }

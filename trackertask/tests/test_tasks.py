@@ -50,4 +50,39 @@ class TestPythonTask(unittest.TestCase):
         import shutil
         shutil.rmtree(root_dir)
 
+    @patch('os.makedirs')
+    def test_output_dir_DirExists_IgnoreException(self, makedirs):
+        import errno
+        makedirs.side_effect = OSError(errno.EEXIST, 'File exists')
+        task = tasks.PythonTask()
+        task.app.conf['task_output_directory'] = '/tmp'
+        task.request.id = 'mytaskid'
+
+        self.assertEqual(task.output_dir, '/tmp/mytaskid')
+
+
+class TestRTask(unittest.TestCase):
+
+    def test_r_cached(self):
+        task = tasks.RTask()
+        task._r = 1234
+
+        self.assertEqual(task.r, 1234)
+
+class TestMatlabTask(unittest.TestCase):
+
+    def test_matlab(self):
+        task = tasks.MatlabTask()
+        task.app.conf['matlab.location'] = '/opt/matlab'
+
+        self.assertEqual(task.matlab, '/opt/matlab')
+
+    def test_pargs(self):
+        task = tasks.MatlabTask()
+        task.app.conf['matlab.location'] = '/opt/matlab'
+        task.deploy_script = 'runme.sh'
+
+        taskdir = os.path.dirname(os.path.abspath(tasks.__file__))
+
+        self.assertEqual(task.pargs(), [taskdir+'/runme.sh', '/opt/matlab'])
 

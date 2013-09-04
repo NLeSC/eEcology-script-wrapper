@@ -1,4 +1,5 @@
 import os
+import errno
 import sys
 import subprocess
 from celery import Task
@@ -15,6 +16,7 @@ logger = get_task_logger(__name__)
 
 class PythonTask(Task):
     """Abstract task to run Python code"""
+
     abstract = True
     """Human readable label of task"""
     label = None
@@ -32,7 +34,8 @@ class PythonTask(Task):
         try:
             os.makedirs(directory)
         except OSError as e:
-            if e.errno != 17:
+            # ignore exception when it already exists
+            if e.errno != errno.EEXIST:
                 raise e
 
         return directory
@@ -181,7 +184,6 @@ class SubProcessTask(PythonTask):
         - return_code
         """
         pargs = self.pargs() + list(args)
-        logger.warn(pargs)
         stdout_fn = os.path.join(self.output_dir, 'stdout.txt')
         stdout = open(stdout_fn, 'w')
         stderr_fn = os.path.join(self.output_dir, 'stderr.txt')

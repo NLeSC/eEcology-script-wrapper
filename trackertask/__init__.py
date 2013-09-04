@@ -6,6 +6,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS, DENY_ALL
 from sqlalchemy import engine_from_config
 
+
 class RootFactory(object):
     __acl__ = [(Allow, Authenticated, ALL_PERMISSIONS), DENY_ALL]
 

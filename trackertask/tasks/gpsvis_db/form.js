@@ -14,7 +14,6 @@ Ext.onReady(function() {
 
     Ext.define('Esc.eEcology.model.Tracker', {
         extend: 'Ext.data.Model',
-        idProperty: 'id',
         fields: ['id',
                  'species',
                  'project',
