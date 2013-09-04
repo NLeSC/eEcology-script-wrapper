@@ -11,7 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+   script_requirements
+   adding_script
 
 Indices and tables
 ==================

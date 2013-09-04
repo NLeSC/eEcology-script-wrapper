@@ -10,3 +10,4 @@ data/
 /cover
 /.coverage
 trackertask/static/ext/
+docs/_build
