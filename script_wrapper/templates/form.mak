@@ -10,8 +10,8 @@ Ext.Loader.setConfig({
     enabled: true,
   //  disableCaching: false, // uncomment to use firebug breakpoints
     paths: {
-      'Ext.ux': '${request.static_path('trackertask:static/ext/examples/ux')}',
-      'Esc': '${request.static_path('trackertask:static/esc')}'
+      'Ext.ux': '${request.static_path('script_wrapper:static/ext/examples/ux')}',
+      'Esc': '${request.static_path('script_wrapper:static/esc')}'
     }
   });
 </script>
