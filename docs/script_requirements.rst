@@ -22,4 +22,5 @@ The script will be executed with the priveleges of the end-user. This means only
 Matlab
 ======
 
-Script will be run inside a directory so any generated output file should have no directory prefixed to it.
+* The script should start with a function which takes only strings as arguments. (Script will be compiled and started from command-line with arguments)
+* Script will be run inside a directory so any generated output file should have no directory prefixed to it.

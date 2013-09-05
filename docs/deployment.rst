@@ -1,5 +1,5 @@
 Deployment
-----------
+==========
 
 To install the script wrapper::
 
