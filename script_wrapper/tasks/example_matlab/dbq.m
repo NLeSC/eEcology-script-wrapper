@@ -1,35 +1,44 @@
-function gps_overview(username, password, dbname, dburl, query)
-% function = GPSvis_database(username, password, KDevice, Colors, STimes, AltChoice, SizeChoice, SpeedClasses)
-% KDevices is a vector (length n) with the devices that are included in the anaysis
-% Colors is a vector (length n) with the colorsthat are choosen from the list
-% STimes is a matrix (nx2)with a vector (length n) with timeStamps of StartTime and a vector (length n) of EndTime
-% AltChoice is a vector (length n) with for each device 'clampToGround', 'relativeToGround', 'absolute'
-% SpeedClasses is a matrix (nx3) with three threshold values for speed
-% SizeChoice is a vector (length n) with 'small', 'medium' , 'large'
-% This function uses the Matlab2GoogleEarth toolbox 
-% clear all
-% close all
+function db_query(dbUsername, dbPassword, dbName, databaseHost, TrackerIdentifiers, startTime, stopTime)
+% dbUsername is a string for connecting to the database
+% dbPassword is a string for connecting to the database
+% dbName is a string
+% databaseHost is a string hostname of the database
+% TrackerIdentifiers is a string representation of an array of tracker indentifiers, eg '[620,800]'.
+% startTime is a string in ISO8601 time format, eg. '2013-07-01T00:00:00'
+% stopTime is a string in ISO8601 time format, eg. '2013-07-01T00:00:00'
 
-% display(username);
-% display(password);
+% This function uses the OpenEarth toolbox
 
-% if ischar(KDevice)
-%  KDevice = eval(KDevice);
-%end
+close all
 
-% display('KDevice');
-% display(KDevice);
-% display('DB_PASSWORD');
-% display(getenv('DB_PASSWORD'));
+% Command to compile:
+% mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun dbq.m
 
-% dbname = 'flysafe';
-% dburl = 'jdbc:postgresql://localhost:5432/flysafe';
+% Usage:
+% ./run_dbq.sh /opt/matlab2009b '****' '****' eecology db.e-ecology.sara.nl '[620,800]' 2010-07-01T00:00:00 2010-09-01T00:00:00
 
-conn = database(dbname, username, password, 'org.postgresql.Driver',dburl);
-display(conn)
-sql1 = query;
-res = fetch(conn,sql1);
-display(sql1);
-display(res)
+% Sometimes required to find postgresql driver
+% pg_settings()
+
+conn = pg_connectdb(dbName, 'host', databaseHost, 'user', dbUsername, 'pass', dbPassword, 'database_toolbox', 0);
+
+% SV: Command line arguments are strings, use eval to convert them into Matlab variable types.
+if ischar(TrackerIdentifiers)
+  TrackerIdentifiers = eval(TrackerIdentifiers);
+end
+
+% The SQL IN statement requires a comma seperated list of track indentifiers
+n=numel(TrackerIdentifiers);formatStr = [repmat('%d,',[1,n-1]),'%d'];
+TrackerIdentifiersCommaJoined = sprintf(formatStr,TrackerIdentifiers)
+
+sql = ['SELECT device_info_serial, count(*) ',...
+       'FROM gps.uva_tracking_limited ',...
+       'WHERE device_info_serial IN (',TrackerIdentifiersCommaJoined,') ',...
+       'AND date_time BETWEEN ',char(39) , startTime,char(39) , ' AND ',char(39) , stopTime, char(39), ' ',...
+       'GROUP BY device_info_serial'];
+results = pg_fetch(conn, sql);
+display(results);
+
+save('results.mat','results')
 
 

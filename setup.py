@@ -5,6 +5,7 @@ requires = [
     'waitress',
     'Paste',
     'pyramid_debugtoolbar',
+    'psycopg2',  # eecology is Postresql
     'sqlalchemy',
     'geoalchemy',  # required for PostGIS geometry column type
     'pyramid_celery',

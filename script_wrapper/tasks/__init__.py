@@ -1,7 +1,8 @@
-import os
+import datetime
 import errno
-import sys
+import os
 import subprocess
+import sys
 from celery import Task
 from celery.utils.log import get_task_logger
 from sqlalchemy.engine.url import make_url
@@ -115,14 +116,14 @@ class PythonTask(Task):
 class RTask(PythonTask):
     """Abstract task to run R function in a R-script file"""
     abstract = True
-    r_script = None
+    script = None
     _r = None
 
     @property
     def r(self):
         """self.r_script is imported into R and it's functions are available as self.r.<function>"""
         if self._r is None:
-            f = open(os.path.join(self.task_dir, self.r_script))
+            f = open(os.path.join(self.task_dir, self.script))
             r_string = f.read()
             f.close()
             self._r = SignatureTranslatedAnonymousPackage(r_string, 'r')
@@ -144,14 +145,14 @@ class OctaveTask(PythonTask):
 
     """
     abstract = True
-    octave_script = None
+    script = None
 
     def __init__(self):
         from oct2py import octave
         self.octave = octave
 
     def load_mfile(self):
-        self.octave.addpath(os.path.join(self.task_dir, self.octave_script))
+        self.octave.addpath(os.path.join(self.task_dir, self.script))
 
 
 class SubProcessTask(PythonTask):
@@ -225,8 +226,10 @@ class MatlabTask(SubProcessTask):
     """Matlab deployment script.
     During `mcc -vm -p googleearth script.m helper.m` an executable and deployment script is build.
     The executable is deployed or executed using the deployment script.
+
+    Eg. Matlab script `myscript.m` will be runnable by running `run_myscript.sh`.
     """
-    deploy_script = None
+    script = None
 
     @property
     def matlab(self):
@@ -242,7 +245,12 @@ class MatlabTask(SubProcessTask):
     def pargs(self):
         """Prepend the deployment script and matlab location"""
         p = super(MatlabTask, self).pargs()
-        p += [os.path.join(self.task_dir, self.deploy_script),
+        p += [os.path.join(self.task_dir, self.script),
               self.matlab,
               ]
         return p
+
+
+def iso8601parse(datetime_string):
+    return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S")
+

@@ -1,10 +1,10 @@
-import datetime
 import os
 import subprocess
 from celery import Task
 from celery import current_task
 from celery.utils.log import get_task_logger
 from script_wrapper.tasks import MatlabTask
+from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import make_url
 
 logger = get_task_logger(__name__)
@@ -86,6 +86,3 @@ class GpsVisDB(MatlabTask):
                 'end': iso8601parse(fields['end']),
                 'trackers': fields['trackers'],
                 }
-
-def iso8601parse(datetime_string):
-    return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S")
