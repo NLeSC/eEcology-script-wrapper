@@ -15,7 +15,7 @@ Contents:
    script_requirements
    adding_script
    deployment
-
+   api
 
 Indices and tables
 ==================
