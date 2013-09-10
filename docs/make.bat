@@ -129,6 +129,13 @@ if "%1" == "latex" (
 	goto end
 )
 
+if "%1" == "pdf" (
+    %SPHINXBUILD% -b pdf %ALLSPHINXOPTS% %BUILDDIR%/pdf
+    echo.
+    echo.Build finished. The PDF files are in %BUILDDIR%/pdf
+    goto end
+)
+
 if "%1" == "text" (
 	%SPHINXBUILD% -b text %ALLSPHINXOPTS% %BUILDDIR%/text
 	if errorlevel 1 exit /b 1
