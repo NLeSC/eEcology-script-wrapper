@@ -277,7 +277,7 @@ class TestViews(unittest.TestCase):
     def testTrackers(self, sm):
         session = Mock()
         mock_trackers = [(1, 'Project1', 'Lesser Black-backed Gull')]
-        config = { 'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value': mock_trackers}
+        config = { 'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value.distinct.return_value': mock_trackers}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()

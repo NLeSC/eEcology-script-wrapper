@@ -10,6 +10,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
+from rpy2 import robjects
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 import script_wrapper.models as models
 
@@ -112,6 +113,12 @@ class PythonTask(Task):
         """Javascript to render ExtJS form to div with 'form' id"""
         return os.path.join(self.task_dir, self.js_form)
 
+    def outputFiles(self):
+        """Returns dict of all files in the output dir"""
+        result = {}
+        for fn in os.listdir(self.output_dir):
+            result[fn] = os.path.join(self.output_dir, fn)
+        return result
 
 class RTask(PythonTask):
     """Abstract task to run R function in a R-script file"""
@@ -129,6 +136,9 @@ class RTask(PythonTask):
             self._r = SignatureTranslatedAnonymousPackage(r_string, 'r')
         return self._r
 
+    def toIntVector(self, myints):
+        """Convert Python list of ints into a R Int vector"""
+        return robjects.IntVector(myints)
 
 class OctaveTask(PythonTask):
     """Abstract task to run GNU Octave function in a octave script file
@@ -249,6 +259,13 @@ class MatlabTask(SubProcessTask):
               self.matlab,
               ]
         return p
+
+    def toNumberVectorString(self, mylist):
+        """Convers list into Matlab vector
+
+        eg. x = [1,2,3] becomes '[1,2,3]'
+        """
+        return '[{}]'.format(",".join([str(i) for i in mylist]))
 
 
 def iso8601parse(datetime_string):

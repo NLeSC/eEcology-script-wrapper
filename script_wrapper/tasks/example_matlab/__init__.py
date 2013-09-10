@@ -13,35 +13,34 @@ class ExampleMatlab(MatlabTask):
     label = 'Example in Matlab'
     description = 'Example in Matlab'
     """Perform a db query in a Matlab executable with postgresql query"""
-    deploy_script = 'run_dbq.sh'
+    script = 'run_dbq.sh'
 
-    def run(self, db_url, query):
-        # TODO pass tracker_ids as '[1 2]' and in Matlab eval
-        # See http://blogs.mathworks.com/loren/2011/01/06/matlab-data-types-as-arguments-to-standalone-applications/
+    def run(self, db_url, trackers, start, end):
         u = make_url(db_url)
-        username = u.username
-        password = u.password
-        instance = u.database
-        jdbc_url = 'jdbc:{drivername}://{host}:{port}/{database}'.format(drivername=u.drivername,
-                                                                         host=u.host,
-                                                                         port=u.port or 5432,
-                                                                         database=u.database)
+
+        db_name = u.database
+        if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
+            db_name+='?ssl=true'
 
         # execute
-        result = super(ExampleMatlab, self).run(username,
-                                              password,
-                                              instance,
-                                              jdbc_url,
-                                              query
-                                              )
+        result = super(ExampleMatlab, self).run(u.username,
+                                                u.password,
+                                                db_name,
+                                                u.host,
+                                                self.toNumberVectorString(trackers),
+                                                start,
+                                                end,
+                                                )
 
         # Add files in output dir to result set
-        for fn in os.listdir(self.output_dir):
-            result['files'][fn] = os.path.join(self.output_dir, fn)
+        result['files'].update(self.outputFiles())
 
         return result
 
     def formfields2taskargs(self, fields, db_url):
-        return {'db_url':  db_url,
-                'query': fields['query'],
+        return {'start': fields['start'],
+                'end': fields['end'],
+                'trackers': fields['trackers'],
+                # below example of adding argument values
+                'db_url':  db_url,
                 }

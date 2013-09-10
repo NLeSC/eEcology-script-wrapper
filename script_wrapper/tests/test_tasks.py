@@ -80,7 +80,7 @@ class TestMatlabTask(unittest.TestCase):
     def test_pargs(self):
         task = tasks.MatlabTask()
         task.app.conf['matlab.location'] = '/opt/matlab'
-        task.deploy_script = 'runme.sh'
+        task.script = 'runme.sh'
 
         taskdir = os.path.dirname(os.path.abspath(tasks.__file__))
 

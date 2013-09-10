@@ -16,30 +16,26 @@ class ExamplePython(PythonTask):
     name = 'examplepython'
     label = 'Example in Python'
     description = 'Example in Python'
-    auto_register = False
 
-    def run(self, db_url, start, end, trackers):
-        ids = [tracker['id'] for tracker in trackers]
-        msg = 'fancy plot of {0} from {1} to {2}'.format(json.dumps(trackers), start, end)
-
+    def run(self, db_url, trackers, start, end):
         # Perform a database query
         s = DBSession(db_url)
         tid = Tracking.device_info_serial
         dt = Tracking.date_time
         q = s().query(tid, func.count(tid))
-        q = q.filter(tid.in_(ids))
+        q = q.filter(tid.in_(trackers))
         q = q.filter(dt.between(start, end))
         q = q.group_by(tid)
         r = q.all()
-        msg += json.dumps(r)
+        msg = json.dumps(r)
 
         s.close_all()
 
         # Write results to text files
-        fn = os.path.join(self.output_dir, 'plot.txt')
+        fn = os.path.join(self.output_dir, 'result.txt')
         with open(fn, 'w') as f:
             f.write(msg)
-        return {'files': {'plot.txt': fn}}
+        return {'files': {'result.txt': fn}}
 
     def formfields2taskargs(self, fields, db_url):
         return {'start': iso8601parse(fields['start']),

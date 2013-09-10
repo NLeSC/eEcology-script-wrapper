@@ -124,7 +124,7 @@ class Views(object):
                           Individual.species,
                           )
         q = q.join(TrackSession).join(Individual)
-        q = q.order_by(Device.device_info_serial)
+        q = q.order_by(Device.device_info_serial).distinct()
         trackers = []
         for tid, project, species in q:
             trackers.append({'id': tid, 'project': project, 'species': species})
