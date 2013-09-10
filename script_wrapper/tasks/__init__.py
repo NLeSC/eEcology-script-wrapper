@@ -135,7 +135,24 @@ class PythonTask(Task):
         return result
 
 class RTask(PythonTask):
-    """Abstract task to run R function in a R-script file"""
+    """Abstract task to run R function in a R-script file
+
+    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
+
+        class PlotTask(RTask):
+            script = 'plot.r'
+
+            def run(self, output_dir):
+                self.load_mfile()
+                self.r.plot(output_dir)
+                return {'plot.png': os.path.join(self.output_dir, 'plot.png')}
+
+    Attributes:
+
+    script : string
+        Filename of R script with a function.
+
+    """
     abstract = True
     script = None
     _r = None
@@ -157,16 +174,20 @@ class RTask(PythonTask):
 class OctaveTask(PythonTask):
     """Abstract task to run GNU Octave function in a octave script file
 
-    eg.
+    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
 
-    class PlotTask(OctaveTask):
-        octave_script = 'plot.m'
+        class PlotTask(OctaveTask):
+            script = 'plot.m'
 
-        def run(self, output_dir, dsn, start, end, trackers):
-            self.load_mfile()
-            self.octave.plot(output_dir, dsn, start, end, trackers)
-            return {'output': '<output_dir>/plot.png'}
+            def run(self, output_dir):
+                self.load_mfile()
+                self.octave.plot(output_dir)
+                return {'plot.png': os.path.join(self.output_dir, 'plot.png')}
 
+    Attributes:
+
+    script : string
+        Filename of octave script with a function.
     """
     abstract = True
     script = None
@@ -232,27 +253,27 @@ class SubProcessTask(PythonTask):
 class MatlabTask(SubProcessTask):
     """Abstract task to execute compiled Matlab function
 
-    eg.
+    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
 
-    class PlotTask(MatlabTask):
-        deploy_script = 'run_plot.sh'
+        class PlotTask(MatlabTask):
+            script = 'run_plot.sh'
 
-        def run(self, output_dir, dsn, start, end, trackers):
-            super(PlotTask, self).run([output_dir, dsn, start, end, trackers])
-            return {'output': output_dir+'/plot.png'}
+            def run(self, output_dir):
+                result = super(PlotTask, self).run(output_dir)
+                result['files']['plot.png'] = os.path.join(self.output_dir, 'plot.png')
+                return result
 
-    Important!! Passing arguments containing spaces will fail.
-    To fix in run_*.sh comment out the lines from args= to done
-    and use "$@" instead of $args.
+    Attributes:
+
+    script : string
+        Filename of Matlab deployment script.
+        During `mcc -vm plot.m` an executable and deployment script is build.
+        The executable is executed using the script.
+        Eg. Matlab script `plot.m` will be runnable by running `run_plot.sh`.
+
     """
     abstract = True
     _matlab = None
-    """Matlab deployment script.
-    During `mcc -vm -p googleearth script.m helper.m` an executable and deployment script is build.
-    The executable is deployed or executed using the deployment script.
-
-    Eg. Matlab script `myscript.m` will be runnable by running `run_myscript.sh`.
-    """
     script = None
 
     @property

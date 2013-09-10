@@ -29,6 +29,7 @@ Matlab
 * Use the **OpenEarth PostgreSQL library** to perform database queries. For more information see https://publicwiki.deltares.nl/display/OET/PostgreSQL+access+with+Matlab
 * Standard out and error are saved as ``stdout.txt`` and ``stderr.txt`` resp.
 * Script will be run inside a directory so any generated output file should have no directory prefixed to it.
+* Do not use hardcoded absolute paths in script, as the machine where it is compiled or being run may not have those paths.
 
 Example Matlab script to find number of timepoints of a tracker in a certain date range:
 
