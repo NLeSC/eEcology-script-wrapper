@@ -17,14 +17,28 @@ import script_wrapper.models as models
 logger = get_task_logger(__name__)
 
 class PythonTask(Task):
-    """Abstract task to run Python code"""
+    """Abstract task to run Python code
+
+    Attributes:
+
+    abstract : boolean
+        Abstract classes are not registered, but are used as the base class for new task types.
+    label : string
+        Human readable label of task.
+    description : string
+        Description of task.
+    autoregister : boolean
+        If disabled this task won't be registered automatically.
+    js_form : string
+        Filename of javascript form.
+    output_dir : string
+        Directory where task can put output files.
+
+    """
 
     abstract = True
-    """Human readable label of task"""
     label = None
-    """Description of task"""
     description = None
-    """Filename of javascript form"""
     js_form = 'form.js'
     autoregister = True  # Change to False to hide this task
 
@@ -174,7 +188,7 @@ class SubProcessTask(PythonTask):
     abstract = True
 
     def pargs(self):
-        """Arguments prepended to run(*args) which are used as Popen args"""
+        """Arguments prepended to run(\*args) which are used as Popen args"""
         return []
 
     def env(self):
@@ -188,7 +202,7 @@ class SubProcessTask(PythonTask):
 
     def run(self, *args):
         """
-        Perform subprocess with self.pargs() and *args as arguments.
+        Perform subprocess with self.pargs() and \*args as arguments.
 
         Returns dict with following keys:
         - files, a dict of base-filenames and absolute paths.

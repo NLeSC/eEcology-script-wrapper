@@ -17,6 +17,9 @@ Contents:
    deployment
    api
 
+A way make Matlab, Python and R scripts usable by wider community.
+By wrapping the scripts in a web application.
+
 Indices and tables
 ==================
 
