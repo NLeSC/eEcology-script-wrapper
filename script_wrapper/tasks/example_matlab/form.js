@@ -1,17 +1,21 @@
 Ext.require([
     'Esc.ee.form.Panel',
+    'Esc.ee.form.field.DateTimeRange',
+    'Esc.ee.store.TrackerIds',
+    'Esc.ee.form.field.TrackerIdSelector',
 ]);
 
 Ext.onReady(function() {
 	Ext.QuickTips.init();
 
+	var store = Ext.create('Esc.ee.store.TrackerIds');
+
 	Ext.create('Esc.ee.form.Panel', {
        items: [{
-    	   xtype: 'textarea',
-    	   name: 'query',
-    	   width: '100%',
-    	   height: 300,
-    	   value: 'SELECT device_info_serial FROM gps.ee_device_limited'
-       }],
+           xtype: 'datetimerange'
+       }, {
+           xtype: 'trackerselector',
+           store: store
+       }]
    });
 });

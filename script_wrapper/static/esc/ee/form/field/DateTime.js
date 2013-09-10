@@ -157,9 +157,10 @@ Ext.define('Esc.ee.form.field.DateTime', {
 
         // this dummy is necessary because Ext.Editor will not check whether an inputEl is present or not
         this.inputEl = {
-            dom : {},
+//            dom : {},
             swallowEvent : function() {
-            }
+            },
+            setStyle: Ext.emptyFn
         };
 
         me.initField();
