@@ -13,6 +13,7 @@ class ExampleR(RTask):
     label = 'Example in R'
     description = 'Example in R'
     script = 'dbq.r'
+    autoregister = False
 
     def run(self, db_url, trackers, start, end):
         u = make_url(db_url)

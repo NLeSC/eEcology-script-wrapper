@@ -16,6 +16,7 @@ class ExamplePython(PythonTask):
     name = 'examplepython'
     label = 'Example in Python'
     description = 'Example in Python'
+    autoregister = False
 
     def run(self, db_url, trackers, start, end):
         # Perform a database query

@@ -14,6 +14,7 @@ class ExampleMatlab(MatlabTask):
     description = 'Example in Matlab'
     """Perform a db query in a Matlab executable with postgresql query"""
     script = 'run_dbq.sh'
+    autoregister = False
 
     def run(self, db_url, trackers, start, end):
         u = make_url(db_url)
