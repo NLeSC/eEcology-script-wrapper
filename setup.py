@@ -19,7 +19,7 @@ requires = [
     'nose',
     'sphinx',
     'rst2pdf',  # to create PDF of documentation
-    'sphinx-readable-theme',  # to create nice looking html documentation
+    'sphinx_bootstrap_theme',  # to create nice looking html documentation
 ]
 
 setup(name='script_wrapper',
