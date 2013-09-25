@@ -5,3 +5,9 @@ env/
 *.egg-info/
 *.pyc
 data/
+/build
+/.settings
+/cover
+/.coverage
+script_wrapper/static/ext/
+docs/_build
