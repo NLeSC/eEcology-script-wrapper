@@ -13,6 +13,7 @@
 <link rel="stylesheet" type="text/css" href="${request.static_path('script_wrapper:static/ext/examples/ux/grid/css/GridFilters.css')}" />
 <link rel="stylesheet" type="text/css" href="${request.static_path('script_wrapper:static/ext/examples/ux/grid/css/RangeMenu.css')}" />
 <script type="text/javascript" src="${request.static_path('script_wrapper:static/ext/ext-all.js')}"></script>
+<script type="text/javascript" src="${request.static_path('script_wrapper:static/js/datetime.js')}"></script>
 <%block name="header"/>
 </head>
 <body>

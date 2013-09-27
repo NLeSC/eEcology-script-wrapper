@@ -1,9 +1,5 @@
 Ext.require([
-    'Esc.ee.store.TrackerIds',
-    'Esc.ee.form.Panel',
-    'Esc.ee.form.field.DateTimeStart',
-    'Esc.ee.form.field.DateTimeEnd',
-    'Esc.ee.form.field.TrackerCombo',
+    'Esc.ee.form.Panel'
 ]);
 
 Ext.onReady(function() {

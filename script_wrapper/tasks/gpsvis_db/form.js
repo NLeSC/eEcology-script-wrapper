@@ -1,6 +1,6 @@
 Ext.require([
     'Esc.ee.form.Panel',
-    'Esc.ee.form.field.DateTimeRange',
+    'NLeSC.form.field.DateTimeRange',
     'Esc.ee.form.field.Color',
     'Esc.ee.form.field.TrackerGridSelector',
     'Ext.grid.plugin.CellEditing',
