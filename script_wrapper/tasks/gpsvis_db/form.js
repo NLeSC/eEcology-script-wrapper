@@ -1,7 +1,6 @@
 Ext.require([
     'Esc.ee.form.Panel',
-    'Esc.ee.form.field.DateTimeStart',
-    'Esc.ee.form.field.DateTimeEnd',
+    'Esc.ee.form.field.DateTimeRange',
     'Esc.ee.form.field.Color',
     'Esc.ee.form.field.TrackerGridSelector',
     'Ext.grid.plugin.CellEditing',
@@ -94,9 +93,7 @@ Ext.onReady(function() {
    var form = Ext.create('Esc.ee.form.Panel', {
        id:'myform',
        items: [{
-           xtype: 'xdatetimestart'
-       }, {
-           xtype: 'xdatetimeend'
+           xtype: 'datetimerange'
        }, {
            xtype      : 'radiogroup',
            fieldLabel : 'Altitude',
