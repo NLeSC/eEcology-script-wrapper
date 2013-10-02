@@ -25,10 +25,12 @@ Example compilations:
 .. code-block:: bash
 
     # Matlab script which uses openearth postgresql library
-    mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun dbq.m
+    mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth \
+    -I openearth/general -I openearth/general/io_fun dbq.m
 
     # Matlab script like above, but also uses googleearth library and a dependency dist.m
-    mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth -I openearth/general -I openearth/general/io_fun -I googleearth gpsvis.m dist.m
+    mcc -mv -R -nodisplay -I openearth/io/postgresql -I openearth \
+    -I openearth/general -I openearth/general/io_fun -I googleearth gpsvis.m dist.m
 
 2. Make skeleton
 ================
