@@ -4,7 +4,7 @@ Install instructions
 Red hat 6/CentOS 6 dependencies
 -------------------------------
 
-  yum install postgresql-devel.x86_64 mod_perl ntp
+  yum install postgresql-devel.x86_64 mod_perl ntp libXp
 
 Octave, R, redis are available in epel repo::
 

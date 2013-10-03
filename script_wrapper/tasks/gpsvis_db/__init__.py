@@ -14,7 +14,7 @@ class GpsVisDB(MatlabTask):
     name = 'gpsvis_db'
     label = "GPSvis_database"
     description = """Example script of Willem"""
-    deploy_script = 'run_stefanoe.sh'
+    script = 'run_stefanoe.sh'
 
     def run(self, db_url, start, end, alt, trackers):
         # prepare arguments
@@ -53,7 +53,7 @@ class GpsVisDB(MatlabTask):
 
         db_name = u.database
         if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
-            db_name += '?ssl=true'
+            db_name += '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory'
 
         # execute
         result = super(GpsVisDB, self).run(u.username,

@@ -35,6 +35,8 @@ def main(global_config, **settings):
     config.set_authentication_policy(RemoteUserAuthenticationPolicy('HTTP_REMOTE_USER'))
     config.set_authorization_policy(ACLAuthorizationPolicy())
 
+    config.include('pyramid_mako')
+
     config.scan()
 
     return config.make_wsgi_app()
