@@ -26,7 +26,7 @@ Matlab
 ======
 
 * The script should start with a function which takes only **strings as arguments**. The reason is that the script will be compiled and started from command-line. The arguments can be converted to Matlab native variables using ``val = eval(valAsStr)``.
-* Use the **OpenEarth PostgreSQL library** to perform database queries. For more information see https://publicwiki.deltares.nl/display/OET/PostgreSQL+access+with+Matlab
+* Use the **OpenEarth PostgreSQL library** to perform database queries. For more information see https://services.e-ecology.sara.nl/redmine/projects/uvagps/wiki/Matlab_with_OpenEarth
 * Standard out and error are saved as ``stdout.txt`` and ``stderr.txt`` resp.
 * Script will be run inside a directory so any generated output file should have no directory prefixed to it.
 * Do not use hardcoded absolute paths in script, as the machine where it is compiled or being run may not have those paths.
@@ -35,8 +35,11 @@ Example Matlab script to find number of timepoints of a tracker in a certain dat
 
 .. code-block:: matlab
 
-    function db_query(dbUsername, dbPassword, dbName, databaseHost, TrackerIdentifier, startTime, stopTime)
-    conn = pg_connectdb(dbName, 'host', databaseHost, 'user', dbUsername, 'pass', dbPassword, 'database_toolbox', 0);
+    function db_query(dbUsername, dbPassword, dbName, databaseHost,...
+                      TrackerIdentifier, startTime, stopTime)
+    conn = pg_connectdb(dbName, 'host', databaseHost,...
+                        'user', dbUsername, 'pass', dbPassword,...
+                        'database_toolbox', 0);
     sql = ['SELECT device_info_serial, count(*) ',...
            'FROM gps.uva_tracking_limited ',...
            'WHERE device_info_serial=',TrackerIdentifier,' ',...
@@ -56,11 +59,13 @@ Example R script to find number of timepoints of a tracker in a certain date ran
 
 .. code-block:: r
 
-    db_query <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdentifier, startTime, stopTime, outputDir) {
+    db_query <- function(dbUsername, dbPassword, dbName, databaseHost,
+                         TrackerIdentifier, startTime, stopTime, outputDir) {
         library(RPostgreSQL)
         library(stringr)
         drv <- dbDriver("PostgreSQL")
-        conn = dbConnect(drv, user=dbUsername, password=dbPassword, dbname=dbName, host=databaseHost)
+        conn = dbConnect(drv, user=dbUsername, password=dbPassword,
+                         dbname=dbName, host=databaseHost)
 
         sql <- paste("SELECT device_info_serial, count(*) FROM gps.uva_tracking_limited ",
            "WHERE device_info_serial=",TrackerIdentifier, " ",

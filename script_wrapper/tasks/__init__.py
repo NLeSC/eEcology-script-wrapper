@@ -89,10 +89,11 @@ class PythonTask(Task):
             instance = u.database
             drivers = {'postgresql': 'org.postgresql.Driver'}
             driver = drivers[u.drivername]
-            jdbc_url = 'jdbc:{drivername}://{host}:{port}/{database}'.format(drivername=u.drivername,
-                                                                             host=u.host,
-                                                                             port=u.port or 5432,
-                                                                             database=u.database)
+            jdbct = 'jdbc:{drivername}://{host}:{port}/{database}'
+            jdbc_url = jdbct.format(drivername=u.drivername,
+                                    host=u.host,
+                                    port=u.port or 5432,
+                                    database=u.database)
             if u.query.has_key('sslmode') and u.query['sslmode'] == 'require':
                 jdbc_url += '?ssl=true'
 
@@ -118,7 +119,8 @@ class PythonTask(Task):
 
             drv <- dbDriver(driver)
             # TODO how to use sslmode=require in R, possibly via PGSSLMODE environment variable?
-            con <- dbConnect(drv, dbname=dbname, host=host, port=port, user=username, password=password)
+            con <- dbConnect(drv, dbname=dbname, host=host, port=port,
+                             user=username, password=password)
         """
         return fields
 
