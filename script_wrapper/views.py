@@ -55,7 +55,7 @@ class Views(object):
                                         taskid=taskresp.id)
         return {'success': True, 'state': state_url}
 
-    @view_config(route_name='state.json', renderer='json')
+    @view_config(route_name='state.json', renderer='json', request_method='GET')
     def statejson(self):
         result = self.celery.AsyncResult(self.taskid)
         result_url = self.request.route_path('result',
@@ -65,6 +65,7 @@ class Views(object):
         return {'state': result.state,
                 'success': result.successful(),
                 'failure': result.failed(),
+                'ready': result.ready(),
                 'result': result_url,
                 }
 
@@ -76,6 +77,19 @@ class Views(object):
         if response['success'] or response['failure']:
             return HTTPFound(location=response['result'])
         return response
+
+    @view_config(route_name='state.json', request_method='DELETE')
+    def revoke_task(self):
+        celery.control.revoke(self.taskid, terminate=True, signal='SIGKILL')
+        return HTTPFound(self.request.route_path('apply',
+                                                 script=self.scriptid,
+                                                 )
+                         )
+
+    @view_config(route_name='error', renderer='json')
+    def result_error(self):
+        result = self.celery.AsyncResult(self.taskid)
+        return repr(result.state)
 
     def result_file_url(self, filename):
         return self.request.route_path('result_file',

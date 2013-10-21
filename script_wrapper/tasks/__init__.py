@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 from celery import Task
+from celery.signals import task_revoked
 from celery.utils.log import get_task_logger
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
@@ -243,6 +244,7 @@ class SubProcessTask(PythonTask):
                                  stdout=stdout,
                                  stderr=stderr,
                                  )
+        self.update_state(state='RUNNING', meta={'pid': popen.pid})
         return_code = popen.wait()
 
         files = {}
@@ -251,6 +253,15 @@ class SubProcessTask(PythonTask):
 
         return { 'files': files, 'return_code': return_code}
 
+    def kill(self):
+        # TODO find pid of subprocess
+        # and kill it
+        # os.kill(pid)
+
+@task_revoked.connect()
+def revoke_subprocesstask(sender, signum, terminated, signal, expired):
+    logger.warn(sender)
+    sender.kill()
 
 class MatlabTask(SubProcessTask):
     """Abstract task to execute compiled Matlab function
