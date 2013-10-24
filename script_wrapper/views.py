@@ -1,12 +1,11 @@
 import logging
-from celery.result import AsyncResult
 from celery import current_app as celery
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
-from pyramid.security import unauthenticated_userid
 from models import make_session_from_request, db_url_from_request
 from models import Device, Individual, TrackSession
+from exceptions import SWException
 
 logger = logging.getLogger(__package__)
 
@@ -48,12 +47,15 @@ class Views(object):
     def submit(self):
         task = self.tasks()[self.scriptid]
         db_url = db_url_from_request(self.request)
-        kwargs = task.formfields2taskargs(self.request.json_body, db_url)
-        taskresp = task.apply_async(kwargs=kwargs)
-        state_url = self.request.route_path('state',
-                                        script=self.scriptid,
-                                        taskid=taskresp.id)
-        return {'success': True, 'state': state_url}
+        try:
+            kwargs = task.formfields2taskargs(self.request.json_body, db_url)
+            taskresp = task.apply_async(kwargs=kwargs)
+            state_url = self.request.route_path('state',
+                                            script=self.scriptid,
+                                            taskid=taskresp.id)
+            return {'success': True, 'state': state_url}
+        except SWException as e:
+            return {'success': False, 'msg': e.message}
 
     @view_config(route_name='state.json', renderer='json')
     def statejson(self):

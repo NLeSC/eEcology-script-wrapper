@@ -133,8 +133,17 @@ Ext.define('Esc.ee.form.Panel', {
                         // TODO ? change to polling for state.json route inside form
                       window.location = obj.state;
                     },
-                    failure: function(response, opts) {
-                        Ext.Msg.alert('Failed', response.status);
+                    failure: function(f, action) {
+                      switch (action.failureType) {
+                        case Ext.form.action.Action.CLIENT_INVALID:
+                            Ext.Msg.alert('Failure', 'Form fields may not be submitted with invalid values');
+                            break;
+                        case Ext.form.action.Action.CONNECT_FAILURE:
+                            Ext.Msg.alert('Failure', 'Ajax communication failed');
+                            break;
+                        case Ext.form.action.Action.SERVER_INVALID:
+                           Ext.Msg.alert('Failure', action.result.msg);
+                      }
                     },
                 });
             }
