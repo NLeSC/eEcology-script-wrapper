@@ -82,7 +82,7 @@ class Views(object):
 
     @view_config(route_name='state.json', request_method='DELETE')
     def revoke_task(self):
-        celery.control.revoke(self.taskid, terminate=True, signal='SIGKILL')
+        celery.control.revoke(self.taskid, terminate=True)
         return HTTPFound(self.request.route_path('apply',
                                                  script=self.scriptid,
                                                  )

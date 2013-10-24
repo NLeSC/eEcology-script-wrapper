@@ -17,6 +17,7 @@ import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
 
+
 class PythonTask(Task):
     """Abstract task to run Python code
 
@@ -36,7 +37,6 @@ class PythonTask(Task):
         Directory where task can put output files.
 
     """
-
     abstract = True
     label = None
     description = None
@@ -137,6 +137,7 @@ class PythonTask(Task):
             result[fn] = os.path.join(self.output_dir, fn)
         return result
 
+
 class RTask(PythonTask):
     """Abstract task to run R function in a R-script file
 
@@ -173,6 +174,7 @@ class RTask(PythonTask):
     def toIntVector(self, myints):
         """Convert Python list of ints into a R Int vector"""
         return robjects.IntVector(myints)
+
 
 class OctaveTask(PythonTask):
     """Abstract task to run GNU Octave function in a octave script file
@@ -232,19 +234,43 @@ class SubProcessTask(PythonTask):
         - files, a dict of base-filenames and absolute paths.
         - return_code
         """
+        mypid = None
         pargs = self.pargs() + list(args)
         stdout_fn = os.path.join(self.output_dir, 'stdout.txt')
         stdout = open(stdout_fn, 'w')
         stderr_fn = os.path.join(self.output_dir, 'stderr.txt')
         stderr = open(stderr_fn, 'w')
+
+        # When the task is revoked the children of the subprocess will keep running
+        # To make sure the children are also killed use the process group id
+        # To kill the process group id the term signal has to be redirected
+        import signal
+        oldsignal = signal.getsignal(signal.SIGTERM)
+
+        def cleanup():
+            stderr.close()
+            stdout.close()
+            signal.signal(signal.SIGTERM, oldsignal)
+
+        def killit(signum, frame):
+            os.killpg(mypid, signum)
+            cleanup()
+
+        signal.signal(signal.SIGTERM, killit)
+
         popen = subprocess.Popen(pargs,
                                  cwd=self.output_dir,
                                  env=self.env(),
                                  stdout=stdout,
                                  stderr=stderr,
                                  )
-        self.update_state(state='RUNNING', meta={'pid': popen.pid})
+        self.update_state(state='RUNNING')
+        mypid = popen.pid
+        os.setpgid(mypid, 0)
+
         return_code = popen.wait()
+
+        cleanup()
 
         files = {}
         files['stdout.txt'] = stdout_fn
@@ -252,15 +278,6 @@ class SubProcessTask(PythonTask):
 
         return {'files': files, 'return_code': return_code}
 
-    def kill(self):
-        # TODO find pid of subprocess
-        # and kill it
-        # os.kill(pid)
-
-@task_revoked.connect()
-def revoke_subprocesstask(sender, signum, terminated, signal, expired):
-    logger.warn(sender)
-    sender.kill()
 
 class MatlabTask(SubProcessTask):
     """Abstract task to execute compiled Matlab function
