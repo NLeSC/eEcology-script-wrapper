@@ -239,7 +239,6 @@ class SubProcessTask(PythonTask):
         stderr = open(stderr_fn, 'w')
         popen = subprocess.Popen(pargs,
                                  cwd=self.output_dir,
-#                                 shell=True,
                                  env=self.env(),
                                  stdout=stdout,
                                  stderr=stderr,
@@ -251,7 +250,7 @@ class SubProcessTask(PythonTask):
         files['stdout.txt'] = stdout_fn
         files['stderr.txt'] = stderr_fn
 
-        return { 'files': files, 'return_code': return_code}
+        return {'files': files, 'return_code': return_code}
 
     def kill(self):
         # TODO find pid of subprocess

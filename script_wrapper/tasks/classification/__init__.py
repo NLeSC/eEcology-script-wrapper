@@ -7,6 +7,8 @@ from celery.utils.log import get_task_logger
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import make_url
+from script_wrapper.models import DBSession, Acceleration
+from script_wrapper.exceptions import validateDataPoints
 
 logger = get_task_logger(__name__)
 
@@ -43,8 +45,17 @@ class Classification(MatlabTask):
         return result
 
     def formfields2taskargs(self, fields, db_url):
+        start = iso8601parse(fields['start'])
+        end = iso8601parse(fields['end'])
+        id = fields['id']
+
+        # Test if selection will give results
+        s = DBSession(db_url)
+        count = s().query(Acceleration).filter(Acceleration.device_info_serial==id).filter(Acceleration.date_time.between(start, end)).count()
+        validateDataPoints(count)
+
         return {'db_url':  db_url,
-                'start': iso8601parse(fields['start']),
-                'end': iso8601parse(fields['end']),
-                'tracker_id': fields['id'],
+                'start': start,
+                'end': end,
+                'tracker_id': id,
                 }
