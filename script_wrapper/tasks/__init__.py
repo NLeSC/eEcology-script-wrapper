@@ -1,18 +1,19 @@
 import datetime
 import errno
 import os
-import subprocess
+import signal
 import sys
+import subprocess
 from celery import Task
 from celery.signals import task_revoked
 from celery.utils.log import get_task_logger
+from rpy2 import robjects
+from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
-from rpy2 import robjects
-from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
@@ -244,7 +245,6 @@ class SubProcessTask(PythonTask):
         # When the task is revoked the children of the subprocess will keep running
         # To make sure the children are also killed use the process group id
         # To kill the process group id the term signal has to be redirected
-        import signal
         oldsignal = signal.getsignal(signal.SIGTERM)
 
         def cleanup():
