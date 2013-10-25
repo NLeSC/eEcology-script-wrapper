@@ -1,3 +1,17 @@
+# Copyright 2013 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
 from celery import current_app as celery
 from pyramid.view import view_config
@@ -5,7 +19,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
 from models import make_session_from_request, db_url_from_request
 from models import Device, Individual, TrackSession
-from exceptions import SWException
+from validation import Invalid
 
 logger = logging.getLogger(__package__)
 
@@ -54,7 +68,7 @@ class Views(object):
                                             script=self.scriptid,
                                             taskid=taskresp.id)
             return {'success': True, 'state': state_url}
-        except SWException as e:
+        except Invalid as e:
             return {'success': False, 'msg': e.message}
 
     @view_config(route_name='state.json', renderer='json')

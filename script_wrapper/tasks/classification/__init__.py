@@ -1,3 +1,17 @@
+# Copyright 2013 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import inspect
 import os
 import subprocess
@@ -7,8 +21,8 @@ from celery.utils.log import get_task_logger
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import make_url
-from script_wrapper.models import DBSession, Acceleration
-from script_wrapper.exceptions import validateDataPoints
+from script_wrapper.models import getAccelerationCount
+from script_wrapper.validation import validateRange
 
 logger = get_task_logger(__name__)
 
@@ -50,9 +64,7 @@ class Classification(MatlabTask):
         id = fields['id']
 
         # Test if selection will give results
-        s = DBSession(db_url)
-        count = s().query(Acceleration).filter(Acceleration.device_info_serial==id).filter(Acceleration.date_time.between(start, end)).count()
-        validateDataPoints(count)
+        validateRange(getAccelerationCount(db_url, id, start, end), 0, 50000)
 
         return {'db_url':  db_url,
                 'start': start,
