@@ -4,8 +4,9 @@ from pyramid import testing
 from pyramid.response import FileResponse
 from pyramid.httpexceptions import HTTPFound
 from celery.result import AsyncResult
-from script_wrapper.views import Views
 from script_wrapper.tasks import PythonTask
+from script_wrapper.validation import Invalid
+from script_wrapper.views import Views
 
 class TestViews(unittest.TestCase):
 
@@ -84,6 +85,23 @@ class TestViews(unittest.TestCase):
                    }
         self.assertEqual(result, eresult)
         task.formfields2taskargs.assert_called_with(1234, 'sqlite:///')
+
+    @patch('script_wrapper.views.db_url_from_request')
+    def testSubmit_InvalidQuery(self, dr):
+        dr.return_value = 'sqlite:///'
+        request = testing.DummyRequest()
+        request.matchdict['script'] = 'plot'
+        request.json_body = 1234
+        task = Mock(PythonTask)
+        task.formfields2taskargs.side_effect = Invalid('Invalid query')
+        views = Views(request)
+        views.celery.tasks = {'plot': task}
+
+        result = views.submit()
+
+        eresult = {'success': False,
+                   'msg': 'Invalid query'}
+        self.assertEqual(result, eresult)
 
     def testStateJson(self):
         self.config.add_route('result', '/{script}/{taskid}/result')

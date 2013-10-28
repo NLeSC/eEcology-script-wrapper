@@ -1,7 +1,7 @@
 import unittest
 import os
 import sys
-from mock import patch, Mock
+from mock import patch, Mock, ANY
 from celery import Celery
 import script_wrapper.tasks as tasks
 
@@ -76,6 +76,8 @@ class TestMatlabTask(unittest.TestCase):
         task.app.conf['matlab.location'] = '/opt/matlab'
 
         self.assertEqual(task.matlab, '/opt/matlab')
+        # matlab location from cache
+        self.assertEqual(task.matlab, '/opt/matlab')
 
     def test_pargs(self):
         task = tasks.MatlabTask()
@@ -86,3 +88,32 @@ class TestMatlabTask(unittest.TestCase):
 
         self.assertEqual(task.pargs(), [taskdir+'/runme.sh', '/opt/matlab'])
 
+class TestSubProcessTask(unittest.TestCase):
+
+    def test_pargs(self):
+        task = tasks.SubProcessTask()
+        self.assertEqual(task.pargs(), [])
+
+    @patch('subprocess.Popen')
+    def test_run(self, po):
+
+        from tempfile import mkdtemp
+        root_dir = mkdtemp()
+        task = tasks.SubProcessTask()
+        task.app.conf['task_output_directory'] = root_dir
+        task.request.id = 'mytaskid'
+        po.return_value.wait.return_value = 0
+
+        result = task.run('hostname')
+
+        eresult = {'files': {
+                             'stderr.txt': root_dir + '/mytaskid/stderr.txt',
+                             'stdout.txt': root_dir + '/mytaskid/stdout.txt',
+                             },
+                   'return_code': 0}
+
+        self.assertEqual(result, eresult)
+        po.assert_called_with(['hostname'], stdout=ANY, stderr=ANY, cwd=root_dir + '/mytaskid', env=ANY)
+
+        import shutil
+        shutil.rmtree(root_dir)
