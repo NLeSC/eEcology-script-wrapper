@@ -35,10 +35,7 @@ class Classification(MatlabTask):
 
     def run(self, db_url, start, end, tracker_id):
         u = make_url(db_url)
-
-        db_name = u.database
-        if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
-            db_name += '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory'
+        db_name = self.sslify_dbname(u)
 
         # Data directory, classification requires a classification model
         data_dir = os.path.dirname(os.path.abspath(inspect.getsourcefile(Classification)))

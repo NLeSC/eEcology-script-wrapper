@@ -18,17 +18,14 @@ class ExampleMatlab(MatlabTask):
 
     def run(self, db_url, trackers, start, end):
         u = make_url(db_url)
-
-        db_name = u.database
-        if 'sslmode' in u.query and u.query['sslmode'] in ['require', 'verify', 'verify-full']:
-            db_name+='?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory'
+        db_name = self.sslify_dbname(u)
 
         # execute
         result = super(ExampleMatlab, self).run(u.username,
                                                 u.password,
                                                 db_name,
                                                 u.host,
-                                                self.toNumberVectorString(trackers),
+                                                self.list2vector_string(trackers),
                                                 start,
                                                 end,
                                                 )

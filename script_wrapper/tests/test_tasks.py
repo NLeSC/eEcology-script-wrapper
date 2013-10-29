@@ -96,6 +96,37 @@ class TestPythonTask(unittest.TestCase):
                   'stdout.txt': '/tmp/myjobdir/stdout.txt'}
         self.assertEqual(files, efiles)
 
+    def test_sslify_dbname_nossl(self):
+        task = tasks.PythonTask()
+        from sqlalchemy.engine.url import make_url
+
+        urls = ['postgresql://localhost/eecology',
+                'postgresql://localhost/eecology?sslmode=disable',
+                'postgresql://localhost/eecology?sslmode=prefer',
+                'postgresql://localhost/eecology?sslmode=allow',
+                ]
+        for url in urls:
+            db_url = make_url(url)
+            db_name = task.sslify_dbname(db_url)
+            exp = 'eecology'
+            self.assertEqual(db_name, exp)
+
+    def test_sslify_dbname_ssl(self):
+        task = tasks.PythonTask()
+        from sqlalchemy.engine.url import make_url
+
+        urls = ['postgresql://localhost/eecology?sslmode=require',
+                'postgresql://localhost/eecology?sslmode=verify',
+                'postgresql://localhost/eecology?sslmode=verify-full',
+                ]
+        for url in urls:
+            db_url = make_url(url)
+            db_name = task.sslify_dbname(db_url)
+            exp = 'eecology'
+            exp += '?ssl=true&'
+            exp += 'sslfactory=org.postgresql.ssl.NonValidatingFactory'
+            self.assertEqual(db_name, exp)
+
 
 class TestOctaveTask(unittest.TestCase):
     def test_load_mfile(self):
@@ -145,11 +176,18 @@ class TestMatlabTask(unittest.TestCase):
 
         self.assertEqual(task.pargs(), [taskdir + '/runme.sh', '/opt/matlab'])
 
-    def test_toNumberVectorString(self):
+    def test_list2vector_string(self):
         task = tasks.MatlabTask()
 
-        result = task.toNumberVectorString([1, 2, 3])
+        result = task.list2vector_string([1, 2, 3])
         eresult = '[1,2,3]'
+        self.assertEqual(result, eresult)
+
+    def test_list2cell_array_string(self):
+        task = tasks.MatlabTask()
+
+        result = task.list2cell_array_string(['foo', 'bar'])
+        eresult = '{foo,bar}'
         self.assertEqual(result, eresult)
 
 

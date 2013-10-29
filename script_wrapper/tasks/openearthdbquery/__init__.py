@@ -20,11 +20,7 @@ class OpenEarthDbQuery(MatlabTask):
         u = make_url(db_url)
         username = u.username
         password = u.password
-        dbname = u.database
-        sslmode = u.query.get('sslmode', 'prefer')
-        if sslmode == 'require':
-            dbname += '?ssl=true'
-#            dbname += '&sslfactory=org.postgresql.ssl.NonValidatingFactory'
+        dbname = self.sslify_dbname(u)
         host = u.host
 
         # execute

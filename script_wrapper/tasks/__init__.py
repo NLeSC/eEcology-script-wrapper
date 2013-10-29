@@ -158,6 +158,14 @@ class PythonTask(Task):
             result[fn] = os.path.join(self.output_dir(), fn)
         return result
 
+    def sslify_dbname(self, db_url):
+        """To connect to postgresql database which requires ssl add query to db name."""
+        db_name = db_url.database
+        sslmodes = ['require', 'verify', 'verify-full']
+        if 'sslmode' in db_url.query and db_url.query['sslmode'] in sslmodes:
+            db_name += '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory'
+        return db_name
+
 
 class RTask(PythonTask):
     """Abstract task to run R function in a R-script file
@@ -351,9 +359,16 @@ class MatlabTask(SubProcessTask):
               ]
         return p
 
-    def toNumberVectorString(self, mylist):
+    def list2vector_string(self, mylist):
         """Convers list into Matlab vector
 
         eg. x = [1,2,3] becomes '[1,2,3]'
         """
         return '[{}]'.format(",".join([str(i) for i in mylist]))
+
+    def list2cell_array_string(self, mylist):
+        """Convers list into Matlab vector
+
+        eg. x = ['foo', 'bar'] becomes '{foo,bar}'
+        """
+        return '{{{}}}'.format(",".join([str(i) for i in mylist]))
