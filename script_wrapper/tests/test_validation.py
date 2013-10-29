@@ -24,9 +24,13 @@ class TestValidateRange(unittest.TestCase):
     def testTooLow(self):
         with self.assertRaises(swv.Invalid) as e:
             swv.validateRange(-5, 0, 10)
-            self.assertEquals(e.message, 'No data points selected for this script, please increase or shift time range')
+
+        self.assertEquals(e.exception.message,
+                          'No data points selected for this script, please increase or shift time range')
 
     def testTooHigh(self):
         with self.assertRaises(swv.Invalid) as e:
             swv.validateRange(15, 0, 10)
-            self.assertEquals(e.message, 'Too many data points selected for this script, please reduce time range')
+
+        self.assertEquals(e.exception.message,
+                          'Too many data points selected for this script, please reduce time range')

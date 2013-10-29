@@ -237,7 +237,7 @@ def populate(session):
                                  ring_number=rn,
                                  project_leader='Someone, someone@example.com'
                                  ))
-        dt = datetime.datetime.now()
+        dt = datetime.datetime.utcnow()
         offset = tid * 0.1
         lon = 4.830617 + offset
         lat = 52.979970 + offset

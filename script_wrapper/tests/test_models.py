@@ -16,6 +16,7 @@ from datetime import datetime
 import unittest
 from mock import Mock, patch
 from pyramid.testing import DummyRequest
+from pytz import UTC
 from sqlalchemy.orm import Session, Query
 from script_wrapper import models
 
@@ -56,8 +57,8 @@ class TestModels(unittest.TestCase):
     def test_getAccelerationCount(self, dbsession):
         db_url = 'postgresql://localhost?ssl=true'
         device_info_serial = 1234
-        start = datetime(2013, 1, 1)
-        end = datetime(2013, 12, 12)
+        start = datetime(2013, 1, 1, tzinfo=UTC)
+        end = datetime(2013, 12, 12, tzinfo=UTC)
         query = Mock(Query)
         session = Mock(Session)
         session.query.return_value = query

@@ -20,7 +20,11 @@ Several pieces of information about the script are required:
 Database
 ========
 
-The script will be executed with the database privileges of the end-user. This means only use table/views everyone can use eg. only use ``\*_limited`` views.
+The script will be executed with the database privileges of the end-user.
+This means only use table/views everyone can use eg. only use ``\*_limited`` views.
+
+The database stores datetime with UTC timezone. Datetimes from the submit form are also in UTC timezone.
+Inside script make sure you use **UTC timezone** when quering database and generating output.
 
 Matlab
 ======

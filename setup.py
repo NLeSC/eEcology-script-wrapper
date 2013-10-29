@@ -13,6 +13,7 @@ requires = [
     'celery',
     'redis',
     'iso8601',
+    'pytz',
     'rpy2',
     'oct2py',
     'scipy',  # required by oct2py
