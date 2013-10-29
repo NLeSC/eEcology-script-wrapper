@@ -202,23 +202,15 @@ def populate(session):
         GRANT SELECT ON TABLE gps.uva_energy_limited TO public;
 
         -- Create elevation schema
-        CREATE SCHEMA elevation AUTHORIZATION stefanv;
+        CREATE SCHEMA elevation;
         GRANT USAGE ON SCHEMA elevation TO public;
         CREATE OR REPLACE FUNCTION elevation.srtm_getvalue(IN my_point geometry, OUT altitude numeric)
-  RETURNS numeric AS
-$BODY$
-
---Usage: select elevation.srtm_getvalue (pointfromtext('POINT(90 90)',4326))
---When srtm3 does not give an elevation, srtm30 is used
---On borders between cells the south and/or east  cell is selected, also between tiles!
-select -9999.0
-$BODY$
-  LANGUAGE sql IMMUTABLE STRICT
-  COST 100;
-ALTER FUNCTION elevation.srtm_getvalue(geometry)
-  OWNER TO stefanv;
-
-
+          RETURNS numeric AS
+        $BODY$
+        SELECT -9999.0
+        $BODY$
+          LANGUAGE sql IMMUTABLE STRICT
+          COST 100;
 
     """
     engine = session.get_bind()
