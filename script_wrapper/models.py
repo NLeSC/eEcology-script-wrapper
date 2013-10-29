@@ -137,11 +137,11 @@ class Energy(Base):
 def request_credentials(request):
     """Returns the username/password from the authorization header with Basic Authentication.
 
-    When authorization header is missing it returns ('', '') tuple.
+    When authorization header is missing it returns (None, None) tuple.
     """
     if 'HTTP_AUTHORIZATION' not in request.environ:
         logger.warn('No HTTP_AUTHORIZATION found, using empty credentials')
-        return ('', '')
+        return (None, None)
     (method, auth) = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)
     if method.lower() != 'basic':
         err = 'Can only request credentials from Basic Authentication'

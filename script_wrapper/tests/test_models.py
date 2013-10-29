@@ -46,7 +46,7 @@ class TestModels(unittest.TestCase):
 
         creds = models.request_credentials(req)
 
-        self.assertEqual(creds, ('', ''))
+        self.assertEqual(creds, (None, None))
 
     def test_db_url_from_request(self):
         req = DummyRequest()

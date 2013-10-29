@@ -268,6 +268,8 @@ class SubProcessTask(PythonTask):
         """
         mypid = None
         pargs = self.pargs() + list(args)
+        # Make sure all arguments are strings
+        pargs = [str(parg) for parg in pargs]
         stdout_fn = os.path.join(self.output_dir(), 'stdout.txt')
         stdout = open(stdout_fn, 'w')
         stderr_fn = os.path.join(self.output_dir(), 'stderr.txt')
