@@ -20,8 +20,8 @@ class ExampleR(RTask):
         u = make_url(db_url)
         trackersInR = self.toIntVector(trackers)
         self.r.exampler(u.username, u.password, u.database, u.host,
-                        trackersInR, start, end, self.output_dir)
-        return {'files': self.outputFiles()}
+                        trackersInR, start, end, self.output_dir())
+        return {'files': self.output_files()}
 
     def formfields2taskargs(self, fields, db_url):
         return {'start': fields['start'],

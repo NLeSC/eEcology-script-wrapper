@@ -34,7 +34,7 @@ class ExampleMatlab(MatlabTask):
                                                 )
 
         # Add files in output dir to result set
-        result['files'].update(self.outputFiles())
+        result['files'].update(self.output_files())
 
         return result
 

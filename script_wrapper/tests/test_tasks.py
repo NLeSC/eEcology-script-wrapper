@@ -1,3 +1,17 @@
+# Copyright 2013 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 import os
 from mock import patch, Mock, ANY
@@ -29,7 +43,7 @@ class TestPythonTask(unittest.TestCase):
         task = tasks.PythonTask()
         edir = os.path.dirname(os.path.abspath(tasks.__file__))
         efn = os.path.join(edir, 'form.js')
-        self.assertEqual(task.js_form_location, efn)
+        self.assertEqual(task.js_form_location(), efn)
 
     def test_output_dir(self):
         from tempfile import mkdtemp
@@ -39,7 +53,7 @@ class TestPythonTask(unittest.TestCase):
         task.app.conf['task_output_directory'] = root_dir
         task.request.id = 'mytaskid'
 
-        output_dir = task.output_dir
+        output_dir = task.output_dir()
 
         eoutput_dir = os.path.join(root_dir, 'mytaskid')
         self.assertEqual(output_dir, eoutput_dir)
@@ -56,7 +70,31 @@ class TestPythonTask(unittest.TestCase):
         task.app.conf['task_output_directory'] = '/tmp'
         task.request.id = 'mytaskid'
 
-        self.assertEqual(task.output_dir, '/tmp/mytaskid')
+        self.assertEqual(task.output_dir(), '/tmp/mytaskid')
+
+    @patch('os.makedirs')
+    def test_output_dir_PermissionDenied_Exception(self, makedirs):
+        import errno
+        makedirs.side_effect = OSError(errno.EPERM, 'Permission denied')
+        task = tasks.PythonTask()
+        task.app.conf['task_output_directory'] = '/etc'
+        task.request.id = 'mytaskid'
+
+        with self.assertRaises(OSError):
+            task.output_dir()
+
+    @patch('os.listdir')
+    def test_output_files(self, listdir):
+        listdir.return_value = ['stderr.txt', 'stdout.txt']
+        task = tasks.PythonTask()
+        task.output_dir = Mock(return_value='/tmp/myjobdir')
+
+        files = task.output_files()
+
+        listdir.assert_called_with('/tmp/myjobdir')
+        efiles = {'stderr.txt': '/tmp/myjobdir/stderr.txt',
+                  'stdout.txt': '/tmp/myjobdir/stdout.txt'}
+        self.assertEqual(files, efiles)
 
 
 class TestOctaveTask(unittest.TestCase):
@@ -78,6 +116,14 @@ class TestRTask(unittest.TestCase):
         task._r = 1234
 
         self.assertEqual(task.r, 1234)
+
+    def test_toIntVector(self):
+        task = tasks.RTask()
+
+        result = task.toIntVector([1, 2, 3])
+
+        from rpy2.robjects import IntVector
+        self.assertIsInstance(result, IntVector)
 
 
 class TestMatlabTask(unittest.TestCase):
@@ -119,8 +165,7 @@ class TestSubProcessTask(unittest.TestCase):
         from tempfile import mkdtemp
         root_dir = mkdtemp()
         task = tasks.SubProcessTask()
-        task.app.conf['task_output_directory'] = root_dir
-        task.request.id = 'mytaskid'
+        task.output_dir = Mock(return_value=root_dir)
         po.return_value.wait.return_value = 0
         from os import getpid
         po.return_value.pid = getpid()
@@ -128,14 +173,14 @@ class TestSubProcessTask(unittest.TestCase):
         result = task.run('hostname')
 
         eresult = {'files': {
-                             'stderr.txt': root_dir + '/mytaskid/stderr.txt',
-                             'stdout.txt': root_dir + '/mytaskid/stdout.txt',
+                             'stderr.txt': root_dir + '/stderr.txt',
+                             'stdout.txt': root_dir + '/stdout.txt',
                              },
                    'return_code': 0}
 
         self.assertEqual(result, eresult)
         po.assert_called_with(['hostname'],
-                              cwd=root_dir + '/mytaskid',
+                              cwd=root_dir,
                               stdout=ANY, stderr=ANY,
                               env=ANY)
 

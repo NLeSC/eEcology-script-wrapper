@@ -69,7 +69,7 @@ class GpsVisDB(MatlabTask):
                                            self.vectorize(speeds),
                                            )
 
-        result['files'].update(self.outputFiles())
+        result['files'].update(self.output_files())
         return result
 
     def vectorize(self, mylist):

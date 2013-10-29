@@ -54,7 +54,7 @@ class Classification(MatlabTask):
                                                  data_dir,
                                                  )
 
-        result['files'].update(self.outputFiles())
+        result['files'].update(self.output_files())
         return result
 
     def formfields2taskargs(self, fields, db_url):

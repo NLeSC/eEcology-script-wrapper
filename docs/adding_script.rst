@@ -48,7 +48,6 @@ In ``script_wrapper/tasks/<script_id>/__init__.py``:
 
 Edit ``script_wrapper/tasks/<script_id>/form.js``.
 
-
 4. Validate form and map form result to script arguments
 ========================================================
 
@@ -56,6 +55,11 @@ In ``script_wrapper/tasks/<script_id>/__init__.py`` the ``formfields2taskargs`` 
 This function recieves the form submission result.
 
 After validation and mapping the script can be executed.
+
+Examples of validation:
+
+* Prevent script from running when there is no data or too much data to work with.
+* Give hints which date range to choose.
 
 5. Run script
 =============
@@ -72,3 +76,8 @@ Any binaries that the script calls should also be in ``script_wrapper/tasks/<scr
 
 The script will generate one or more output files.
 The return value of the ``run`` functions ``script_wrapper/tasks/<script_id>/__init__.py`` is the list of output files which will be presented to the end-user.
+
+7. Add unit tests
+=================
+
+When script contains a lot of Python code write unit tests for it.

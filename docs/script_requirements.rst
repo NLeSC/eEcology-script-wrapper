@@ -40,19 +40,19 @@ Example Matlab script to find number of timepoints of a tracker in a certain dat
     conn = pg_connectdb(dbName, 'host', databaseHost,...
                         'user', dbUsername, 'pass', dbPassword,...
                         'database_toolbox', 0);
-    sql = ['SELECT device_info_serial, count(*) ',...
+    sql_tpl = ['SELECT device_info_serial, count(*) ',...
            'FROM gps.uva_tracking_limited ',...
-           'WHERE device_info_serial=',TrackerIdentifier,' ',...
-           'AND date_time BETWEEN ',char(39) , startTime,char(39) ,...
-           ' AND ',char(39) , stopTime, char(39), ' ',...
+           'WHERE device_info_serial=%d ',...
+           'AND date_time BETWEEN ''%s'' AND %s'' ',...
            'GROUP BY device_info_serial'];
-    results = pg_fetch(conn, sql);
+    sql = sprintf(sql_tpl, TrackerIdentifier, starTime, stopTime)
+    results = pg_fetch_struct(conn, sql);
     display(results);
 
 R
 =
 
-* Python list variables have to converted to R vectors using eg. ``robjects.IntVector([1,2,3])`` (For more information see http://rpy.sourceforge.net/rpy2/doc-2.2/html/introduction.html#r-vectors)
+* Python list variables have to converted to R vectors using eg. ``rpy2.robjects.IntVector([1,2,3])`` (For more information see http://rpy.sourceforge.net/rpy2/doc-2.2/html/introduction.html#r-vectors)
 * To write output files to the ``output_dir``, it has to be passed a R function argument
 
 Example R script to find number of timepoints of a tracker in a certain date range:
@@ -81,7 +81,7 @@ Example R script to find number of timepoints of a tracker in a certain date ran
 Python
 ======
 
-* Use SQLAlchemy models of e-ecology database
+Use SQLAlchemy models of e-ecology database.
 
 Example Python run function to find number of timepoints of a tracker in a certain date range:
 
@@ -97,7 +97,7 @@ Example Python run function to find number of timepoints of a tracker in a certa
         s.close_all()
 
         # Write results to text files
-        fn = os.path.join(self.output_dir, 'result.txt')
+        fn = os.path.join(self.output_dir(), 'result.txt')
         with open(fn, 'w') as f:
             f.write(count)
         return {'files': {'result.txt': fn}}

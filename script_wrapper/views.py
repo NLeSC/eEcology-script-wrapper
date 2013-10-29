@@ -53,9 +53,7 @@ class Views(object):
     @view_config(route_name='jsform')
     def jsform(self):
         task = self.tasks()[self.scriptid]
-        return FileResponse(task.js_form_location,
-                            self.request,
-                            )
+        return FileResponse(task.js_form_location(), self.request)
 
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
