@@ -9,5 +9,5 @@ data/
 /.settings
 /cover
 /.coverage
-script_wrapper/static/ext/
 docs/_build
+script_wrapper/static/ext*
