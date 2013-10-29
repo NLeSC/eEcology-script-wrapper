@@ -135,6 +135,13 @@ class Energy(Base):
 
 
 def request_credentials(request):
+    """Returns the username/password from the authorization header with Basic Authentication.
+
+    When authorization header is missing it returns ('', '') tuple.
+    """
+    if 'HTTP_AUTHORIZATION' not in request.environ:
+        logger.warn('No HTTP_AUTHORIZATION found, using empty credentials')
+        return ('', '')
     (method, auth) = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)
     if method.lower() != 'basic':
         err = 'Can only request credentials from Basic Authentication'
@@ -147,9 +154,9 @@ def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
     db_url = make_url(settings['sqlalchemy.url'])
-    if username is not None:
+    if username:
         db_url.username = username
-    if password is not None:
+    if password:
         db_url.password = password
     return str(db_url)
 

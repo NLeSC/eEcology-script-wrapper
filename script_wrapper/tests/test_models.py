@@ -41,6 +41,13 @@ class TestModels(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             models.request_credentials(req)
 
+    def test_request_credentials_noauth(self):
+        req = DummyRequest()
+
+        creds = models.request_credentials(req)
+
+        self.assertEqual(creds, ('', ''))
+
     def test_db_url_from_request(self):
         req = DummyRequest()
         odb_url = 'postgresql://localhost?ssl=true'
