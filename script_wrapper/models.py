@@ -19,7 +19,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema
@@ -60,7 +59,6 @@ class TrackSession(Base):
                          primary_key=True,
                          )
     project_leader = Column(String)
-
 
 
 class Tracking(Base):
@@ -123,6 +121,7 @@ class Acceleration(Base):
     date_time = Column(DateTime)
     index = Column(Integer)
 
+
 class Energy(Base):
     __tablename__ = 'uva_energy_limited'  # uva_energy101
     __table_args__ = {'schema': GPS_SCHEMA}
@@ -138,7 +137,8 @@ class Energy(Base):
 def request_credentials(request):
     (method, auth) = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)
     if method.lower() != 'basic':
-        raise NotImplementedError('Can only request credentials from Basic Authentication')
+        err = 'Can only request credentials from Basic Authentication'
+        raise NotImplementedError(err)
     (username, password) = auth.strip().decode('base64').split(':', 1)
     return (username, password)
 
@@ -274,11 +274,12 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
                            ))
     session.commit()
 
+
 def getAccelerationCount(db_url, device_info_serial, start, end):
     """Returns the number of acceleration rows for selected tracker and time range.
     """
     s = DBSession(db_url)
     q = s().query(Acceleration)
-    q = q.filter(Acceleration.device_info_serial==device_info_serial)
+    q = q.filter(Acceleration.device_info_serial == device_info_serial)
     q = q.filter(Acceleration.date_time.between(start, end))
     return q.count()

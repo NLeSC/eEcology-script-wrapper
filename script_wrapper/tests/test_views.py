@@ -49,7 +49,8 @@ class TestViews(unittest.TestCase):
 
     def testJsForm(self):
         from tempfile import NamedTemporaryFile
-        formjs =  NamedTemporaryFile(suffix='.js')
+        formjs = NamedTemporaryFile(suffix='.js')
+
         class Task(object):
             js_form_location = formjs.name
 
@@ -110,7 +111,7 @@ class TestViews(unittest.TestCase):
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         task_result.state = 'PENDING'
         task_result.ready.return_value = False
@@ -168,7 +169,8 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result.location, result_url)
 
     def testResultMultipleFiles(self):
-        self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')
+        self.config.add_route('result_file',
+                              '/{script}/{taskid}/result/{filename}')
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
@@ -201,8 +203,10 @@ class TestViews(unittest.TestCase):
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.failed.return_value = False
-        task_result.result = { 'files': {'stdout.txt': '/tmp/stdout.txt',
-                                         }}
+        task_result.result = {'files': {
+                                        'stdout.txt': '/tmp/stdout.txt',
+                                        }
+                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
 
         result = views.result()

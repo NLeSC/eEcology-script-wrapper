@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class Invalid(Exception):
     pass
+
 
 def validateRange(count, minimum, maximum):
     """Validator which succeeds if the value it is passed is greater
