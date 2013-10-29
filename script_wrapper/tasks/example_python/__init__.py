@@ -34,7 +34,7 @@ class ExamplePython(PythonTask):
         s.close_all()
 
         # Write results to text files
-        fn = os.path.join(self.output_dir, 'result.txt')
+        fn = os.path.join(self.output_dir(), 'result.txt')
         with open(fn, 'w') as f:
             f.write(msg)
         return {'files': {'result.txt': fn}}

@@ -14,18 +14,20 @@
 
 import errno
 import os
-import subprocess
+import signal
 import sys
+import subprocess
 from celery import Task
+from celery.signals import task_revoked
 from celery.utils.log import get_task_logger
 import iso8601
+from rpy2.robjects import IntVector
+from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
 from sqlalchemy import MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
-from rpy2 import robjects
-from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
@@ -47,19 +49,21 @@ class PythonTask(Task):
         If disabled this task won't be registered automatically.
     js_form : string
         Filename of javascript form.
-    output_dir : string
-        Directory where task can put output files.
 
     """
-
     abstract = True
     label = None
     description = None
     js_form = 'form.js'
     autoregister = True  # Change to False to hide this task
 
-    @property
     def output_dir(self):
+        """Directory where task can put output files.
+
+        Combination of 'task_output_directory' config and task identifier.
+
+        Directory be created when it does not exists.
+        """
         directory = os.path.join(self.app.conf['task_output_directory'],
                                  self.request.id,
                                  )
@@ -138,20 +142,29 @@ class PythonTask(Task):
             # possibly via PGSSLMODE environment variable?
             con <- dbConnect(drv, dbname=dbname, host=host, port=port,
                              user=username, password=password)
+
+        Throw a script_wrapper.validation.Invalid exception when fields are not valid.
         """
         return fields
 
-    @property
     def js_form_location(self):
         """Javascript to render ExtJS form to div with 'form' id"""
         return os.path.join(self.task_dir(), self.js_form)
 
-    def outputFiles(self):
+    def output_files(self):
         """Returns dict of all files in the output dir"""
         result = {}
-        for fn in os.listdir(self.output_dir):
-            result[fn] = os.path.join(self.output_dir, fn)
+        for fn in os.listdir(self.output_dir()):
+            result[fn] = os.path.join(self.output_dir(), fn)
         return result
+
+    def sslify_dbname(self, db_url):
+        """To connect to postgresql database which requires ssl add query to db name."""
+        db_name = db_url.database
+        sslmodes = ['require', 'verify', 'verify-full']
+        if 'sslmode' in db_url.query and db_url.query['sslmode'] in sslmodes:
+            db_name += '?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory'
+        return db_name
 
 
 class RTask(PythonTask):
@@ -163,10 +176,10 @@ class RTask(PythonTask):
         class PlotTask(RTask):
             script = 'plot.r'
 
-            def run(self, output_dir):
+            def run(self, output_dir()):
                 self.load_mfile()
-                self.r.plot(output_dir)
-                return {'plot.png': os.path.join(self.output_dir, 'plot.png')}
+                self.r.plot(output_dir())
+                return {'plot.png': os.path.join(self.output_dir(), 'plot.png')}
 
     Attributes:
 
@@ -191,7 +204,7 @@ class RTask(PythonTask):
 
     def toIntVector(self, myints):
         """Convert Python list of ints into a R Int vector"""
-        return robjects.IntVector(myints)
+        return IntVector(myints)
 
 
 class OctaveTask(PythonTask):
@@ -203,10 +216,10 @@ class OctaveTask(PythonTask):
         class PlotTask(OctaveTask):
             script = 'plot.m'
 
-            def run(self, output_dir):
+            def run(self, output_dir()):
                 self.load_mfile()
-                self.octave.plot(output_dir)
-                return {'plot.png': os.path.join(self.output_dir, 'plot.png')}
+                self.octave.plot(output_dir())
+                return {'plot.png': os.path.join(self.output_dir(), 'plot.png')}
 
     Attributes:
 
@@ -229,7 +242,6 @@ class SubProcessTask(PythonTask):
     """Abstract task to subprocess.Popen.
 
     Can execute any executable program with arguments.
-
     """
     abstract = True
 
@@ -247,24 +259,55 @@ class SubProcessTask(PythonTask):
         return os.environ
 
     def run(self, *args):
-        """Perform subprocess with self.pargs() and *args as arguments.
+        """Perform subprocess with self.pargs() and \*args list as arguments.
 
         Returns dict with following keys:
-        - files, a dict of base-filenames and absolute paths.
-        - return_code
+
+        * files, a dict of base-filenames and absolute paths.
+        * return_code
         """
+        mypid = None
         pargs = self.pargs() + list(args)
-        stdout_fn = os.path.join(self.output_dir, 'stdout.txt')
+        # Make sure all arguments are strings
+        pargs = [str(parg) for parg in pargs]
+        stdout_fn = os.path.join(self.output_dir(), 'stdout.txt')
         stdout = open(stdout_fn, 'w')
-        stderr_fn = os.path.join(self.output_dir, 'stderr.txt')
+        stderr_fn = os.path.join(self.output_dir(), 'stderr.txt')
         stderr = open(stderr_fn, 'w')
+
+        # When the task is revoked the children of the subprocess will keep running
+        # To make sure the children are also killed use the process group id
+        # To kill the process group id the term signal has to be redirected
+
+        oldsignal = signal.getsignal(signal.SIGTERM)
+
+        def cleanup():
+            """Close output files and revert term signal"""
+            stderr.close()
+            stdout.close()
+            signal.signal(signal.SIGTERM, oldsignal)
+
+        def killit(signum, frame):
+            """Kill the current process group and cleanup"""
+            os.killpg(os.getpgid(mypid), signum)
+            cleanup()
+
+        signal.signal(signal.SIGTERM, killit)
+
         popen = subprocess.Popen(pargs,
-                                 cwd=self.output_dir,
+                                 cwd=self.output_dir(),
                                  env=self.env(),
                                  stdout=stdout,
                                  stderr=stderr,
+                                 # starts subprocess in own process group
+                                 # whole group can be killed when task is revoked
+                                 preexec_fn=os.setsid,
                                  )
+        self.update_state(state='RUNNING')
+        mypid = popen.pid
         return_code = popen.wait()
+
+        cleanup()
 
         files = {}
         files['stdout.txt'] = stdout_fn
@@ -282,9 +325,9 @@ class MatlabTask(SubProcessTask):
         class PlotTask(MatlabTask):
             script = 'run_plot.sh'
 
-            def run(self, output_dir):
-                result = super(PlotTask, self).run(output_dir)
-                abs_path = os.path.join(self.output_dir, 'plot.png')
+            def run(self, output_dir()):
+                result = super(PlotTask, self).run(output_dir())
+                abs_path = os.path.join(self.output_dir(), 'plot.png')
                 result['files']['plot.png'] = abs_path
                 return result
 
@@ -320,9 +363,16 @@ class MatlabTask(SubProcessTask):
               ]
         return p
 
-    def toNumberVectorString(self, mylist):
+    def list2vector_string(self, mylist):
         """Convers list into Matlab vector
 
         eg. x = [1,2,3] becomes '[1,2,3]'
         """
         return '[{}]'.format(",".join([str(i) for i in mylist]))
+
+    def list2cell_array_string(self, mylist):
+        """Convers list into Matlab vector
+
+        eg. x = ['foo', 'bar'] becomes '{foo,bar}'
+        """
+        return '{{{}}}'.format(",".join([str(i) for i in mylist]))

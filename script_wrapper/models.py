@@ -19,7 +19,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema
@@ -60,7 +59,6 @@ class TrackSession(Base):
                          primary_key=True,
                          )
     project_leader = Column(String)
-
 
 
 class Tracking(Base):
@@ -123,6 +121,7 @@ class Acceleration(Base):
     date_time = Column(DateTime)
     index = Column(Integer)
 
+
 class Energy(Base):
     __tablename__ = 'uva_energy_limited'  # uva_energy101
     __table_args__ = {'schema': GPS_SCHEMA}
@@ -136,9 +135,17 @@ class Energy(Base):
 
 
 def request_credentials(request):
+    """Returns the username/password from the authorization header with Basic Authentication.
+
+    When authorization header is missing it returns (None, None) tuple.
+    """
+    if 'HTTP_AUTHORIZATION' not in request.environ:
+        logger.warn('No HTTP_AUTHORIZATION found, using empty credentials')
+        return (None, None)
     (method, auth) = request.environ['HTTP_AUTHORIZATION'].split(' ', 1)
     if method.lower() != 'basic':
-        raise NotImplementedError('Can only request credentials from Basic Authentication')
+        err = 'Can only request credentials from Basic Authentication'
+        raise NotImplementedError(err)
     (username, password) = auth.strip().decode('base64').split(':', 1)
     return (username, password)
 
@@ -147,9 +154,9 @@ def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
     db_url = make_url(settings['sqlalchemy.url'])
-    if username is not None:
+    if username:
         db_url.username = username
-    if password is not None:
+    if password:
         db_url.password = password
     return str(db_url)
 
@@ -202,23 +209,15 @@ def populate(session):
         GRANT SELECT ON TABLE gps.uva_energy_limited TO public;
 
         -- Create elevation schema
-        CREATE SCHEMA elevation AUTHORIZATION stefanv;
+        CREATE SCHEMA elevation;
         GRANT USAGE ON SCHEMA elevation TO public;
         CREATE OR REPLACE FUNCTION elevation.srtm_getvalue(IN my_point geometry, OUT altitude numeric)
-  RETURNS numeric AS
-$BODY$
-
---Usage: select elevation.srtm_getvalue (pointfromtext('POINT(90 90)',4326))
---When srtm3 does not give an elevation, srtm30 is used
---On borders between cells the south and/or east  cell is selected, also between tiles!
-select -9999.0
-$BODY$
-  LANGUAGE sql IMMUTABLE STRICT
-  COST 100;
-ALTER FUNCTION elevation.srtm_getvalue(geometry)
-  OWNER TO stefanv;
-
-
+          RETURNS numeric AS
+        $BODY$
+        SELECT -9999.0
+        $BODY$
+          LANGUAGE sql IMMUTABLE STRICT
+          COST 100;
 
     """
     engine = session.get_bind()
@@ -245,7 +244,7 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
                                  ring_number=rn,
                                  project_leader='Someone, someone@example.com'
                                  ))
-        dt = datetime.datetime.now()
+        dt = datetime.datetime.utcnow()
         offset = tid * 0.1
         lon = 4.830617 + offset
         lat = 52.979970 + offset
@@ -274,11 +273,12 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
                            ))
     session.commit()
 
+
 def getAccelerationCount(db_url, device_info_serial, start, end):
     """Returns the number of acceleration rows for selected tracker and time range.
     """
     s = DBSession(db_url)
     q = s().query(Acceleration)
-    q = q.filter(Acceleration.device_info_serial==device_info_serial)
+    q = q.filter(Acceleration.device_info_serial == device_info_serial)
     q = q.filter(Acceleration.date_time.between(start, end))
     return q.count()

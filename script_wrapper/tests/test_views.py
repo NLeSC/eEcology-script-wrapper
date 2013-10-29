@@ -1,3 +1,17 @@
+# Copyright 2013 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 from mock import Mock, patch
 from pyramid import testing
@@ -7,6 +21,7 @@ from celery.result import AsyncResult
 from script_wrapper.tasks import PythonTask
 from script_wrapper.validation import Invalid
 from script_wrapper.views import Views
+
 
 class TestViews(unittest.TestCase):
 
@@ -48,14 +63,14 @@ class TestViews(unittest.TestCase):
 
     def testJsForm(self):
         from tempfile import NamedTemporaryFile
-        formjs =  NamedTemporaryFile(suffix='.js')
-        class Task(object):
-            js_form_location = formjs.name
+        formjs = NamedTemporaryFile(suffix='.js')
 
+        task = PythonTask()
+        task.js_form_location = Mock(return_value=formjs.name)
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         views = Views(request)
-        views.celery.tasks = {'plot': Task()}
+        views.celery.tasks = {'plot': task}
 
         result = views.jsform()
 
@@ -109,9 +124,10 @@ class TestViews(unittest.TestCase):
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         task_result.state = 'PENDING'
+        task_result.ready.return_value = False
         task_result.successful.return_value = False
         task_result.failed.return_value = False
         views.celery.AsyncResult = Mock(return_value=task_result)
@@ -120,6 +136,7 @@ class TestViews(unittest.TestCase):
 
         result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a/result'
         expected_result = {'state': 'PENDING',
+                           'ready': False,
                            'success': False,
                            'failure': False,
                            'result': result_url}
@@ -130,6 +147,7 @@ class TestViews(unittest.TestCase):
         state = {'state': 'PENDING',
                  'success': False,
                  'failure': False,
+                 'ready': False,
                  'result': result_url,
                  'task': 'pythontask',
                  }
@@ -147,6 +165,7 @@ class TestViews(unittest.TestCase):
         result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a/result'
         state = {'state': 'STOPPED',
                  'success': True,
+                 'ready': True,
                  'failure': False,
                  'result': result_url,
                  'task': 'pythontask',
@@ -163,17 +182,19 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result.location, result_url)
 
     def testResultMultipleFiles(self):
-        self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')
+        self.config.add_route('result_file',
+                              '/{script}/{taskid}/result/{filename}')
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.failed.return_value = False
-        task_result.result = { 'files': {'stdout.txt': '/tmp/stdout.txt',
-                                         'stderr.txt': '/tmp/stderr.txt',
-                                         }}
+        task_result.result = {'files': {'stdout.txt': '/tmp/stdout.txt',
+                                        'stderr.txt': '/tmp/stderr.txt',
+                                        }
+                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
         views.celery.tasks = {'plot': 'pythontask'}
 
@@ -182,9 +203,12 @@ class TestViews(unittest.TestCase):
         efiles = {'stderr.txt': '/plot/mytaskid/result/stderr.txt',
                   'stdout.txt': '/plot/mytaskid/result/stdout.txt',
                   }
-        self.assertDictEqual(result, {'files': efiles,
-                                      'task': 'pythontask',
-                                      })
+        eresult = {
+                   'result': task_result,
+                   'files': efiles,
+                   'task': 'pythontask',
+                   }
+        self.assertEqual(result, eresult)
 
     def testResultSingleFiles(self):
         self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')
@@ -192,11 +216,13 @@ class TestViews(unittest.TestCase):
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.failed.return_value = False
-        task_result.result = { 'files': {'stdout.txt': '/tmp/stdout.txt',
-                                         }}
+        task_result.result = {'files': {
+                                        'stdout.txt': '/tmp/stdout.txt',
+                                        }
+                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
 
         result = views.result()
@@ -204,36 +230,21 @@ class TestViews(unittest.TestCase):
         self.assertIsInstance(result, HTTPFound)
         self.assertEqual(result.location, '/plot/mytaskid/result/stdout.txt')
 
-    def testResultFailure(self):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
-        task_result =  Mock(AsyncResult)
-        task_result.id = 'mytaskid'
-        task_result.failed.return_value = True
-        class TaskException(Exception):
-            pass
-        task_result.result = TaskException()
-        views.celery.AsyncResult = Mock(return_value=task_result)
-
-        with self.assertRaises(TaskException):
-            views.result()
-
     def testResultFile(self):
         from tempfile import NamedTemporaryFile
-        out =  NamedTemporaryFile(suffix='.txt')
+        out = NamedTemporaryFile(suffix='.txt')
 
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         request.matchdict['filename'] = 'stdout.txt'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.failed.return_value = False
-        task_result.result = { 'files': {'stdout.txt': out.name,
-                                         }}
+        task_result.result = {'files': {'stdout.txt': out.name,
+                                        }
+                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
 
         result = views.result_file()
@@ -248,11 +259,13 @@ class TestViews(unittest.TestCase):
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
-        task_result =  Mock(AsyncResult)
+        task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.failed.return_value = True
+
         class TaskException(Exception):
             pass
+
         task_result.result = TaskException()
         views.celery.AsyncResult = Mock(return_value=task_result)
 
@@ -263,7 +276,7 @@ class TestViews(unittest.TestCase):
     def testSpecies(self, sm):
         session = Mock()
         mock_species = ['Lesser Black-backed Gull']
-        config = { 'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_species}
+        config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_species}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()
@@ -279,7 +292,7 @@ class TestViews(unittest.TestCase):
     def testProjects(self, sm):
         session = Mock()
         mock_projects = [('Project1')]
-        config = { 'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_projects}
+        config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_projects}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()
@@ -295,7 +308,7 @@ class TestViews(unittest.TestCase):
     def testTrackers(self, sm):
         session = Mock()
         mock_trackers = [(1, 'Project1', 'Lesser Black-backed Gull')]
-        config = { 'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value.distinct.return_value': mock_trackers}
+        config = {'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value.distinct.return_value': mock_trackers}
         session.configure_mock(**config)
         sm.return_value = session
         request = testing.DummyRequest()
@@ -307,10 +320,3 @@ class TestViews(unittest.TestCase):
                                     'project': 'Project1',
                                     'species': 'Lesser Black-backed Gull',
                                     }])
-
-
-
-
-
-if __name__ == '__main__':
-    unittest.main()

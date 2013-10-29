@@ -13,6 +13,7 @@ requires = [
     'celery',
     'redis',
     'iso8601',
+    'pytz',
     'rpy2',
     'oct2py',
     'scipy',  # required by oct2py
@@ -42,7 +43,7 @@ setup(name='script_wrapper',
       include_package_data=True,
       zip_safe=False,
       test_suite='script_wrapper',
-      install_requires = requires,
+      install_requires=requires,
       entry_points="""\
       [paste.app_factory]
       main = script_wrapper:main

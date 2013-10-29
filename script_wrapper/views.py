@@ -53,9 +53,7 @@ class Views(object):
     @view_config(route_name='jsform')
     def jsform(self):
         task = self.tasks()[self.scriptid]
-        return FileResponse(task.js_form_location,
-                            self.request,
-                            )
+        return FileResponse(task.js_form_location(), self.request)
 
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
@@ -71,7 +69,7 @@ class Views(object):
         except Invalid as e:
             return {'success': False, 'msg': e.message}
 
-    @view_config(route_name='state.json', renderer='json')
+    @view_config(route_name='state.json', renderer='json', request_method='GET')
     def statejson(self):
         result = self.celery.AsyncResult(self.taskid)
         result_url = self.request.route_path('result',
@@ -81,6 +79,7 @@ class Views(object):
         return {'state': result.state,
                 'success': result.successful(),
                 'failure': result.failed(),
+                'ready': result.ready(),
                 'result': result_url,
                 }
 
@@ -93,6 +92,14 @@ class Views(object):
             return HTTPFound(location=response['result'])
         return response
 
+    @view_config(route_name='state.json', request_method='DELETE')
+    def revoke_task(self):
+        celery.control.revoke(self.taskid, terminate=True)
+        return HTTPFound(self.request.route_path('apply',
+                                                 script=self.scriptid,
+                                                 )
+                         )
+
     def result_file_url(self, filename):
         return self.request.route_path('result_file',
                                   script=self.scriptid,
@@ -104,20 +111,20 @@ class Views(object):
     def result(self):
         aresult = self.celery.AsyncResult(self.taskid)
         result = aresult.result
-        if aresult.failed():
-            raise result
 
-        if len(result['files']) == 1:
-            first_fn = result['files'].keys()[0]
-            return HTTPFound(location=self.result_file_url(first_fn))
-
-        # replace local filesystem paths with urls to files
         files = {}
-        for filename in result['files']:
-            files[filename] = self.result_file_url(filename)
+        if 'files' in result:
+            if len(result['files']) == 1:
+                first_fn = result['files'].keys()[0]
+                return HTTPFound(location=self.result_file_url(first_fn))
+            # Convert file pointer from file space to web space
+            for filename in result['files']:
+                files[filename] = self.result_file_url(filename)
 
-        return {'files': files,
+        return {
                 'task': self.tasks()[self.scriptid],
+                'files': files,
+                'result': aresult,
                 }
 
     @view_config(route_name='result_file')

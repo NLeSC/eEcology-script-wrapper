@@ -14,21 +14,17 @@
 
 from datetime import datetime
 import unittest
-from mock import patch
 from pytz import UTC
-from script_wrapper.validation import Invalid
-from script_wrapper.tasks.classification import Classification
+from script_wrapper.tasks.example_python import ExamplePython
 
 
-class TestClassification(unittest.TestCase):
+class TestExamplePython(unittest.TestCase):
 
-    @patch('script_wrapper.tasks.classification.getAccelerationCount')
-    def test_formfields2taskargs(self, gac):
-        gac.return_value = 10000
-        task = Classification()
+    def test_formfields2taskargs(self):
+        task = ExamplePython()
 
         formquery = {
-                     'id': 1234,
+                     'trackers': [1234, 5678],
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
                      }
@@ -40,21 +36,7 @@ class TestClassification(unittest.TestCase):
                      'db_url': 'postgresql://localhost',
                      'start': datetime(2013, 1, 1, tzinfo=UTC),
                      'end': datetime(2013, 10, 10, tzinfo=UTC),
-                     'tracker_id': 1234,
+                     'trackers': [1234, 5678],
                      }
 
         self.assertEqual(taskargs, etaskargs)
-
-    @patch('script_wrapper.tasks.classification.getAccelerationCount')
-    def test_formfields2taskargs_invalid(self, gac):
-        gac.return_value = 10000000
-        task = Classification()
-
-        formquery = {
-                     'id': 1234,
-                     'start': '2013-01-01T00:00:00',
-                     'end': '2013-10-10T00:00:00',
-                     }
-
-        with self.assertRaises(Invalid):
-            task.formfields2taskargs(formquery, 'postgresql://localhost')
