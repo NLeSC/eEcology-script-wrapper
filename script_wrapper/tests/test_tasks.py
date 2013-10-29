@@ -1,8 +1,6 @@
 import unittest
 import os
-import sys
 from mock import patch, Mock, ANY
-from celery import Celery
 import script_wrapper.tasks as tasks
 
 
@@ -124,6 +122,8 @@ class TestSubProcessTask(unittest.TestCase):
         task.app.conf['task_output_directory'] = root_dir
         task.request.id = 'mytaskid'
         po.return_value.wait.return_value = 0
+        from os import getpid
+        po.return_value.pid = getpid()
 
         result = task.run('hostname')
 
@@ -134,7 +134,10 @@ class TestSubProcessTask(unittest.TestCase):
                    'return_code': 0}
 
         self.assertEqual(result, eresult)
-        po.assert_called_with(['hostname'], stdout=ANY, stderr=ANY, cwd=root_dir + '/mytaskid', env=ANY)
+        po.assert_called_with(['hostname'],
+                              cwd=root_dir + '/mytaskid',
+                              stdout=ANY, stderr=ANY,
+                              env=ANY)
 
         import shutil
         shutil.rmtree(root_dir)

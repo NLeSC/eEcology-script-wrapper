@@ -267,12 +267,14 @@ class SubProcessTask(PythonTask):
         oldsignal = signal.getsignal(signal.SIGTERM)
 
         def cleanup():
+            """Close output files and revert term signal"""
             stderr.close()
             stdout.close()
             signal.signal(signal.SIGTERM, oldsignal)
 
         def killit(signum, frame):
-            os.killpg(mypid, signum)
+            """Kill the current process group and cleanup"""
+            os.killpg(os.getpgid(os.getpid()), signum)
             cleanup()
 
         signal.signal(signal.SIGTERM, killit)
@@ -284,8 +286,9 @@ class SubProcessTask(PythonTask):
                                  stderr=stderr,
                                  )
         self.update_state(state='RUNNING')
-        mypid = popen.pid
-        os.setpgid(mypid, 0)
+        # Set process group of current task instance so
+        # it and it's children can be killed when task is revoked
+        os.setpgid(popen.pid, 0)
 
         return_code = popen.wait()
 
