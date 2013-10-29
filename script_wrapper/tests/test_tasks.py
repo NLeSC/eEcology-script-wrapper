@@ -220,6 +220,7 @@ class TestSubProcessTask(unittest.TestCase):
         po.assert_called_with(['hostname'],
                               cwd=root_dir,
                               stdout=ANY, stderr=ANY,
+                              preexec_fn=os.setsid,
                               env=ANY)
 
         import shutil

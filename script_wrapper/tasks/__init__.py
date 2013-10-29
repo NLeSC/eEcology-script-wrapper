@@ -266,6 +266,7 @@ class SubProcessTask(PythonTask):
         * files, a dict of base-filenames and absolute paths.
         * return_code
         """
+        mypid = None
         pargs = self.pargs() + list(args)
         stdout_fn = os.path.join(self.output_dir(), 'stdout.txt')
         stdout = open(stdout_fn, 'w')
@@ -275,6 +276,7 @@ class SubProcessTask(PythonTask):
         # When the task is revoked the children of the subprocess will keep running
         # To make sure the children are also killed use the process group id
         # To kill the process group id the term signal has to be redirected
+
         oldsignal = signal.getsignal(signal.SIGTERM)
 
         def cleanup():
@@ -285,7 +287,7 @@ class SubProcessTask(PythonTask):
 
         def killit(signum, frame):
             """Kill the current process group and cleanup"""
-            os.killpg(os.getpgid(os.getpid()), signum)
+            os.killpg(os.getpgid(mypid), signum)
             cleanup()
 
         signal.signal(signal.SIGTERM, killit)
@@ -295,12 +297,12 @@ class SubProcessTask(PythonTask):
                                  env=self.env(),
                                  stdout=stdout,
                                  stderr=stderr,
+                                 # starts subprocess in own process group
+                                 # whole group can be killed when task is revoked
+                                 preexec_fn=os.setsid,
                                  )
         self.update_state(state='RUNNING')
-        # Set process group of current task instance so
-        # it and it's children can be killed when task is revoked
-        os.setpgid(popen.pid, 0)
-
+        mypid = popen.pid
         return_code = popen.wait()
 
         cleanup()
