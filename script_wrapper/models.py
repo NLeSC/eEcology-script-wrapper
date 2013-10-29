@@ -1,3 +1,17 @@
+# Copyright 2013 Netherlands eScience Center
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
 import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
@@ -108,7 +122,6 @@ class Acceleration(Base):
     device_info_serial = Column(Integer, primary_key=True)
     date_time = Column(DateTime)
     index = Column(Integer)
-
 
 class Energy(Base):
     __tablename__ = 'uva_energy_limited'  # uva_energy101
@@ -260,3 +273,12 @@ ALTER FUNCTION elevation.srtm_getvalue(geometry)
                            ssw=63,
                            ))
     session.commit()
+
+def getAccelerationCount(db_url, device_info_serial, start, end):
+    """Returns the number of acceleration rows for selected tracker and time range.
+    """
+    s = DBSession(db_url)
+    q = s().query(Acceleration)
+    q = q.filter(Acceleration.device_info_serial==device_info_serial)
+    q = q.filter(Acceleration.date_time.between(start, end))
+    return q.count()

@@ -1,6 +1,8 @@
+from datetime import datetime
 import unittest
+from mock import Mock, patch
 from pyramid.testing import DummyRequest
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 from script_wrapper import models
 
 class TestModels(unittest.TestCase):
@@ -35,5 +37,19 @@ class TestModels(unittest.TestCase):
         edb_url = 'postgresql://me:password@localhost?ssl=true'
         self.assertEqual(db_url, edb_url)
 
+    @patch('script_wrapper.models.DBSession')
+    def test_getAccelerationCount(self, dbsession):
+        db_url = 'postgresql://localhost?ssl=true'
+        device_info_serial = 1234
+        start = datetime(2013, 1, 1)
+        end = datetime(2013, 12, 12)
+        query = Mock(Query)
+        session = Mock(Session)
+        session.query.return_value = query
+        dbsession.return_value = session
+
+        models.getAccelerationCount(db_url, device_info_serial, start, end)
+
+        query.count.assert_called()
 
 

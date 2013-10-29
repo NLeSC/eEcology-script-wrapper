@@ -1,7 +1,7 @@
 import unittest
 import os
 import sys
-from mock import patch, Mock
+from mock import patch, Mock, ANY
 from celery import Celery
 import script_wrapper.tasks as tasks
 
@@ -22,7 +22,7 @@ class TestPythonTask(unittest.TestCase):
 
     def test_task_dir(self):
         task = tasks.PythonTask()
-        tdir = task.task_dir
+        tdir = task.task_dir()
 
         edir = os.path.dirname(os.path.abspath(tasks.__file__))
         self.assertEqual(tdir, edir)
@@ -61,6 +61,18 @@ class TestPythonTask(unittest.TestCase):
         self.assertEqual(task.output_dir, '/tmp/mytaskid')
 
 
+class TestOctaveTask(unittest.TestCase):
+    def test_load_mfile(self):
+        task = tasks.OctaveTask()
+        task.script = 'myscript.m'
+        task.task_dir = Mock(return_value='/tmp/mydir')
+        task.octave = Mock()
+
+        task.load_mfile()
+
+        task.octave.addpath.assert_called_with('/tmp/mydir/myscript.m')
+
+
 class TestRTask(unittest.TestCase):
 
     def test_r_cached(self):
@@ -69,12 +81,15 @@ class TestRTask(unittest.TestCase):
 
         self.assertEqual(task.r, 1234)
 
+
 class TestMatlabTask(unittest.TestCase):
 
     def test_matlab(self):
         task = tasks.MatlabTask()
         task.app.conf['matlab.location'] = '/opt/matlab'
 
+        self.assertEqual(task.matlab, '/opt/matlab')
+        # matlab location from cache
         self.assertEqual(task.matlab, '/opt/matlab')
 
     def test_pargs(self):
@@ -84,5 +99,42 @@ class TestMatlabTask(unittest.TestCase):
 
         taskdir = os.path.dirname(os.path.abspath(tasks.__file__))
 
-        self.assertEqual(task.pargs(), [taskdir+'/runme.sh', '/opt/matlab'])
+        self.assertEqual(task.pargs(), [taskdir + '/runme.sh', '/opt/matlab'])
 
+    def test_toNumberVectorString(self):
+        task = tasks.MatlabTask()
+
+        result = task.toNumberVectorString([1, 2, 3])
+        eresult = '[1,2,3]'
+        self.assertEqual(result, eresult)
+
+
+class TestSubProcessTask(unittest.TestCase):
+
+    def test_pargs(self):
+        task = tasks.SubProcessTask()
+        self.assertEqual(task.pargs(), [])
+
+    @patch('subprocess.Popen')
+    def test_run(self, po):
+
+        from tempfile import mkdtemp
+        root_dir = mkdtemp()
+        task = tasks.SubProcessTask()
+        task.app.conf['task_output_directory'] = root_dir
+        task.request.id = 'mytaskid'
+        po.return_value.wait.return_value = 0
+
+        result = task.run('hostname')
+
+        eresult = {'files': {
+                             'stderr.txt': root_dir + '/mytaskid/stderr.txt',
+                             'stdout.txt': root_dir + '/mytaskid/stdout.txt',
+                             },
+                   'return_code': 0}
+
+        self.assertEqual(result, eresult)
+        po.assert_called_with(['hostname'], stdout=ANY, stderr=ANY, cwd=root_dir + '/mytaskid', env=ANY)
+
+        import shutil
+        shutil.rmtree(root_dir)

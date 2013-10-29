@@ -12,6 +12,7 @@ requires = [
     'pyramid_celery',
     'celery',
     'redis',
+    'iso8601',
     'rpy2',
     'oct2py',
     'scipy',  # required by oct2py

@@ -4,6 +4,7 @@ from celery import Task
 from celery import current_task
 from script_wrapper.tasks import MatlabTask
 
+
 class KmzGen(MatlabTask):
     name = 'kmz_gen'
     label = "Generate KMZ file"

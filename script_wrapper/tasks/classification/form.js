@@ -16,6 +16,6 @@ Ext.onReady(function() {
        }, {
            xtype: 'trackercombo',
            store: store
-       }]
+       }, {xtype: 'displayfield', value:'Example 355 on 2010-06-28'}]
    });
 });
