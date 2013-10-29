@@ -100,11 +100,6 @@ class Views(object):
                                                  )
                          )
 
-    @view_config(route_name='error', renderer='json')
-    def result_error(self):
-        result = self.celery.AsyncResult(self.taskid)
-        return repr(result.state)
-
     def result_file_url(self, filename):
         return self.request.route_path('result_file',
                                   script=self.scriptid,
@@ -116,20 +111,20 @@ class Views(object):
     def result(self):
         aresult = self.celery.AsyncResult(self.taskid)
         result = aresult.result
-        if aresult.failed():
-            raise result
 
-        if len(result['files']) == 1:
-            first_fn = result['files'].keys()[0]
-            return HTTPFound(location=self.result_file_url(first_fn))
-
-        # replace local filesystem paths with urls to files
         files = {}
-        for filename in result['files']:
-            files[filename] = self.result_file_url(filename)
+        if 'files' in result:
+            if len(result['files']) == 1:
+                first_fn = result['files'].keys()[0]
+                return HTTPFound(location=self.result_file_url(first_fn))
+            # Convert file pointer from file space to web space
+            for filename in result['files']:
+                files[filename] = self.result_file_url(filename)
 
-        return {'files': files,
+        return {
                 'task': self.tasks()[self.scriptid],
+                'files': files,
+                'result': aresult,
                 }
 
     @view_config(route_name='result_file')

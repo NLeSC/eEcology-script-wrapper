@@ -6,11 +6,7 @@
 
 <%block name="header">
 % if ready:
-    % if success:
     <meta http-equiv="refresh" content="0;url=${result}" />
-    % else:
-    <meta http-equiv="refresh" content="0;url=${request.route_path('error', script=task.name, taskid=request.matchdict['taskid'])}" />
-    % endif
 % else:
 <meta http-equiv="refresh" content="5" />
 % endif

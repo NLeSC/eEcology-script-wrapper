@@ -43,7 +43,6 @@ def main(global_config, **settings):
     config.add_route('state.json', '/tool/{script}/{taskid}/state.json')
     config.add_route('state', '/tool/{script}/{taskid}/state')
     config.add_route('result', '/tool/{script}/{taskid}/result')
-    config.add_route('error', '/tool/{script}/{taskid}/error')
     config.add_route('result_file',
                      '/tool/{script}/{taskid}/result/{filename}')
     config.add_static_view('static',

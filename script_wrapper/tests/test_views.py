@@ -203,9 +203,12 @@ class TestViews(unittest.TestCase):
         efiles = {'stderr.txt': '/plot/mytaskid/result/stderr.txt',
                   'stdout.txt': '/plot/mytaskid/result/stdout.txt',
                   }
-        self.assertDictEqual(result, {'files': efiles,
-                                      'task': 'pythontask',
-                                      })
+        eresult = {
+                   'result': task_result,
+                   'files': efiles,
+                   'task': 'pythontask',
+                   }
+        self.assertEqual(result, eresult)
 
     def testResultSingleFiles(self):
         self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')
@@ -226,24 +229,6 @@ class TestViews(unittest.TestCase):
 
         self.assertIsInstance(result, HTTPFound)
         self.assertEqual(result.location, '/plot/mytaskid/result/stdout.txt')
-
-    def testResultFailure(self):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
-        task_result = Mock(AsyncResult)
-        task_result.id = 'mytaskid'
-        task_result.failed.return_value = True
-
-        class TaskException(Exception):
-            pass
-
-        task_result.result = TaskException()
-        views.celery.AsyncResult = Mock(return_value=task_result)
-
-        with self.assertRaises(TaskException):
-            views.result()
 
     def testResultFile(self):
         from tempfile import NamedTemporaryFile
