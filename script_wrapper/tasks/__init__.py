@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
 import errno
 import os
 import subprocess
 import sys
 from celery import Task
 from celery.utils.log import get_task_logger
+import iso8601
 from sqlalchemy.engine.url import make_url
 from sqlalchemy import engine_from_config
 from sqlalchemy import MetaData
@@ -30,13 +30,15 @@ import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
 
+
 class PythonTask(Task):
     """Abstract task to run Python code
 
     Attributes:
 
     abstract : boolean
-        Abstract classes are not registered, but are used as the base class for new task types.
+        Abstract classes are not registered,
+        but are used as the base class for new task types.
     label : string
         Human readable label of task.
     description : string
@@ -70,13 +72,13 @@ class PythonTask(Task):
 
         return directory
 
-    @property
     def task_dir(self):
         """Directory in which Task is defined
 
-        Can be used to find location of Task resources like executables or javascript files.
+        Can be used to find location of Task resources like executables.
         """
-        return os.path.dirname(os.path.abspath(sys.modules[self.__module__].__file__))
+        this_file = os.path.abspath(sys.modules[self.__module__].__file__)
+        return os.path.dirname(this_file)
 
     def formfields2taskargs(self, fields, db_url):
         """Validate and serialize form fields to dict which is passed to Task.run().
@@ -132,7 +134,8 @@ class PythonTask(Task):
         In R::
 
             drv <- dbDriver(driver)
-            # TODO how to use sslmode=require in R, possibly via PGSSLMODE environment variable?
+            # TODO how to use sslmode=require in R,
+            # possibly via PGSSLMODE environment variable?
             con <- dbConnect(drv, dbname=dbname, host=host, port=port,
                              user=username, password=password)
         """
@@ -141,7 +144,7 @@ class PythonTask(Task):
     @property
     def js_form_location(self):
         """Javascript to render ExtJS form to div with 'form' id"""
-        return os.path.join(self.task_dir, self.js_form)
+        return os.path.join(self.task_dir(), self.js_form)
 
     def outputFiles(self):
         """Returns dict of all files in the output dir"""
@@ -150,10 +153,12 @@ class PythonTask(Task):
             result[fn] = os.path.join(self.output_dir, fn)
         return result
 
+
 class RTask(PythonTask):
     """Abstract task to run R function in a R-script file
 
-    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
+    Implementing this class requires you to override the script attribute
+    and the ``run`` method, eg.::
 
         class PlotTask(RTask):
             script = 'plot.r'
@@ -175,9 +180,10 @@ class RTask(PythonTask):
 
     @property
     def r(self):
-        """self.r_script is imported into R and it's functions are available as self.r.<function>"""
+        """self.r_script is imported into R
+        and it's functions are available as self.r.<function>"""
         if self._r is None:
-            f = open(os.path.join(self.task_dir, self.script))
+            f = open(os.path.join(self.task_dir(), self.script))
             r_string = f.read()
             f.close()
             self._r = SignatureTranslatedAnonymousPackage(r_string, 'r')
@@ -187,10 +193,12 @@ class RTask(PythonTask):
         """Convert Python list of ints into a R Int vector"""
         return robjects.IntVector(myints)
 
+
 class OctaveTask(PythonTask):
     """Abstract task to run GNU Octave function in a octave script file
 
-    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
+    Implementing this class requires you to override the script attribute
+    and the ``run`` method, eg.::
 
         class PlotTask(OctaveTask):
             script = 'plot.m'
@@ -213,7 +221,8 @@ class OctaveTask(PythonTask):
         self.octave = octave
 
     def load_mfile(self):
-        self.octave.addpath(os.path.join(self.task_dir, self.script))
+        """Add self.script to Octave path"""
+        self.octave.addpath(os.path.join(self.task_dir(), self.script))
 
 
 class SubProcessTask(PythonTask):
@@ -233,13 +242,12 @@ class SubProcessTask(PythonTask):
 
         Defaults to current environment.
 
-        Can be used to pass sensitive information to subprocess like database passwords.
+        Can be used to pass sensitive information to subprocess like passwords.
         """
         return os.environ
 
     def run(self, *args):
-        """
-        Perform subprocess with self.pargs() and \*args as arguments.
+        """Perform subprocess with self.pargs() and *args as arguments.
 
         Returns dict with following keys:
         - files, a dict of base-filenames and absolute paths.
@@ -268,14 +276,16 @@ class SubProcessTask(PythonTask):
 class MatlabTask(SubProcessTask):
     """Abstract task to execute compiled Matlab function
 
-    Implementing this class requires you to override the script attribute and the ``run`` method, eg.::
+    Implementing this class requires you to override the script attribute
+    and the ``run`` method, eg.::
 
         class PlotTask(MatlabTask):
             script = 'run_plot.sh'
 
             def run(self, output_dir):
                 result = super(PlotTask, self).run(output_dir)
-                result['files']['plot.png'] = os.path.join(self.output_dir, 'plot.png')
+                abs_path = os.path.join(self.output_dir, 'plot.png')
+                result['files']['plot.png'] = abs_path
                 return result
 
     Attributes:
@@ -305,7 +315,7 @@ class MatlabTask(SubProcessTask):
     def pargs(self):
         """Prepend the deployment script and matlab location"""
         p = super(MatlabTask, self).pargs()
-        p += [os.path.join(self.task_dir, self.script),
+        p += [os.path.join(self.task_dir(), self.script),
               self.matlab,
               ]
         return p
@@ -316,8 +326,3 @@ class MatlabTask(SubProcessTask):
         eg. x = [1,2,3] becomes '[1,2,3]'
         """
         return '[{}]'.format(",".join([str(i) for i in mylist]))
-
-
-def iso8601parse(datetime_string):
-    return datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%S")
-

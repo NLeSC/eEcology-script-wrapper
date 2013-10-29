@@ -3,8 +3,8 @@ import subprocess
 from celery import Task
 from celery import current_task
 from celery.utils.log import get_task_logger
+import iso8601
 from script_wrapper.tasks import MatlabTask
-from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import make_url
 
 logger = get_task_logger(__name__)
@@ -69,8 +69,7 @@ class GpsVisDB(MatlabTask):
                                            self.vectorize(speeds),
                                            )
 
-        for fn in os.listdir(self.output_dir):
-            result['files'][fn] = os.path.join(self.output_dir, fn)
+        result['files'].update(self.outputFiles())
         return result
 
     def vectorize(self, mylist):
@@ -81,8 +80,8 @@ class GpsVisDB(MatlabTask):
 
     def formfields2taskargs(self, fields, db_url):
         return {'db_url':  db_url,
-                'start': iso8601parse(fields['start']),
+                'start': iso8601.parse_date(fields['start']),
                 'alt': fields['alt'],
-                'end': iso8601parse(fields['end']),
+                'end': iso8601.parse_date(fields['end']),
                 'trackers': fields['trackers'],
                 }

@@ -8,10 +8,12 @@ from script_wrapper.models import make_url
 
 logger = get_task_logger(__name__)
 
+
 class OpenEarthDbQuery(MatlabTask):
     name = 'open_earth_db_query'
     label = "OpenEarth Database query"
-    description = """Perform a db query in a Matlab executable with postgresql query using OpenEarth toolkit"""
+    description = """Perform a db query in a Matlab executable
+                  with postgresql query using OpenEarth toolkit"""
     deploy_script = 'run_test.sh'
 
     def run(self, db_url):

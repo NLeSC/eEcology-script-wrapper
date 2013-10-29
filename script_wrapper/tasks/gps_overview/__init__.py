@@ -8,6 +8,7 @@ from script_wrapper.models import make_url
 
 logger = get_task_logger(__name__)
 
+
 class GpsOverview(MatlabTask):
     name = 'gps_overview'
     label = "GPS Overview"
@@ -28,10 +29,11 @@ class GpsOverview(MatlabTask):
         username = u.username
         password = u.password
         instance = u.database
-        jdbc_url = 'jdbc:{drivername}://{host}:{port}/{database}'.format(drivername=u.drivername,
-                                                                         host=u.host,
-                                                                         port=u.port or 5432,
-                                                                         database=u.database)
+        jdbc_tpl = 'jdbc:{drivername}://{host}:{port}/{database}'
+        jdbc_url = jdbc_tpl.format(drivername=u.drivername,
+                                   host=u.host,
+                                   port=u.port or 5432,
+                                   database=u.database)
 
         # execute
         result = super(GpsOverview, self).run(username,

@@ -5,12 +5,13 @@ from celery import Task
 from celery import current_task
 from celery import current_app
 from celery.utils.log import get_task_logger
+import iso8601
 from sqlalchemy import func
 from script_wrapper.tasks import PythonTask
-from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import DBSession, Tracking
 
 logger = get_task_logger(__name__)
+
 
 class ExamplePython(PythonTask):
     name = 'examplepython'
@@ -39,10 +40,9 @@ class ExamplePython(PythonTask):
         return {'files': {'result.txt': fn}}
 
     def formfields2taskargs(self, fields, db_url):
-        return {'start': iso8601parse(fields['start']),
-                'end': iso8601parse(fields['end']),
+        return {'start': iso8601.parse_date(fields['start']),
+                'end': iso8601.parse_date(fields['end']),
                 'trackers': fields['trackers'],
                 # below example of adding argument values
                 'db_url': db_url,
                 }
-

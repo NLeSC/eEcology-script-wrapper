@@ -18,8 +18,8 @@ import subprocess
 from celery import Task
 from celery import current_task
 from celery.utils.log import get_task_logger
+import iso8601
 from script_wrapper.tasks import MatlabTask
-from script_wrapper.tasks import iso8601parse
 from script_wrapper.models import make_url
 from script_wrapper.models import getAccelerationCount
 from script_wrapper.validation import validateRange
@@ -54,13 +54,12 @@ class Classification(MatlabTask):
                                                  data_dir,
                                                  )
 
-        for fn in os.listdir(self.output_dir):
-            result['files'][fn] = os.path.join(self.output_dir, fn)
+        result['files'].update(self.outputFiles())
         return result
 
     def formfields2taskargs(self, fields, db_url):
-        start = iso8601parse(fields['start'])
-        end = iso8601parse(fields['end'])
+        start = iso8601.parse_date(fields['start'])
+        end = iso8601.parse_date(fields['end'])
         id = fields['id']
 
         # Test if selection will give results
