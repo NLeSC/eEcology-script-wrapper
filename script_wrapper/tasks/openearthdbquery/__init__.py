@@ -14,7 +14,7 @@ class OpenEarthDbQuery(MatlabTask):
     label = "OpenEarth Database query"
     description = """Perform a db query in a Matlab executable
                   with postgresql query using OpenEarth toolkit"""
-    deploy_script = 'run_test.sh'
+    script = 'run_test.sh'
 
     def run(self, db_url):
         u = make_url(db_url)
