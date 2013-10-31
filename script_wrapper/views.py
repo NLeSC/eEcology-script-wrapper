@@ -17,9 +17,9 @@ from celery import current_app as celery
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
-from models import make_session_from_request, db_url_from_request
-from models import Device, Individual, TrackSession
-from validation import Invalid
+from script_wrapper.models import make_session_from_request, db_url_from_request
+from script_wrapper.models import Device, Individual, TrackSession
+from script_wrapper.validation import Invalid
 
 logger = logging.getLogger(__package__)
 
@@ -92,13 +92,11 @@ class Views(object):
             return HTTPFound(location=response['result'])
         return response
 
-    @view_config(route_name='state.json', request_method='DELETE')
+    @view_config(route_name='state.json', request_method='DELETE', renderer='json')
     def revoke_task(self):
-        celery.control.revoke(self.taskid, terminate=True)
-        return HTTPFound(self.request.route_path('apply',
-                                                 script=self.scriptid,
-                                                 )
-                         )
+        result = self.celery.AsyncResult(self.taskid)
+        result.revoke(terminate=True)
+        return {'success': True}
 
     def result_file_url(self, filename):
         return self.request.route_path('result_file',

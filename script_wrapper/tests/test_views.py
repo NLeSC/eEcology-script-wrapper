@@ -320,3 +320,18 @@ class TestViews(unittest.TestCase):
                                     'project': 'Project1',
                                     'species': 'Lesser Black-backed Gull',
                                     }])
+
+
+    def test_revoke_task(self):
+        request = testing.DummyRequest()
+        request.matchdict['taskid'] = 'mytaskid'
+        views = Views(request)
+        task_result = Mock(AsyncResult)
+        views.celery = Mock()
+        views.celery.AsyncResult = Mock(return_value=task_result)
+
+        result = views.revoke_task()
+
+        self.assertEquals(result, {'success': True})
+        views.celery.AsyncResult.assert_called_with('mytaskid')
+        task_result.revoke.assert_called_with(terminate=True)
