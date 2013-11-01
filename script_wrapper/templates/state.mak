@@ -34,7 +34,7 @@ Ext.onReady(function() {
 	            method: 'GET',
 	            success: function(response) {
 	              var result = Ext.JSON.decode(response.responseText);
-	              if (result.is_complete) {
+	              if (result.ready) {
 	                  window.location = '${request.route_url('result', script=task.name, taskid=request.matchdict['taskid'])}';
 	              } else {
 	                  Ext.getCmp('status_cont').update([result.state]);
