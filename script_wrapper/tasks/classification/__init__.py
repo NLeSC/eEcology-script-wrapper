@@ -51,19 +51,23 @@ class Classification(MatlabTask):
                                                  data_dir,
                                                  )
 
-        result['files'].update(self.output_files())
+        result['query'] = {'start': start,
+                           'end': end,
+                           'tracker_id': tracker_id,
+                           }
+
         return result
 
     def formfields2taskargs(self, fields, db_url):
         start = iso8601.parse_date(fields['start'])
         end = iso8601.parse_date(fields['end'])
-        id = fields['id']
+        tracker_id = fields['id']
 
         # Test if selection will give results
-        validateRange(getAccelerationCount(db_url, id, start, end), 0, 50000)
+        validateRange(getAccelerationCount(db_url, tracker_id, start, end), 0, 50000)
 
         return {'db_url':  db_url,
                 'start': start,
                 'end': end,
-                'tracker_id': id,
+                'tracker_id': tracker_id,
                 }

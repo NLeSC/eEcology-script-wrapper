@@ -37,7 +37,14 @@ class ExamplePython(PythonTask):
         fn = os.path.join(self.output_dir(), 'result.txt')
         with open(fn, 'w') as f:
             f.write(msg)
-        return {'files': {'result.txt': fn}}
+
+        result = {}
+        result['query'] = {'start': start,
+                           'end': end,
+                           'trackers': trackers,
+                           }
+
+        return result
 
     def formfields2taskargs(self, fields, db_url):
         return {'start': iso8601.parse_date(fields['start']),

@@ -37,7 +37,7 @@ Ext.onReady(function() {
 	              if (result.ready) {
 	                  window.location = '${request.route_url('result', script=task.name, taskid=request.matchdict['taskid'])}';
 	              } else {
-	                  Ext.getCmp('status_cont').update([result.state]);
+	                  status.update([result.state]);
 	              }
 	            },
 	            failure: function(response) {

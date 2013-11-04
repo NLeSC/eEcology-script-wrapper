@@ -48,7 +48,12 @@ class GpsVisDB(MatlabTask):
                                            self.list2vector_string(speeds),
                                            )
 
-        result['files'].update(self.output_files())
+        result['query'] = {'start': start,
+                           'end':end,
+                           'alt': alt,
+                           'trackers': trackers,
+                           }
+
         return result
 
     def convert_colors(self, tracker):

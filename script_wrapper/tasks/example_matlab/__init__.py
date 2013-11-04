@@ -30,8 +30,10 @@ class ExampleMatlab(MatlabTask):
                                                 end,
                                                 )
 
-        # Add files in output dir to result set
-        result['files'].update(self.output_files())
+        result['query'] = {'start': start,
+                           'end': end,
+                           'trackers': trackers,
+                           }
 
         return result
 

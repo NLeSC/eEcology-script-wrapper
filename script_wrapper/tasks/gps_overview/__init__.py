@@ -43,6 +43,8 @@ class GpsOverview(MatlabTask):
                                               tracker_ids
                                               )
 
+        result['query'] = {'trackers': trackers}
+
         return result
 
     def formfields2taskargs(self, fields, db_url):

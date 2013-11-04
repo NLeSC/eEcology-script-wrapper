@@ -26,7 +26,9 @@ from script_wrapper.views import Views
 class TestViews(unittest.TestCase):
 
     def setUp(self):
-        self.settings = {}
+        self.settings = {
+                         'task_output_directory': '/tmp/results',
+                         }
         self.config = testing.setUp(settings=self.settings)
 
     def tearDown(self):
@@ -45,6 +47,22 @@ class TestViews(unittest.TestCase):
         views = Views(request)
 
         self.assertEqual(views.taskid, 'b3c84d96-4dc7-4532-a864-3573202f202a')
+
+    def test_task_result(self):
+        # TODO implement
+        pass
+
+    def test_task_result_failed(self):
+        # TODO implement
+        pass
+
+    def test_task_result_must_be_ready(self):
+        # TODO implement
+        pass
+
+    def test_task_result_must_be_ready_but_isnt(self):
+        # TODO implement
+        pass
 
     def testIndex(self):
         request = testing.DummyRequest()
@@ -82,7 +100,7 @@ class TestViews(unittest.TestCase):
     @patch('script_wrapper.views.db_url_from_request')
     def testSubmit(self, dr):
         dr.return_value = 'sqlite:///'
-        self.config.add_route('state', '/{taskid}/state')
+        self.config.add_route('result', '/{taskid}')
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.json_body = 1234
@@ -96,7 +114,7 @@ class TestViews(unittest.TestCase):
         result = views.submit()
 
         eresult = {'success': True,
-                   'state': '/b3c84d96-4dc7-4532-a864-3573202f202a/state',
+                   'result': '/b3c84d96-4dc7-4532-a864-3573202f202a',
                    }
         self.assertEqual(result, eresult)
         task.formfields2taskargs.assert_called_with(1234, 'sqlite:///')
@@ -119,7 +137,7 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result, eresult)
 
     def testStateJson(self):
-        self.config.add_route('result', '/{script}/{taskid}/result')
+        self.config.add_route('result', '/{script}/{taskid}')
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
@@ -134,7 +152,7 @@ class TestViews(unittest.TestCase):
 
         result = views.statejson()
 
-        result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a/result'
+        result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a'
         expected_result = {'state': 'PENDING',
                            'ready': False,
                            'success': False,
@@ -142,8 +160,8 @@ class TestViews(unittest.TestCase):
                            'result': result_url}
         self.assertDictEqual(result, expected_result)
 
-    def testStateHtmlPending(self):
-        result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a/result'
+    def testStateHtml(self):
+        result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a'
         state = {'state': 'PENDING',
                  'success': False,
                  'failure': False,
@@ -161,79 +179,52 @@ class TestViews(unittest.TestCase):
 
         self.assertDictEqual(result, state)
 
-    def testStateHtmlFinished(self):
-        result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a/result'
-        state = {'state': 'STOPPED',
-                 'success': True,
-                 'ready': True,
-                 'failure': False,
-                 'result': result_url,
-                 'task': 'pythontask',
-                 }
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        views = Views(request)
-        views.statejson = Mock(return_value=state)
-        views.celery.tasks = {'plot': 'pythontask'}
-
-        result = views.statehtml()
-
-        self.assertIsInstance(result, HTTPFound)
-        self.assertEqual(result.location, result_url)
-
-    def testResultMultipleFiles(self):
-        self.config.add_route('result_file',
-                              '/{script}/{taskid}/result/{filename}')
+    @patch('os.listdir')
+    def testResultMultipleFiles(self, listdir):
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
+        task_result.ready.return_value = True
         task_result.failed.return_value = False
-        task_result.result = {'files': {'stdout.txt': '/tmp/stdout.txt',
-                                        'stderr.txt': '/tmp/stderr.txt',
-                                        }
-                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
         views.celery.tasks = {'plot': 'pythontask'}
+        listdir.return_value = ['stderr.txt', 'stdout.txt']
 
         result = views.result()
 
-        efiles = {'stderr.txt': '/plot/mytaskid/result/stderr.txt',
-                  'stdout.txt': '/plot/mytaskid/result/stdout.txt',
-                  }
         eresult = {
                    'result': task_result,
-                   'files': efiles,
+                   'files': ['stderr.txt', 'stdout.txt'],
                    'task': 'pythontask',
                    }
         self.assertEqual(result, eresult)
+        listdir.assert_called_with('/tmp/results/mytaskid')
 
-    def testResultSingleFiles(self):
-        self.config.add_route('result_file', '/{script}/{taskid}/result/{filename}')
+    @patch('os.listdir')
+    def testResultSingleFiles(self, listdir):
+        self.config.add_route('result_file', '/{script}/{taskid}/{filename}')
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
+        task_result.ready.return_value = True
         task_result.failed.return_value = False
-        task_result.result = {'files': {
-                                        'stdout.txt': '/tmp/stdout.txt',
-                                        }
-                              }
         views.celery.AsyncResult = Mock(return_value=task_result)
+        listdir.return_value = ['stdout.txt']
 
         result = views.result()
 
         self.assertIsInstance(result, HTTPFound)
-        self.assertEqual(result.location, '/plot/mytaskid/result/stdout.txt')
+        self.assertEqual(result.location, '/plot/mytaskid/stdout.txt')
+        listdir.assert_called_with('/tmp/results/mytaskid')
 
-    def testResultFile(self):
-        from tempfile import NamedTemporaryFile
-        out = NamedTemporaryFile(suffix='.txt')
-
+    @patch('script_wrapper.views.FileResponse')
+    def testResultFile(self, fileresponse):
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
@@ -241,36 +232,13 @@ class TestViews(unittest.TestCase):
         views = Views(request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
-        task_result.failed.return_value = False
-        task_result.result = {'files': {'stdout.txt': out.name,
-                                        }
-                              }
+        task_result.ready.return_value = True
         views.celery.AsyncResult = Mock(return_value=task_result)
 
-        result = views.result_file()
+        views.result_file()
 
-        self.assertIsInstance(result, FileResponse)
-        self.assertEqual(result.content_type, 'text/plain')
-
-        out.close()
-
-    def testResultFileFailure(self):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
-        task_result = Mock(AsyncResult)
-        task_result.id = 'mytaskid'
-        task_result.failed.return_value = True
-
-        class TaskException(Exception):
-            pass
-
-        task_result.result = TaskException()
-        views.celery.AsyncResult = Mock(return_value=task_result)
-
-        with self.assertRaises(TaskException):
-            views.result_file()
+        epath = '/tmp/results/mytaskid/stdout.txt'
+        fileresponse.assert_called_with(epath, request)
 
     @patch('script_wrapper.views.make_session_from_request')
     def testSpecies(self, sm):
@@ -327,6 +295,7 @@ class TestViews(unittest.TestCase):
         request.matchdict['taskid'] = 'mytaskid'
         views = Views(request)
         task_result = Mock(AsyncResult)
+        task_result.failed.return_value = False
         views.celery = Mock()
         views.celery.AsyncResult = Mock(return_value=task_result)
 

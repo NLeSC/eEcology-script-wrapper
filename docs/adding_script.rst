@@ -71,11 +71,15 @@ The script has to be added to the ``script_wrapper/tasks/<script_id>/`` folder a
 
 Any binaries that the script calls should also be in ``script_wrapper/tasks/<script_id>/`` folder.
 
-6. Collect output files
-=======================
+6. Run script response
+======================
 
-The script will generate one or more output files.
-The return value of the ``run`` functions ``script_wrapper/tasks/<script_id>/__init__.py`` is the list of output files which will be presented to the end-user.
+The script will generate one or more output files. The will be listed on the result page.
+
+The response is a dict with the following keys:
+
+1. query, the query object used as input for the script
+2. return_code, the posix return code of a executable started. Implemented when task is subclassed from SubProcessTask or MatlabTask class.
 
 7. Add unit tests
 =================

@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import logging
 from celery import current_app as celery
-from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
+from pyramid.view import view_config
 from script_wrapper.models import make_session_from_request, db_url_from_request
 from script_wrapper.models import Device, Individual, TrackSession
 from script_wrapper.validation import Invalid
 
 logger = logging.getLogger(__package__)
+
+
+class TaskNotReady(Exception):
+    pass
 
 
 class Views(object):
@@ -40,6 +45,29 @@ class Views(object):
     def tasks(self):
         return {k: v for k, v in self.celery.tasks.iteritems()
                     if not k.startswith('celery.')}
+
+    def task_result(self, must_be_ready=False):
+        """Fetches result for `self.taskid`.
+
+        If taskid does not exists raises a HTTPNotFound.
+
+        ``must_be_ready`` If true raises TaskNotReady when result is not ready.
+        """
+        result = self.celery.AsyncResult(self.taskid)
+        # An unknown taskid will return a PENDING state
+        # TODO distinguish between pending job and unknown job.
+        if result.failed():
+            raise result.result
+
+        if must_be_ready and not result.ready():
+            raise TaskNotReady()
+
+        return result
+
+    def task_result_directory(self):
+        base = self.request.registry.settings['task_output_directory']
+        directory = os.path.join(base, self.taskid)
+        return directory
 
     @view_config(route_name='index', renderer='index.mak')
     def index(self):
@@ -62,16 +90,16 @@ class Views(object):
         try:
             kwargs = task.formfields2taskargs(self.request.json_body, db_url)
             taskresp = task.apply_async(kwargs=kwargs)
-            state_url = self.request.route_path('state',
+            result_url = self.request.route_path('result',
                                             script=self.scriptid,
                                             taskid=taskresp.id)
-            return {'success': True, 'state': state_url}
+            return {'success': True, 'result': result_url}
         except Invalid as e:
             return {'success': False, 'msg': e.message}
 
     @view_config(route_name='state.json', renderer='json', request_method='GET')
     def statejson(self):
-        result = self.celery.AsyncResult(self.taskid)
+        result = self.task_result()
         result_url = self.request.route_path('result',
                                         script=self.scriptid,
                                         taskid=result.id,
@@ -83,62 +111,51 @@ class Views(object):
                 'result': result_url,
                 }
 
-    @view_config(route_name='state', renderer='state.mak')
+    @view_config(renderer='state.mak', context=TaskNotReady)
     def statehtml(self):
         response = self.statejson()
         response['task'] = self.tasks()[self.scriptid]
-
-        if response['success'] or response['failure']:
-            return HTTPFound(location=response['result'])
         return response
 
     @view_config(route_name='state.json', request_method='DELETE', renderer='json')
     def revoke_task(self):
-        result = self.celery.AsyncResult(self.taskid)
+        result = self.task_result()
         result.revoke(terminate=True)
         return {'success': True}
 
-    def result_file_url(self, filename):
-        return self.request.route_path('result_file',
-                                  script=self.scriptid,
-                                  taskid=self.taskid,
-                                  filename=filename,
-                                  )
-
     @view_config(route_name='result', renderer='result.mak')
     def result(self):
-        aresult = self.celery.AsyncResult(self.taskid)
-        result = aresult.result
+        result = self.task_result(True)
 
-        files = {}
-        if 'files' in result:
-            if len(result['files']) == 1:
-                first_fn = result['files'].keys()[0]
-                return HTTPFound(location=self.result_file_url(first_fn))
-            # Convert file pointer from file space to web space
-            for filename in result['files']:
-                files[filename] = self.result_file_url(filename)
+        result_dir =self.task_result_directory()
+        files = os.listdir(result_dir)
+
+        if len(files) == 1:
+            # Redirect to output file when result dir contains only one file
+            resultfile = self.request.route_path('result_file',
+                                                 script=self.scriptid,
+                                                 taskid=self.taskid,
+                                                 filename=files[0],
+                                                 )
+            return HTTPFound(location=resultfile)
 
         return {
                 'task': self.tasks()[self.scriptid],
                 'files': files,
-                'result': aresult,
+                'result': result,
                 }
 
     @view_config(route_name='result_file')
     def result_file(self):
-        aresult = self.celery.AsyncResult(self.taskid)
-        if aresult.failed():
-            raise aresult.result
         # results has files dict with key=base filename
         # and value is absolute path to file
+        result_dir =self.task_result_directory()
         filename = self.request.matchdict['filename']
-        path = aresult.result['files'][filename]
+        path = os.path.join(result_dir, filename)
         return FileResponse(path, self.request)
 
     @view_config(route_name='trackers', renderer='json')
     def trackers(self):
-
         Session = make_session_from_request(self.request)()
 
         q = Session.query(Device.device_info_serial,

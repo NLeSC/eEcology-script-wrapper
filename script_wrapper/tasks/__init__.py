@@ -62,7 +62,7 @@ class PythonTask(Task):
 
         Combination of 'task_output_directory' config and task identifier.
 
-        Directory be created when it does not exists.
+        Directory will be created when it does not exist.
         """
         directory = os.path.join(self.app.conf['task_output_directory'],
                                  self.request.id,
@@ -151,13 +151,6 @@ class PythonTask(Task):
         """Javascript to render ExtJS form to div with 'form' id"""
         return os.path.join(self.task_dir(), self.js_form)
 
-    def output_files(self):
-        """Returns dict of all files in the output dir"""
-        result = {}
-        for fn in os.listdir(self.output_dir()):
-            result[fn] = os.path.join(self.output_dir(), fn)
-        return result
-
     def sslify_dbname(self, db_url):
         """To connect to postgresql database which requires ssl add query to db name."""
         db_name = db_url.database
@@ -179,7 +172,7 @@ class RTask(PythonTask):
             def run(self, output_dir()):
                 self.load_mfile()
                 self.r.plot(output_dir())
-                return {'plot.png': os.path.join(self.output_dir(), 'plot.png')}
+                return {'query': {}}
 
     Attributes:
 
@@ -219,7 +212,7 @@ class OctaveTask(PythonTask):
             def run(self, output_dir()):
                 self.load_mfile()
                 self.octave.plot(output_dir())
-                return {'plot.png': os.path.join(self.output_dir(), 'plot.png')}
+                return {'query': {}}
 
     Attributes:
 
@@ -240,6 +233,8 @@ class OctaveTask(PythonTask):
 
 class SubProcessTask(PythonTask):
     """Abstract task to subprocess.Popen.
+
+    Writes standard out to `stdout.txt` file and standard error to `stderr.txt` file.
 
     Can execute any executable program with arguments.
     """
@@ -289,6 +284,7 @@ class SubProcessTask(PythonTask):
 
         def killit(signum, frame):
             """Kill the current process group and cleanup"""
+            logger.warn('Killing pg {} of pid {} with signal {}'.format(os.getpgid(mypid), mypid, signum))
             os.killpg(os.getpgid(mypid), signum)
             cleanup()
 
@@ -309,11 +305,7 @@ class SubProcessTask(PythonTask):
 
         cleanup()
 
-        files = {}
-        files['stdout.txt'] = stdout_fn
-        files['stderr.txt'] = stderr_fn
-
-        return {'files': files, 'return_code': return_code}
+        return {'return_code': return_code}
 
 
 class MatlabTask(SubProcessTask):
@@ -327,8 +319,6 @@ class MatlabTask(SubProcessTask):
 
             def run(self, output_dir()):
                 result = super(PlotTask, self).run(output_dir())
-                abs_path = os.path.join(self.output_dir(), 'plot.png')
-                result['files']['plot.png'] = abs_path
                 return result
 
     Attributes:

@@ -13,9 +13,6 @@ class KmzGen(MatlabTask):
 
     def run(self):
         result = super(KmzGen, self).run()
-        result['files'] = {}  # Hide stderr.txt and stdout.txt
-        result['files']['out.kmz'] = os.path.join(self.output_dir(),
-                                                  'out.kmz')
         return result
 
     def formfields2taskargs(self, fields, db_url):

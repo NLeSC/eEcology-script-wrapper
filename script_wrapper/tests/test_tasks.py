@@ -83,19 +83,6 @@ class TestPythonTask(unittest.TestCase):
         with self.assertRaises(OSError):
             task.output_dir()
 
-    @patch('os.listdir')
-    def test_output_files(self, listdir):
-        listdir.return_value = ['stderr.txt', 'stdout.txt']
-        task = tasks.PythonTask()
-        task.output_dir = Mock(return_value='/tmp/myjobdir')
-
-        files = task.output_files()
-
-        listdir.assert_called_with('/tmp/myjobdir')
-        efiles = {'stderr.txt': '/tmp/myjobdir/stderr.txt',
-                  'stdout.txt': '/tmp/myjobdir/stdout.txt'}
-        self.assertEqual(files, efiles)
-
     def test_sslify_dbname_nossl(self):
         task = tasks.PythonTask()
         from sqlalchemy.engine.url import make_url
@@ -210,11 +197,7 @@ class TestSubProcessTask(unittest.TestCase):
 
         result = task.run('hostname')
 
-        eresult = {'files': {
-                             'stderr.txt': root_dir + '/stderr.txt',
-                             'stdout.txt': root_dir + '/stdout.txt',
-                             },
-                   'return_code': 0}
+        eresult = {'return_code': 0}
 
         self.assertEqual(result, eresult)
         po.assert_called_with(['hostname'],
