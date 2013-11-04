@@ -8,7 +8,7 @@ pyramid.debug_routematch = true
 pyramid.debug_templates = true
 pyramid.default_locale_name = en
 pyramid.includes = pyramid_celery
-                   pyramid_debugtoolbar
+#                   pyramid_debugtoolbar
 #                   pyramid_tm
 
 # sqlalchemy.url = sqlite:///celery.db
@@ -27,7 +27,10 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 CELERY_IMPORTS = ("script_wrapper.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
+# Must be able to send revoke signal to cancel a task
 CELERY_SEND_EVENTS = True
+# Task expire in 12 weeks
+CELERY_TASK_RESULT_EXPIRES = 7257600
 
 sqlalchemy.url = postgresql://db.e-ecology.sara.nl/eecology?sslmode=require
 matlab.location = /home/stefanv/MATLAB/MATLAB_Compiler_Runtime/v711
