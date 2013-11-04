@@ -128,7 +128,7 @@ class Views(object):
         result = self.task_result(True)
 
         result_dir =self.task_result_directory()
-        files = os.listdir(result_dir)
+        files = sorted(os.listdir(result_dir))
 
         if len(files) == 1:
             # Redirect to output file when result dir contains only one file
