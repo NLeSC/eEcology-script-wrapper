@@ -93,4 +93,4 @@ Enable it by
 
 Enable it by restarting apache with `/etc/init.d/httpd restart`.
 
-
+See https://services.e-ecology.sara.nl/redmine/projects/uvagps/wiki/Apache_authentication_against_DB to add db authentication.

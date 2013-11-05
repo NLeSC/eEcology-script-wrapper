@@ -18,7 +18,8 @@ from celery import current_app as celery
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
 from pyramid.view import view_config
-from script_wrapper.models import make_session_from_request, db_url_from_request
+from script_wrapper.models import make_session_from_request
+from script_wrapper.models import db_url_from_request
 from script_wrapper.models import Device, Individual, TrackSession
 from script_wrapper.validation import Invalid
 
@@ -49,7 +50,7 @@ class Views(object):
     def task_result(self, must_be_ready=False):
         """Fetches result for `self.taskid`.
 
-        If taskid does not exists raises a HTTPNotFound.
+        If task failed raises it's exception.
 
         ``must_be_ready`` If true raises TaskNotReady when result is not ready.
         """
@@ -97,7 +98,9 @@ class Views(object):
         except Invalid as e:
             return {'success': False, 'msg': e.message}
 
-    @view_config(route_name='state.json', renderer='json', request_method='GET')
+    @view_config(route_name='state.json',
+                 renderer='json',
+                 request_method='GET')
     def statejson(self):
         result = self.task_result()
         result_url = self.request.route_path('result',
@@ -117,7 +120,9 @@ class Views(object):
         response['task'] = self.tasks()[self.scriptid]
         return response
 
-    @view_config(route_name='state.json', request_method='DELETE', renderer='json')
+    @view_config(route_name='state.json',
+                 request_method='DELETE',
+                 renderer='json')
     def revoke_task(self):
         result = self.task_result()
         result.revoke(terminate=True)
@@ -127,7 +132,7 @@ class Views(object):
     def result(self):
         result = self.task_result(True)
 
-        result_dir =self.task_result_directory()
+        result_dir = self.task_result_directory()
         files = sorted(os.listdir(result_dir))
 
         if len(files) == 1:
@@ -149,7 +154,7 @@ class Views(object):
     def result_file(self):
         # results has files dict with key=base filename
         # and value is absolute path to file
-        result_dir =self.task_result_directory()
+        result_dir = self.task_result_directory()
         filename = self.request.matchdict['filename']
         path = os.path.join(result_dir, filename)
         return FileResponse(path, self.request)
