@@ -30,12 +30,12 @@ Ext.onReady(function() {
 	        'update': function() {
 	          if (!progress.isWaiting()) return;
 	          Ext.Ajax.request({
-	            url: '${request.route_url('state.json', script=task.name, taskid=request.matchdict['taskid'])}',
+	            url: '${request.route_path('state.json', script=task.name, taskid=request.matchdict['taskid'])}',
 	            method: 'GET',
 	            success: function(response) {
 	              var result = Ext.JSON.decode(response.responseText);
 	              if (result.ready) {
-	                  window.location = '${request.route_url('result', script=task.name, taskid=request.matchdict['taskid'])}';
+	                  window.location = '${request.route_path('result', script=task.name, taskid=request.matchdict['taskid'])}';
 	              } else {
 	                  status.update([result.state]);
 	              }
@@ -62,7 +62,7 @@ Ext.onReady(function() {
 	      function(button) {
 	        if (button === 'yes') {
 	            Ext.Ajax.request({
-	              url: '${request.route_url('state.json', script=task.name, taskid=request.matchdict['taskid'])}',
+	              url: '${request.route_path('state.json', script=task.name, taskid=request.matchdict['taskid'])}',
 	              method: 'DELETE',
 	              success: function() {
 	                  window.location = '${request.route_path('apply', script=task.name)}';
