@@ -14,6 +14,7 @@ class GpsOverview(MatlabTask):
     label = "GPS Overview"
     description = """Perform something in a Matlab executable with postgresql query"""
     deploy_script = 'run_gps_overview.sh'
+    autoregister = False
 
     def env(self):
         env = super(GpsOverview, self).env()

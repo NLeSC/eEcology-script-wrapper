@@ -9,7 +9,8 @@ class KmzGen(MatlabTask):
     name = 'kmz_gen'
     label = "Generate KMZ file"
     description = """Uses Matlab google earth toolkit"""
-    deploy_script = 'run_kmz_gen.sh'
+    script = 'run_kmz_gen.sh'
+    autoregister = False
 
     def run(self):
         result = super(KmzGen, self).run()
