@@ -282,3 +282,13 @@ def getAccelerationCount(db_url, device_info_serial, start, end):
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
     q = q.filter(Acceleration.date_time.between(start, end))
     return q.count()
+
+
+def getGPSCount(db_url, device_info_serial, start, end):
+    """Returns the number of gps rows for selected tracker and time range.
+    """
+    s = DBSession(db_url)
+    q = s().query(Tracking)
+    q = q.filter(Tracking.device_info_serial == device_info_serial)
+    q = q.filter(Tracking.date_time.between(start, end))
+    return q.count()
