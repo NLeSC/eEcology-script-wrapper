@@ -16,11 +16,10 @@ import unittest
 from mock import Mock, patch
 from pyramid import testing
 from pyramid.response import FileResponse
-from pyramid.httpexceptions import HTTPFound
 from celery.result import AsyncResult
 from script_wrapper.tasks import PythonTask
 from script_wrapper.validation import Invalid
-from script_wrapper.views import Views
+from script_wrapper.views import Views, TaskNotReady
 
 
 class TestViews(unittest.TestCase):
@@ -49,26 +48,50 @@ class TestViews(unittest.TestCase):
         self.assertEqual(views.taskid, 'b3c84d96-4dc7-4532-a864-3573202f202a')
 
     def test_task_result(self):
-        # TODO implement
-        pass
+        request = testing.DummyRequest()
+        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(request)
+        mresult = Mock(AsyncResult)
+        is_ready = True
+        mresult.ready.return_value = is_ready
+        views.celery.AsyncResult.return_value = mresult
 
-    def test_task_result_failed(self):
-        # TODO implement
-        pass
+        result = views.task_result()
+
+        self.assertEqual(result, mresult)
 
     def test_task_result_must_be_ready(self):
-        # TODO implement
-        pass
+        request = testing.DummyRequest()
+        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(request)
+        mresult = Mock(AsyncResult)
+        is_ready = True
+        mresult.ready.return_value = is_ready
+        views.celery.AsyncResult.return_value = mresult
+
+        result = views.task_result(True)
+
+        self.assertEqual(result, mresult)
 
     def test_task_result_must_be_ready_but_isnt(self):
-        # TODO implement
-        pass
+        request = testing.DummyRequest()
+        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(request)
+        mresult = Mock(AsyncResult)
+        is_ready = False
+        mresult.ready.return_value = is_ready
+        views.celery.AsyncResult.return_value = mresult
+
+        with self.assertRaises(TaskNotReady):
+            views.task_result(True)
 
     def testIndex(self):
         request = testing.DummyRequest()
         views = Views(request)
         views.celery.tasks = {'plot': 'task1'}
+
         result = views.index()
+
         self.assertEqual(result, {'tasks': {'plot': 'task1'}})
 
     def testForm(self):
@@ -76,13 +99,14 @@ class TestViews(unittest.TestCase):
         request.matchdict['script'] = 'plot'
         views = Views(request)
         views.celery.tasks = {'plot': 'task1'}
+
         result = views.form()
+
         self.assertEqual(result, {'task': 'task1'})
 
     def testJsForm(self):
         from tempfile import NamedTemporaryFile
         formjs = NamedTemporaryFile(suffix='.js')
-
         task = PythonTask()
         task.js_form_location = Mock(return_value=formjs.name)
         request = testing.DummyRequest()
@@ -94,7 +118,6 @@ class TestViews(unittest.TestCase):
 
         self.assertIsInstance(result, FileResponse)
         self.assertEqual(result.content_type, 'application/javascript')
-
         formjs.close()
 
     @patch('script_wrapper.views.db_url_from_request')
@@ -202,6 +225,29 @@ class TestViews(unittest.TestCase):
                    }
         self.assertEqual(result, eresult)
         listdir.assert_called_with('/tmp/results/mytaskid')
+
+    @patch('os.listdir')
+    def test_result_nofiles(self, listdir):
+        request = testing.DummyRequest()
+        request.matchdict['script'] = 'plot'
+        request.matchdict['taskid'] = 'mytaskid'
+        views = Views(request)
+        task_result = Mock(AsyncResult)
+        task_result.id = 'mytaskid'
+        task_result.ready.return_value = True
+        task_result.failed.return_value = False
+        views.celery.AsyncResult = Mock(return_value=task_result)
+        views.celery.tasks = {'plot': 'pythontask'}
+        listdir.side_effect = OSError('[Errno 2] No such file or directory: /tmp/results/mytaskid')
+
+        result = views.result()
+
+        eresult = {
+                   'result': task_result,
+                   'files': [],
+                   'task': 'pythontask',
+                   }
+        self.assertEqual(result, eresult)
 
     @patch('script_wrapper.views.FileResponse')
     def testResultFile(self, fileresponse):
