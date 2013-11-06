@@ -21,7 +21,13 @@ ${result.result['query']}
 
 % if result.failed():
 Not successfully completed.
-Return code is ${result.result['return_code']}.
+<div>
+	% if 'return_code' in result.result:
+	Return code is ${result.result['return_code']}.
+	% else:
+	Error: ${result.result}
+	% endif
+</div>
 % elif result.state == 'REVOKED':
 Cancelled.
 % else:

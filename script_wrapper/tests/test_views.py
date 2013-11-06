@@ -180,7 +180,7 @@ class TestViews(unittest.TestCase):
         self.assertDictEqual(result, state)
 
     @patch('os.listdir')
-    def testResultMultipleFiles(self, listdir):
+    def testResult(self, listdir):
         request = testing.DummyRequest()
         request.matchdict['script'] = 'plot'
         request.matchdict['taskid'] = 'mytaskid'
@@ -201,26 +201,6 @@ class TestViews(unittest.TestCase):
                    'task': 'pythontask',
                    }
         self.assertEqual(result, eresult)
-        listdir.assert_called_with('/tmp/results/mytaskid')
-
-    @patch('os.listdir')
-    def testResultSingleFiles(self, listdir):
-        self.config.add_route('result_file', '/{script}/{taskid}/{filename}')
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
-        task_result = Mock(AsyncResult)
-        task_result.id = 'mytaskid'
-        task_result.ready.return_value = True
-        task_result.failed.return_value = False
-        views.celery.AsyncResult = Mock(return_value=task_result)
-        listdir.return_value = ['stdout.txt']
-
-        result = views.result()
-
-        self.assertIsInstance(result, HTTPFound)
-        self.assertEqual(result.location, '/plot/mytaskid/stdout.txt')
         listdir.assert_called_with('/tmp/results/mytaskid')
 
     @patch('script_wrapper.views.FileResponse')

@@ -57,8 +57,6 @@ class Views(object):
         result = self.celery.AsyncResult(self.taskid)
         # An unknown taskid will return a PENDING state
         # TODO distinguish between pending job and unknown job.
-        if result.failed():
-            raise result.result
 
         if must_be_ready and not result.ready():
             raise TaskNotReady()
@@ -133,16 +131,11 @@ class Views(object):
         result = self.task_result(True)
 
         result_dir = self.task_result_directory()
-        files = sorted(os.listdir(result_dir))
-
-        if len(files) == 1:
-            # Redirect to output file when result dir contains only one file
-            resultfile = self.request.route_path('result_file',
-                                                 script=self.scriptid,
-                                                 taskid=self.taskid,
-                                                 filename=files[0],
-                                                 )
-            return HTTPFound(location=resultfile)
+        files = []
+        try:
+            files = sorted(os.listdir(result_dir))
+        except OSError:
+            logger.warn('Task {} resulted in no files'.format(self.taskid))
 
         return {
                 'task': self.tasks()[self.scriptid],
