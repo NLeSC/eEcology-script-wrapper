@@ -1,0 +1,32 @@
+calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdentifier, startTime, stopTime, outputDir) {
+    # Run in R with:
+    # source('dbq.r')
+    # calendar('****', '****, 'eecology', 'eecology db.e-ecology.sara.nl', 620, '2010-07-01T00:00:00', '2010-09-01T00:00:00', '/tmp')
+    library(RPostgreSQL)
+    library(stringr)
+    drv <- dbDriver("PostgreSQL")
+    conn = dbConnect(drv, user=dbUsername, password=dbPassword, dbname=dbName, host=databaseHost)
+
+    spheroid = 'SPHEROID["WGS 84",6378137,298.257223563]'
+
+    # distance from http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis
+    sql <- paste("SELECT to_char(date(date_time), 'YYYY-MM-DD') as date, ",
+       " count(*) as fixes, ",
+       " max(altitude) as maxalt, ",
+       " min(altitude) as minalt, ",
+       " max(temperature) as maxtemp, ",
+       " min(temperature) as mintemp, ",
+       " max(pressure) as maxpres, ",
+       " min(pressure) as minpres, ",
+       " round((ST_Length_Spheroid(ST_MakeLine(location),'",spheroid,"')/1000.0)::numeric, 3) AS distance ",
+       "FROM gps.uva_tracking_limited ",
+       "WHERE device_info_serial=",TrackerIdentifier, " ",
+       "AND date_time BETWEEN '", startTime,"' AND '",stopTime, "' ",
+       "AND longitude IS NOT NULL AND userflag<>1 ",
+       "GROUP BY date(date_time)", sep="")
+
+    results <- dbGetQuery(conn, sql)
+
+    # Save as text
+    write.table(results, sep=",", row.names=FALSE, quote=FALSE, file=file.path(outputDir, "result.csv"))
+}
