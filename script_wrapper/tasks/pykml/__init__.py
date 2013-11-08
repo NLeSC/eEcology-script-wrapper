@@ -16,7 +16,7 @@ logger = get_task_logger(__name__)
 
 class PyKML(PythonTask):
     name = 'kmlpy'
-    label = 'Generate KMZ file'
+    label = 'KMZ file'
     description = 'Generate a KMZ file with multiple trackers.'
     autoregister = True
 
@@ -24,8 +24,13 @@ class PyKML(PythonTask):
         self.update_state(state="RUNNING")
         session = DBSession(db_url)
 
-        fn = os.path.join(self.output_dir(), 'result.kmz')
-        kml = simplekml.Kml()
+        trackers_list = "_".join([str(t['id']) for t in trackers])
+        filename = "{start}-{end}-{trackers}.kmz".format(start=start,
+                                                         end=end,
+                                                         trackers=trackers_list,
+                                                         )
+        fn = os.path.join(self.output_dir(), filename)
+        kml = simplekml.Kml(open=0)
         styles = self.create_styles()
         for tracker in trackers:
             self.track2kml(kml, session, styles, tracker['id'], tracker['color'], start, end)
@@ -67,10 +72,12 @@ class PyKML(PythonTask):
         </table>
         """
 
+        folder = kml.newfolder(name=str(tracker_id),open=1)
+
         parts = []
         for tid, dt, lon, lat, alt, spd, dire in q.all():
             parts.append((lon, lat))
-            pnt = kml.newpoint()
+            pnt = folder.newpoint()
             pnt.style = self.speed2style(styles, base_color, spd)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
@@ -85,7 +92,7 @@ class PyKML(PythonTask):
                 # Don't put point under ground
                 pnt.altitudemode = simplekml.AltitudeMode.clamptoground
 
-        line = kml.newlinestring()
+        line = folder.newlinestring()
         line.style.linestyle.width = 1
         line.style.linestyle.color = 'ff00ffff'
         line.coords = parts
@@ -116,7 +123,7 @@ class PyKML(PythonTask):
                 style = simplekml.Style()
                 style.iconstyle.icon.href = 'http://maps.google.com/mapfiles/kml/pal2/icon26.png'
                 style.iconstyle.scale = 0.4
-                style.iconstyle.color = color
+                style.iconstyle.color = color[0:2] + color[6:8] + color[4:6] + color[2:4]
                 styles[color_scheme[0][2:8]].insert(idx, style)
 
         return styles
