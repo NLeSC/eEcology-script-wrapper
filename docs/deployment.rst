@@ -43,6 +43,14 @@ Java is missing, add by::
    ln -s /usr/lib/jvm/java-6-openjdk-amd64 java/jre/glnxa64
 
 
+R
+-
+
+To query database install from R prompt:
+
+  install.packages('RPostgreSQL')
+  install.packages('stringr')
+
 Add cert for postgresql jdbc ssl connection
 -------------------------------------------
 
