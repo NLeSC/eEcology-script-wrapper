@@ -11,6 +11,7 @@ class KmzGen(MatlabTask):
     description = """Uses Matlab google earth toolkit"""
     script = 'run_kmz_gen.sh'
     autoregister = False
+    matlab_version = '2009a'
 
     def run(self):
         result = super(KmzGen, self).run()

@@ -22,6 +22,10 @@ from script_wrapper.tasks.classification import Classification
 
 class TestClassification(unittest.TestCase):
 
+    def test_matlab_version(self):
+        task = Classification()
+        self.assertEqual(task.matlab_version, '2012a')
+
     @patch('script_wrapper.tasks.classification.getAccelerationCount')
     def test_formfields2taskargs(self, gac):
         gac.return_value = 10000

@@ -333,6 +333,7 @@ class MatlabTask(SubProcessTask):
     abstract = True
     _matlab = None
     script = None
+    matlab_version = '2012a'
 
     @property
     def matlab(self):
@@ -342,7 +343,7 @@ class MatlabTask(SubProcessTask):
         Fetched from celery config with 'matlab.location' key.
         """
         if self._matlab is None:
-            self._matlab = self.app.conf['matlab.location']
+            self._matlab = self.app.conf['matlab.location.'+self.matlab_version]
         return self._matlab
 
     def pargs(self):
