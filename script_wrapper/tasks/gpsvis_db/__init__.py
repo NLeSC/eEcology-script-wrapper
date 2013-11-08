@@ -14,8 +14,8 @@ logger = get_task_logger(__name__)
 
 class GpsVisDB(MatlabTask):
     name = 'gpsvis_db'
-    label = "kmz-statplot"
-    description = """kmz and statistics plot"""
+    label = "KMZ and Plot"
+    description = """Generate KMZ file and statistics plot"""
     script = 'run_stefanoe.sh'
     matlab_version = '2009b'
 
