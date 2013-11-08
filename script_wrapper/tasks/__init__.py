@@ -366,4 +366,4 @@ class MatlabTask(SubProcessTask):
 
         eg. x = ['foo', 'bar'] becomes '{foo,bar}'
         """
-        return '{{{}}}'.format(",".join([str(i) for i in mylist]))
+        return '{{{}}}'.format(",".join(["'{}'".format(i) for i in mylist]))

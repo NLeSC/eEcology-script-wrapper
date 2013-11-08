@@ -6,16 +6,18 @@ from celery.utils.log import get_task_logger
 import iso8601
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.models import make_url
+from script_wrapper.models import getGPSCount
+from script_wrapper.validation import validateRange
 
 logger = get_task_logger(__name__)
 
 
 class GpsVisDB(MatlabTask):
     name = 'gpsvis_db'
-    label = "GPSvis_database"
-    description = """Example script of Willem"""
+    label = "kmz-statplot"
+    description = """kmz and statistics plot"""
     script = 'run_stefanoe.sh'
-    matlab_version = '2009a'
+    matlab_version = '2009b'
 
     def run(self, db_url, start, end, alt, trackers):
         # prepare arguments
@@ -79,16 +81,16 @@ class GpsVisDB(MatlabTask):
         return colorid
 
     def formfields2taskargs(self, fields, db_url):
+        start = iso8601.parse_date(fields['start'])
+        end = iso8601.parse_date(fields['end'])
         trackers = fields['trackers']
         for tracker in trackers:
+            validateRange(getGPSCount(db_url, tracker['id'], start, end), 0, 50000)
             tracker['color'] = self.convert_colors(tracker)
 
-        # TODO compute work amount and
-        # raise Invalid exception when it's too much or no work
-
         return {'db_url':  db_url,
-                'start': iso8601.parse_date(fields['start']),
+                'start': start,
                 'alt': fields['alt'],
-                'end': iso8601.parse_date(fields['end']),
+                'end': end,
                 'trackers': trackers,
                 }

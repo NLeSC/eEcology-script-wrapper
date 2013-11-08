@@ -23,7 +23,7 @@ class TestClassification(unittest.TestCase):
 
     def test_matlab_version(self):
         task = GpsVisDB()
-        self.assertEqual(task.matlab_version, '2009a')
+        self.assertEqual(task.matlab_version, '2009b')
 
     def test_convert_colors_valids(self):
         task = GpsVisDB()
@@ -56,7 +56,9 @@ class TestClassification(unittest.TestCase):
             task.convert_colors({'id': 1, 'color': 'blue',
                                  'size': 'small', 'speed': 1})
 
-    def test_formfields2taskargs(self):
+    @patch('script_wrapper.tasks.gpsvis_db.getGPSCount')
+    def test_formfields2taskargs(self, gps_count):
+        gps_count.return_value = 1000
         task = GpsVisDB()
 
         trackers = [{'id': 1, 'color': 'DADADA',

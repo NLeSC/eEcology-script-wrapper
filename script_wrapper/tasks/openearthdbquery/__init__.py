@@ -16,7 +16,7 @@ class OpenEarthDbQuery(MatlabTask):
                   with postgresql query using OpenEarth toolkit"""
     script = 'run_test.sh'
     autoregister = False
-    matlab_version = '2009a'
+    matlab_version = '2009b'
 
     def run(self, db_url):
         u = make_url(db_url)

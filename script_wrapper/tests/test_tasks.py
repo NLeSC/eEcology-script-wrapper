@@ -174,7 +174,7 @@ class TestMatlabTask(unittest.TestCase):
         task = tasks.MatlabTask()
 
         result = task.list2cell_array_string(['foo', 'bar'])
-        eresult = '{foo,bar}'
+        eresult = "{'foo','bar'}"
         self.assertEqual(result, eresult)
 
 

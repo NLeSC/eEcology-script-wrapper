@@ -96,6 +96,7 @@ for k=1:length(KDevice)
                ' on (t.device_info_serial = a.device_info_serial AND t.date_time = a.date_time)' , ...
                ' where ( t.date_time >= ', start,  ')',...
                ' AND ( t.date_time <= ', stop,    ')' ,...
+               ' AND t.userflag<>1 AND t.longitude IS NOT NULL' ,...
                ' group by   t.device_info_serial, t.date_time, a.date_time, t.speed, t.longitude, ' , ...
                ' t.latitude, t.altitude, t.temperature, t.gps_fixtime, t.positiondop, t.satellites_used, t.location ' , ...
                ' ORDER BY t.date_time' );
@@ -120,43 +121,37 @@ for k=1:length(KDevice)
 
     % this fetch command actually transfers the data from database table to matlab
     % SV: Openearth database combines exec and fetch into pg_fetch
-    curs1 = pg_fetch(conn, sql1);
-    curs2 = pg_fetch(conn, sql2);
+    curs1 = pg_fetch_struct(conn, sql1);
+    curs2 = pg_fetch_struct(conn, sql2);
     %% get the data from the cursor
     % because previously setdbprefs is set to 'structure' devices
     % is a struct with array fields that have the same name as the
     % database columns.  to get the column device_info_serial from
     % the table as an matlab array type tracks.device_info_serial
     tracks = curs1;
-    % SV: Openearth returns columns by position and not by name
-    % SV: So map position to names
-    ener.('date_time') = pg_datenum({curs2{:,2}});
-    ener.('ssw') = [curs2{:,11}];
-    ener.('vsll') = [curs2{:,9}];
-    ener.('vbat') = [curs2{:,10}];
+    ener = curs2
 
     %% close the database connection
     % ( unless running more queries )
     % SV: Openearth has no close
     % close(conn);
     %% copy data
-    ID=[tracks{:,1}]; % .device_info_serial;
-    Year=[tracks{:,4}]; % .year;
-    Month=[tracks{:,5}]; % .month;
-    Day=[tracks{:,6}]; % .day;
-    Hour=[tracks{:,7}]; % .hour;
-    Minute=[tracks{:,8}]; % .minute;
-    Second=[tracks{:,9}]; % .second;
-    Long=[tracks{:,10}]; % .longitude;
-    Lat=[tracks{:,11}]; % .latitude;
-    Alt=[tracks{:,12}]; % .altitude;
-    Temperature=[tracks{:,13}]; % .temperature;
-    AGL=[tracks{:,19}]; % .agl;
-    ISpeed=[tracks{:,17}];
-    ISpeed =ISpeed*3.6; % .speed*3.6; %convert speed from m/s to km/hr
-    nrAcc=[tracks{:,18}]; % .n_acc_points;
-    satellites_used = [tracks{:,16}];
-    gps_fixtime = [tracks{:,14}];
+    ID=tracks.device_info_serial;
+    Year=tracks.year;
+    Month=tracks.month;
+    Day=tracks.day;
+    Hour=tracks.hour;
+    Minute=tracks.minute;
+    Second=tracks.second;
+    Long=tracks.longitude;
+    Lat=tracks.latitude;
+    Alt=tracks.altitude;
+    Temperature=tracks.temperature;
+    AGL=tracks.agl;
+    ISpeed=tracks.speed*3.6; %convert speed from m/s to km/hr
+    nrAcc=tracks.n_acc_points;
+    satellites_used = tracks.satellites_used;
+    gps_fixtime = tracks.gps_fixtime;
 
     ETime=datenum(ener.date_time)-734868; %datenum('2012-01-01 00:00:00')=734869
 
@@ -215,7 +210,7 @@ for k=1:length(KDevice)
 
     %%Make overview figure
          %figure for SSW
-        SSW=ener.ssw';
+         SSW=ener.ssw';
         clear SC
         for u=1:length(ener.ssw)
             SC(u,1:4)=NaN;
