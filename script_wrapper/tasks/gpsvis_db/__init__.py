@@ -15,6 +15,7 @@ class GpsVisDB(MatlabTask):
     label = "GPSvis_database"
     description = """Example script of Willem"""
     script = 'run_stefanoe.sh'
+    matlab_version = '2009a'
 
     def run(self, db_url, start, end, alt, trackers):
         # prepare arguments

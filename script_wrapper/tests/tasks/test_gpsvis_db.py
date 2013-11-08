@@ -21,6 +21,10 @@ from script_wrapper.tasks.gpsvis_db import GpsVisDB
 
 class TestClassification(unittest.TestCase):
 
+    def test_matlab_version(self):
+        task = GpsVisDB()
+        self.assertEqual(task.matlab_version, '2009a')
+
     def test_convert_colors_valids(self):
         task = GpsVisDB()
 

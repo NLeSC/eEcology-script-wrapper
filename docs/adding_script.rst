@@ -42,6 +42,7 @@ In ``script_wrapper/tasks/<script_id>/__init__.py``:
 * Replace ``class example_<language>`` with ``class <script_id>``.
 * Fill in the fields at the beginning of the class (name, description, etc.).
 * Enable script by setting ``autoregister`` to ``True``.
+* By default the Matlab scripts will be compiled with Matlab 2012a, if the script has been compiled with a different version set the matlab_version property and make sure the Matlab Compile Runtime is installed and configured in the *.ini file.
 
 3. Define form
 ==============
