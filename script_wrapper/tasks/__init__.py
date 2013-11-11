@@ -237,6 +237,8 @@ class SubProcessTask(PythonTask):
     Writes standard out to `stdout.txt` file and standard error to `stderr.txt` file.
 
     Can execute any executable program with arguments.
+
+    Raises subprocess.CalledProcessError when subprocess returns non-zero exit status.
     """
     abstract = True
 
@@ -304,6 +306,9 @@ class SubProcessTask(PythonTask):
         return_code = popen.wait()
 
         cleanup()
+
+        if return_code is not 0:
+            raise subprocess.CalledProcessError(return_code, 'script')
 
         return {'return_code': return_code}
 

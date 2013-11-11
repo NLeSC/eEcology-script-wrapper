@@ -208,3 +208,23 @@ class TestSubProcessTask(unittest.TestCase):
 
         import shutil
         shutil.rmtree(root_dir)
+
+    @patch('subprocess.Popen')
+    def test_run_unsuccessfull_return_code(self, po):
+        from subprocess import CalledProcessError
+        from tempfile import mkdtemp
+        root_dir = mkdtemp()
+        task = tasks.SubProcessTask()
+        task.output_dir = Mock(return_value=root_dir)
+        po.return_value.wait.return_value = 1
+        from os import getpid
+        po.return_value.pid = getpid()
+
+        with self.assertRaises(CalledProcessError) as e:
+            task.run('/bin/false')
+
+        self.assertEqual(e.exception.returncode, 1)
+        self.assertEqual(e.exception.cmd, 'script')
+
+        import shutil
+        shutil.rmtree(root_dir)
