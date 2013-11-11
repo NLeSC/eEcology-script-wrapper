@@ -94,3 +94,42 @@ Enable it by
 Enable it by restarting apache with `/etc/init.d/httpd restart`.
 
 See https://services.e-ecology.sara.nl/redmine/projects/uvagps/wiki/Apache_authentication_against_DB to add db authentication.
+
+Script wrapper worker
+---------------------
+
+To distribute work in cloud have one master machine with the web front-end and redis server.
+Have multiple slaves with celery workers and local database. Script results will be shared over NFS.
+
+1. Create cloud ubuntu machine with 25Gb disk.
+2. Install dependencies
+2.0 Update system + install git, build essentials + remove apache, add users myself+sw
+2.1 NFS, /shared/Scratch/script-wrapper-sessions
+2.2 postgresql + postgis
+2.3 python, virtualenv
+2.4 R, DBI, RPostgresql, stringr
+2.5 Matlab MCR's
+2.6 Octave
+3. Install script-wrapper
+3.1 Add ssh key to github + git clone
+3.2 virtualenv, pip install numpy oct2py, python setup.py install
+3.3 setup ini
+3.4 add start/stop script
+
+   description     "Script wrapper worker"
+
+   start on filesystem or runlevel [2345]
+   stop on runlevel [!2345]
+
+   setuid verhoes
+   umask 022
+
+   script
+     cd /home/verhoes/eEcology-script-wrapper
+     . env/bin/activate
+     pceleryd development.ini
+   end script
+
+3.5 Redis server on master bind to all, open firewall `-A INPUT -i eth1 -j ACCEPT` for private network
+4. Stop, rename template, start several instances.
+
