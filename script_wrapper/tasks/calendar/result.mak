@@ -6,9 +6,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
     <style type="text/css">
 
-#body {
+body {
   padding-top: 20px;
-  text-align: center;
 }
 
 svg {
@@ -32,10 +31,18 @@ svg {
    display: block;
 }
 
+#years {
+  text-align: center;
+}
+
+#legend {
+  float: right;
+}
+
     </style>
   </head>
   <body>
-    <div id="body">
+        <div id="legend"></div>
       <div id="header">
         <div>Tracker: ${tracker_id}</div>
         <span>Time range: ${start} - ${end}</span>
@@ -50,11 +57,11 @@ svg {
           <option  value="mintemp">Minimum temperature (&deg;C)</option>
           <option  value="maxpres">Maximum pressure</option>
           <option  value="minpres">Minimum pressure</option>
-          <option  value="distance">Distance travelled (km)</option>
+          <option  value="distance">2D Distance travelled (km)</option>
         </select></div>
         <div>Mouse over day to see date and value.</div>
+        <div id="years"></div>
       </div>
-    </div>
     <script type="text/javascript">
 
 var m = [29, 20, 60, 19], // top right bottom left margin
@@ -73,7 +80,7 @@ var day = d3.time.format("%w"),
 
 var year_range = d3.range(${start.year}, ${end.year}+1);
 
-var svg = d3.select("#body").selectAll(".year")
+var svg = d3.select("#years").selectAll(".year")
     .data(year_range)
   .enter().append("div")
     .attr("class", "year")
@@ -115,6 +122,7 @@ d3.select("select").on("change", function() {
 });
 
 d3.csv('${csv}', function(csv) {
+
   data = d3.nest()
       .key(function(d) { return (d.date = formatDate.parse(d.date)).getFullYear(); })
       .key(function(d) { return d.date; })
@@ -140,15 +148,16 @@ function display(metric) {
        color = d3.scale.quantile();
 
   svg.each(function(year) {
+    // TODO color range is calculated per year, should be over whole dataset
     color
         .domain(d3.values(data[year]).map(function(d) { return d[metric]; }))
-        .range(d3.range(200));
+        .range(d3.range(55, 255));
 
     d3.select(this).selectAll("rect.day")
       .attr("class", "day")
       .attr("style", function(d) {
           if (year in data && d in data[year]) {
-                return 'fill:rgb(0,'+ (55+color(data[year][d][metric]))+',0);';
+                return 'fill:rgb(0,' + color(data[year][d][metric]) + ',0);';
           }
       })
       .select("title")
@@ -161,6 +170,48 @@ function display(metric) {
         });
   });
 }
+
+var lw = 200;
+var lh = 20;
+var legend = d3.select("#legend").append('svg')
+  .attr('width', lw)
+  .attr('height', lh + 30);
+
+var gradient = legend.append("defs")
+.append("linearGradient")
+  .attr("id", "gradient")
+  .attr("x1", "0%")
+  .attr("y1", "0%")
+  .attr("x2", "100%")
+  .attr("y2", "0%")
+  .attr("spreadMethod", "pad");
+
+gradient.append("stop")
+  .attr("offset", "0%")
+  .attr("stop-color", 'rgb(0,55,0)')
+  .attr("stop-opacity", 1);
+
+gradient.append("stop")
+  .attr("offset", "100%")
+  .attr("stop-color", 'rgb(0,255,0)')
+  .attr("stop-opacity", 1);
+
+legend.append("rect")
+  .attr("width", lw)
+  .attr("height", lh)
+  .style("fill", "url(#gradient)");
+
+var g = legend.append('g');
+
+g.append("text")
+ .attr('x', 155)
+ .attr('y', 40)
+ .text('High');
+
+g.append("text")
+ .attr('x', 0)
+ .attr('y', 40)
+ .text('Low');
 
 function monthPath(t0) {
   var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
