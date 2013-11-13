@@ -32,8 +32,13 @@ Matlab
 * The script should start with a function which takes only **strings as arguments**. The reason is that the script will be compiled and started from command-line. The arguments can be converted to Matlab native variables using ``val = eval(valAsStr)``.
 * Use the **OpenEarth PostgreSQL library** to perform database queries. For more information see https://services.e-ecology.sara.nl/redmine/projects/uvagps/wiki/Matlab_with_OpenEarth
 * Standard out and error are saved as ``stdout.txt`` and ``stderr.txt`` resp.
-* Script will be run inside a directory so any generated output file should have no directory prefixed to it.
+* Script will be run inside the result directory so any generated output file should have no directory prefixed to it.
 * Do not use hardcoded absolute paths in script, as the machine where it is compiled or being run may not have those paths.
+* The script must be compiled for Linux so it can be run without a Matlab installation, to compile some information is required:
+
+  * The version of Matlab
+  * Required toolboxes
+  * Additional Matlab files needed to run script.
 
 Example Matlab script to find number of timepoints of a tracker in a certain date range:
 
@@ -71,10 +76,11 @@ Example R script to find number of timepoints of a tracker in a certain date ran
         conn = dbConnect(drv, user=dbUsername, password=dbPassword,
                          dbname=dbName, host=databaseHost)
 
-        sql <- paste("SELECT device_info_serial, count(*) FROM gps.uva_tracking_limited ",
-           "WHERE device_info_serial=",TrackerIdentifier, " ",
-           "AND date_time BETWEEN '", startTime,"' AND '",stopTime, "'",
+        tpl <- paste("SELECT device_info_serial, count(*) FROM gps.uva_tracking_limited ",
+           "WHERE device_info_serial="%s ",
+           "AND date_time BETWEEN '%s' AND '%s' ",
            "GROUP BY device_info_serial")
+        sql =  sprintf(tpl, TrackerIdentifier, startTime, stopTime)
 
         results <- dbGetQuery(conn, sql)
 
@@ -91,19 +97,20 @@ Example Python run function to find number of timepoints of a tracker in a certa
 
 .. code-block:: python
 
-    def run(self, db_url, tracker, start, end):
+    def run(self, db_url, tracker_id, start, end):
         # Perform a database query
         q = DBSession(db_url).query(Tracking)
-        q = q.filter(Tracking.device_info_serial==tracker)
+        q = q.filter(Tracking.device_info_serial==tracker_id)
         q = q.filter(Tracking.date_time.between(start, end))
         count = q.count()
-
-        s.close_all()
 
         # Write results to text files
         fn = os.path.join(self.output_dir(), 'result.txt')
         with open(fn, 'w') as f:
             f.write(count)
-        return {'files': {'result.txt': fn}}
+        return {'query': {'start': start,
+                          'end': end,
+                          'tracker_id': tracker_id,
+                          }}
 
 

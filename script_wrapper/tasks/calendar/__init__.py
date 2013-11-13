@@ -16,7 +16,7 @@ logger = get_task_logger(__name__)
 class Calendar(RTask):
     name = 'calendar'
     label = 'Calendar'
-    description = 'Calendar with daily report of a tracker'
+    description = 'Calendar heatmap with daily stats of tracker'
     script = 'calendar.r'
     autoregister = True
 

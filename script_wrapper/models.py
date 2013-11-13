@@ -219,6 +219,21 @@ def populate(session):
           LANGUAGE sql IMMUTABLE STRICT
           COST 100;
 
+    Or to load a dump::
+
+        # edit pg_hba.conf so md5 is needed for all local users + restart postgresql server
+        # as postgres user
+        createuser --pwprompt eecology
+        # enter password and answer n 3x
+        createdb -O eecology eecology
+        createlang plpgsql eecology
+        psql -d eecology -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql
+        psql -d eecology -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql
+        # as me
+        psql -U eecology -W eecology < gps.sql
+        # edit dump.sql.gz so search_path includes public schema
+        gunzip -c dump.sql.gz | psql -U eecology -W eecology
+
     """
     engine = session.get_bind()
     # Create schema

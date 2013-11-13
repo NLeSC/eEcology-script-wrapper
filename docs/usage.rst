@@ -42,4 +42,4 @@ Result
 
 While the script is running a status page is shown.
 When the script is done the result page will be shown.
-The result page consists out of a list of output files or the single output file itself.
+The result page consists out of a list of output files.
