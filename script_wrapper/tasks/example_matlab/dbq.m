@@ -20,7 +20,7 @@ close all
 % Sometimes required to find postgresql driver
 % pg_settings()
 
-conn = pg_connectdb(dbName, 'host', databaseHost, 'user', dbUsername, 'pass', dbPassword, 'database_toolbox', 0);
+conn = pg_connectdb(dbName, 'host', databaseHost, 'user', dbUsername, 'pass', dbPassword);
 
 % SV: Command line arguments are strings, use eval to convert them into Matlab variable types.
 if ischar(TrackerIdentifiers)
