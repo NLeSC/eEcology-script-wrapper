@@ -32,6 +32,7 @@ class Classification(MatlabTask):
     label = "Classification"
     description = """Classify behavior of track"""
     script = 'run_classificator.sh'
+    MAX_ACC_COUNT = 50000
 
     def run(self, db_url, start, end, tracker_id):
         u = make_url(db_url)
@@ -64,7 +65,7 @@ class Classification(MatlabTask):
         tracker_id = fields['id']
 
         # Test if selection will give results
-        validateRange(getAccelerationCount(db_url, tracker_id, start, end), 0, 50000)
+        validateRange(getAccelerationCount(db_url, tracker_id, start, end), 0, self.MAX_ACC_COUNT)
 
         return {'db_url':  db_url,
                 'start': start,

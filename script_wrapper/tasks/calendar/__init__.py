@@ -19,6 +19,7 @@ class Calendar(RTask):
     description = 'Calendar heatmap with daily stats of tracker'
     script = 'calendar.r'
     autoregister = True
+    MAX_FIX_COUNT = 1000000
 
     def run(self, db_url, tracker_id, start, end):
         self.update_state(state="RUNNING")
@@ -50,7 +51,7 @@ class Calendar(RTask):
         end = iso8601.parse_date(fields['end'])
         tracker_id = fields['id']
 
-        validateRange(getGPSCount(db_url, tracker_id, start, end), 0, 5000000)
+        validateRange(getGPSCount(db_url, tracker_id, start, end), 0, self.MAX_FIX_COUNT)
 
         return {'start': start,
                 'end': end,

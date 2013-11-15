@@ -33,4 +33,4 @@ class TestValidateRange(unittest.TestCase):
             swv.validateRange(15, 0, 10)
 
         self.assertEquals(e.exception.message,
-                          'Too many data points selected for this script, please reduce time range')
+                          'Too many data points selected for this script, please reduce time range and/or number of trackers')

@@ -13,11 +13,15 @@ logger = get_task_logger(__name__)
 
 
 class GpsVisDB(MatlabTask):
+    """Matlab script which generate KMZ file and statistics plot
+    """
     name = 'gpsvis_db'
     label = "KMZ and Plot"
     description = """Generate KMZ file and statistics plot"""
     script = 'run_stefanoe.sh'
     matlab_version = '2009b'
+    MAX_FIX_COUNT = 1000
+    MAX_FIX_TOTAL_COUNT = 10000
 
     def run(self, db_url, start, end, alt, trackers):
         # prepare arguments
@@ -84,9 +88,15 @@ class GpsVisDB(MatlabTask):
         start = iso8601.parse_date(fields['start'])
         end = iso8601.parse_date(fields['end'])
         trackers = fields['trackers']
+
+        # Test if selection will give results
+        total_gps_count = 0
         for tracker in trackers:
-            validateRange(getGPSCount(db_url, tracker['id'], start, end), 0, 50000)
+            gps_count = getGPSCount(db_url, tracker['id'], start, end)
+            total_gps_count += gps_count
+            validateRange(gps_count, 0, self.MAX_FIX_COUNT)
             tracker['color'] = self.convert_colors(tracker)
+        validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
 
         return {'db_url':  db_url,
                 'start': start,
