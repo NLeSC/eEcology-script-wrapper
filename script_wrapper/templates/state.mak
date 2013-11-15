@@ -9,6 +9,7 @@
   font-size: 200%;
 }
 </style>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
 <script type="text/javascript">
 Ext.onReady(function() {
 	var interval = 5000;
@@ -22,9 +23,41 @@ Ext.onReady(function() {
       renderTo: 'status_cont',
     });
 
+	var radius = 50;
+	var stepSize = 0.2
+	var arcGen = d3.svg.arc()
+	    .innerRadius(radius*0.6)
+	    .outerRadius(radius)
+	    .startAngle(0)
+	    .endAngle((2*Math.PI)*stepSize);
+
+	var spinner = d3.select('#spinner_cont').append("svg")
+	    .attr("width", 100)
+	        .attr("height", 100)
+	        .append('g')
+	              .attr('transform', 'translate(50,50)')
+	;
+
+    spinner.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", 50)
+        .style("stroke", "lightgray")
+        .style("fill", "none");
+
+	var arc = spinner.append("path")
+	    .datum([stepSize])
+	    .style("fill", "#009ee0")
+	    .attr("d", arcGen);
+
+	function stepSpin() {
+	    var cAngle = arcGen.endAngle()();
+	    arcGen.startAngle(cAngle);
+	    arcGen.endAngle(cAngle+(2*Math.PI)*stepSize);
+	    arc.transition().duration(interval*0.8).ease('linear').attr('d', arcGen);
+	}
+
 	var progress = Ext.create('Ext.ProgressBar', {
-	    width: '100%',
-	    renderTo: 'progress',
 	    border: true,
 	    listeners: {
 	        'update': function() {
@@ -38,6 +71,7 @@ Ext.onReady(function() {
 	                  window.location = '${request.route_path('result', script=task.name, taskid=request.matchdict['taskid'])}';
 	              } else {
 	                  status.update([result.state]);
+	                  stepSpin();
 	              }
 	            },
 	            failure: function(response) {
@@ -82,6 +116,7 @@ Ext.onReady(function() {
 });
 </script>
 <div id="status_cont"></div>
+<div id="spinner_cont"></div>
 <div id="progress"></div>
-Progress will be refreshed every 5 seconds.
+Progress state will be refreshed every 5 seconds.
 <div id="cancel"></div>
