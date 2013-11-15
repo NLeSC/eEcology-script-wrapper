@@ -9,11 +9,11 @@
 
 body {
   padding-top: 20px;
+  shape-rendering: crispEdges;
 }
 
-svg {
+text.title {
   font-size: 22px;
-  shape-rendering: crispEdges;
 }
 
 .day {
@@ -22,7 +22,7 @@ svg {
   stroke-opacity: .1;
 }
 
-.month {
+path.month {
   fill: none;
   stroke: #000;
   stroke-width: 2px;
@@ -52,6 +52,7 @@ svg {
         <div class="hint">Use the pulldown to change shown metric</div>
         <div><select>
           <option  value="fixes">Nr. of GPS fixes</option>
+          <option  value="accels">Nr. of Accelerator measurements</option>
           <option  value="maxalt">Maximum altitude (m)</option>
           <option  value="minalt">Minimum altitude (m)</option>
           <option  value="maxtemp">Maximum temperature (&deg;C)</option>
@@ -65,7 +66,7 @@ svg {
       </div>
     <script type="text/javascript">
 
-var m = [29, 20, 60, 19], // top right bottom left margin
+var m = [49, 20, 60, 19], // top right bottom left margin
     w = 1420 - m[1] - m[3], // width
     h = 200 - m[0] - m[2], // height
     z = 22; // cell size
@@ -75,6 +76,7 @@ var day = d3.time.format("%w"),
     month = d3.time.format("%B"),
     percent = d3.format(".1%"),
     data,
+    colors = {},
     formatDate = d3.time.format("%Y-%m-%d"),
     formatNumber = d3.format(",d"),
     formatPercent = d3.format("+.1%");
@@ -95,6 +97,7 @@ var svg = d3.select("#years").selectAll(".year")
     .attr("transform", "translate(" + (m[3] + (w - z * 53) / 2) + "," + (m[0] + (h - z * 7) / 2) + ")");
 
 svg.append("svg:text")
+    .attr('class', 'title')
     .attr("transform", "translate(-6," + z * 3.5 + ")rotate(-90)")
     .attr("text-anchor", "middle")
     .text(String);
@@ -111,6 +114,8 @@ var rect = svg.selectAll("rect.day")
 
 rect.append("svg:title");
 
+var monthFormat = d3.time.format('%b');
+
 svg.selectAll("path.month")
     .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
   .enter().append("svg:path")
@@ -118,26 +123,58 @@ svg.selectAll("path.month")
     .attr("d", monthPath)
 ;
 
+svg.selectAll("text.month")
+    .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+    .enter().append('text')
+        .attr("class", "month")
+        .attr("y", -5)
+        .attr("x", monthOffset)
+        .text(monthFormat)
+;
+
 d3.select("select").on("change", function() {
     display(this.value);
 });
 
 d3.csv('${csv}', function(csv) {
+  var metrics = [
+    'fixes',
+    'distance',
+    'accels',
+    'maxalt', 'minalt',
+    'maxtemp', 'mintemp',
+    'maxpres', 'minpres',
+  ];
 
+  // Parse dates, numbers and handle NA's
+  csv.forEach(function(d) {
+      d.date = formatDate.parse(d.date);
+      metrics.forEach(function(m) {
+          if (d[m] === 'NA') {
+              d[m] = null;
+          } else {
+              d[m] = +d[m];
+          }
+      });
+  });
+
+  // Make color scales
+  var minc = 55;
+  var maxc = 255;
+  metrics.forEach(function(m) {
+      colors[m] =  d3.scale.linear().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+  });
+
+  // Group data per year
   data = d3.nest()
-      .key(function(d) { return (d.date = formatDate.parse(d.date)).getFullYear(); })
+      .key(function(d) { return d.date.getFullYear(); })
       .key(function(d) { return d.date; })
       .rollup(function(d) {
-          return {
-              'fixes': +d[0]['fixes'],
-              'maxalt': +d[0]['maxalt'],
-              'minalt': +d[0]['minalt'],
-              'maxtemp': +d[0]['maxtemp'],
-              'mintemp': +d[0]['mintemp'],
-              'maxpres': +d[0]['maxpres'],
-              'minpres': +d[0]['minpres'],
-              'distance': +d[0]['distance']
-          };
+          var r = {};
+          metrics.forEach(function(m) {
+              r[m] = d[0][m];
+          });
+          return r;
       })
       .map(csv);
 
@@ -146,19 +183,22 @@ d3.csv('${csv}', function(csv) {
 
 function display(metric) {
   var formatValue = formatNumber,
-       color = d3.scale.quantile();
+       color;
 
   svg.each(function(year) {
-    // TODO color range is calculated per year, should be over whole dataset
-    color
-        .domain(d3.values(data[year]).map(function(d) { return d[metric]; }))
-        .range(d3.range(55, 255));
+    color = colors[metric];
+
+    // TODO update legend with min and max domain
 
     d3.select(this).selectAll("rect.day")
       .attr("class", "day")
       .attr("style", function(d) {
           if (year in data && d in data[year]) {
+              if (data[year][d][metric] === null) {
+                return 'fill:lightgray;';
+              } else {
                 return 'fill:rgb(0,' + color(data[year][d][metric]) + ',0);';
+              }
           }
       })
       .select("title")
@@ -170,6 +210,9 @@ function display(metric) {
             }
         });
   });
+
+  d3.select('#legend').select('#low_label').text(color.domain()[0]);
+  d3.select('#legend').select('#high_label').text(color.domain()[1]);
 }
 
 var lw = 200;
@@ -205,14 +248,23 @@ legend.append("rect")
 var g = legend.append('g');
 
 g.append("text")
+ .attr('id', 'high_label')
  .attr('x', 155)
  .attr('y', 40)
  .text('High');
 
 g.append("text")
+ .attr('id', 'low_label')
  .attr('x', 0)
  .attr('y', 40)
  .text('Low');
+
+function monthOffset(t0) {
+    var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
+    d0 = +day(t0), w0 = +week(t0),
+    d1 = +day(t1), w1 = +week(t1);
+    return  (w0 + 1) * z;
+}
 
 function monthPath(t0) {
   var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
