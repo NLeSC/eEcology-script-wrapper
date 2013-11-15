@@ -9,7 +9,7 @@ function testdb(dbname, host, username, password)
 
 % pg_settings()
 
-conn = pg_connectdb(dbname, 'host', host, 'user', username, 'pass', password);
+conn = pg_connectdb(dbname, 'host', host, 'user', username, 'pass', password, 'database_toolbox', 0);
 
 res = pg_fetch(conn, 'SELECT * FROM gps.uva_individual');
 
