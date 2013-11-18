@@ -25,7 +25,7 @@ class PyKML(PythonTask):
 
     def run(self, db_url, trackers, start, end):
         self.update_state(state="RUNNING")
-        session = DBSession(db_url)
+        session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])
         filename = "{start}-{end}-{trackers}.kmz".format(start=start,
@@ -38,6 +38,7 @@ class PyKML(PythonTask):
         for tracker in trackers:
             self.track2kml(kml, session, styles, tracker['id'], tracker['color'], start, end)
 
+        session.close()
         kml.savekmz(fn)
 
         result = {}
@@ -51,7 +52,7 @@ class PyKML(PythonTask):
         # Perform a database query
         tid = Speed.device_info_serial
         dt = Speed.date_time
-        q = session().query(tid, dt,
+        q = session.query(tid, dt,
                       Speed.longitude,
                       Speed.latitude,
                       Speed.altitude,

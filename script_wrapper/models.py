@@ -149,7 +149,6 @@ def request_credentials(request):
     (username, password) = auth.strip().decode('base64').split(':', 1)
     return (username, password)
 
-
 def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
@@ -160,19 +159,25 @@ def db_url_from_request(request):
         db_url.password = password
     return str(db_url)
 
-
 def DBSession(db_url):
-    engine = create_engine(db_url)
-    Session = sessionmaker(bind=engine)
-    return Session
+    """Returns sqlalchemy db session based on db_url
+    eg.
 
+        session = DBSession('postgresql://username:password@db.e-ecology.sara.nl/eecology?sslmode=require')
 
-def make_session_from_request(request):
-    db_url = db_url_from_request(request)
+        # Do queries with session
+
+        session.close()
+    """
     engine = create_engine(db_url, poolclass=NullPool)
     Session = sessionmaker(bind=engine)
     return Session
 
+def make_session_from_request(request):
+    """Returns sqlalchemy db session based on pyramid request object"""
+    db_url = db_url_from_request(request)
+    Session = DBSession(db_url)
+    return Session
 
 def populate(session):
     """
@@ -292,18 +297,22 @@ def populate(session):
 def getAccelerationCount(db_url, device_info_serial, start, end):
     """Returns the number of acceleration rows for selected tracker and time range.
     """
-    s = DBSession(db_url)
-    q = s().query(Acceleration)
+    s = DBSession(db_url)()
+    q = s.query(Acceleration)
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
     q = q.filter(Acceleration.date_time.between(start, end))
-    return q.count()
+    acount = q.count()
+    s.close()
+    return acount
 
 
 def getGPSCount(db_url, device_info_serial, start, end):
     """Returns the number of gps rows for selected tracker and time range.
     """
-    s = DBSession(db_url)
-    q = s().query(Tracking)
+    s = DBSession(db_url)()
+    q = s.query(Tracking)
     q = q.filter(Tracking.device_info_serial == device_info_serial)
     q = q.filter(Tracking.date_time.between(start, end))
-    return q.count()
+    gcount = q.count()
+    s.close()
+    return gcount
