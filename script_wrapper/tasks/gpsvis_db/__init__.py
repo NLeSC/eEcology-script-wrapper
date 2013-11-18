@@ -1,7 +1,3 @@
-import os
-import subprocess
-from celery import Task
-from celery import current_task
 from celery.utils.log import get_task_logger
 import iso8601
 from script_wrapper.tasks import MatlabTask
@@ -56,7 +52,7 @@ class GpsVisDB(MatlabTask):
                                            )
 
         result['query'] = {'start': start,
-                           'end':end,
+                           'end': end,
                            'alt': alt,
                            'trackers': trackers,
                            }

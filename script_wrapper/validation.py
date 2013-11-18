@@ -24,7 +24,9 @@ def validateRange(count, minimum, maximum):
     Validator fails by raising a :exc:`Invalid` exception.
     """
     if count > maximum:
-        raise Invalid('Too many data points selected for this script, please reduce time range and/or number of trackers')
+        raise Invalid('Too many data points selected for this script, '
+                      + 'please reduce time range and/or number of trackers')
     if count <= minimum:
-        raise Invalid('No data points selected for this script, please increase or shift time range')
+        raise Invalid('No data points selected for this script, '
+                      + 'please increase or shift time range')
     return True

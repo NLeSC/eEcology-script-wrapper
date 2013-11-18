@@ -18,17 +18,9 @@ import signal
 import sys
 import subprocess
 from celery import Task
-from celery.signals import task_revoked
 from celery.utils.log import get_task_logger
-import iso8601
 from rpy2.robjects import IntVector
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-from sqlalchemy.engine.url import make_url
-from sqlalchemy import engine_from_config
-from sqlalchemy import MetaData
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import scoped_session
-import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
 
@@ -348,7 +340,7 @@ class MatlabTask(SubProcessTask):
         Fetched from celery config with 'matlab.location' key.
         """
         if self._matlab is None:
-            self._matlab = self.app.conf['matlab.location.'+self.matlab_version]
+            self._matlab = self.app.conf['matlab.location.' + self.matlab_version]
         return self._matlab
 
     def pargs(self):

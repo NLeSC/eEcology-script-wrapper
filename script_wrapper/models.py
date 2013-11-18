@@ -149,6 +149,7 @@ def request_credentials(request):
     (username, password) = auth.strip().decode('base64').split(':', 1)
     return (username, password)
 
+
 def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
@@ -158,6 +159,7 @@ def db_url_from_request(request):
     if password:
         db_url.password = password
     return str(db_url)
+
 
 def DBSession(db_url):
     """Returns sqlalchemy db session based on db_url
@@ -173,11 +175,13 @@ def DBSession(db_url):
     Session = sessionmaker(bind=engine)
     return Session
 
+
 def make_session_from_request(request):
     """Returns sqlalchemy db session based on pyramid request object"""
     db_url = db_url_from_request(request)
     Session = DBSession(db_url)
     return Session
+
 
 def populate(session):
     """

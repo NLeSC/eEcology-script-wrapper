@@ -1,7 +1,4 @@
-import tempfile
 import os.path
-from celery import Task
-from celery import current_task
 from celery.utils.log import get_task_logger
 import iso8601
 from mako.template import Template

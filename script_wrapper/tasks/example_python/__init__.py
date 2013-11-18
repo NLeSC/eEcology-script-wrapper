@@ -1,9 +1,5 @@
-import time
 import json
 import os
-from celery import Task
-from celery import current_task
-from celery import current_app
 from celery.utils.log import get_task_logger
 import iso8601
 from sqlalchemy import func

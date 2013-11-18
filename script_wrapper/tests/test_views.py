@@ -26,31 +26,29 @@ class TestViews(unittest.TestCase):
 
     def setUp(self):
         self.settings = {
-                         'task_output_directory': '/tmp/results',
-                         }
+                           'task_output_directory': '/tmp/results',
+                           }
         self.config = testing.setUp(settings=self.settings)
+        self.request = testing.DummyRequest()
 
     def tearDown(self):
         testing.tearDown()
 
     def testScriptId(self):
-        request = testing.DummyRequest()
-        request.matchdict = {'script': 'plot'}
-        views = Views(request)
+        self.request.matchdict = {'script': 'plot'}
+        views = Views(self.request)
 
         self.assertEqual(views.scriptid, 'plot')
 
     def testTaskId(self):
-        request = testing.DummyRequest()
-        request.matchdict = {'taskid': 'b3c84d96-4dc7-4532-a864-3573202f202a'}
-        views = Views(request)
+        self.request.matchdict = {'taskid': 'b3c84d96-4dc7-4532-a864-3573202f202a'}
+        views = Views(self.request)
 
         self.assertEqual(views.taskid, 'b3c84d96-4dc7-4532-a864-3573202f202a')
 
     def test_task_result(self):
-        request = testing.DummyRequest()
-        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
-        views = Views(request)
+        self.request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(self.request)
         mresult = Mock(AsyncResult)
         is_ready = True
         mresult.ready.return_value = is_ready
@@ -61,9 +59,8 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result, mresult)
 
     def test_task_result_must_be_ready(self):
-        request = testing.DummyRequest()
-        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
-        views = Views(request)
+        self.request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(self.request)
         mresult = Mock(AsyncResult)
         is_ready = True
         mresult.ready.return_value = is_ready
@@ -74,9 +71,8 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result, mresult)
 
     def test_task_result_must_be_ready_but_isnt(self):
-        request = testing.DummyRequest()
-        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
-        views = Views(request)
+        self.request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(self.request)
         mresult = Mock(AsyncResult)
         is_ready = False
         mresult.ready.return_value = is_ready
@@ -86,8 +82,7 @@ class TestViews(unittest.TestCase):
             views.task_result(True)
 
     def testIndex(self):
-        request = testing.DummyRequest()
-        views = Views(request)
+        views = Views(self.request)
         views.celery.tasks = {'plot': 'task1'}
 
         result = views.index()
@@ -95,9 +90,8 @@ class TestViews(unittest.TestCase):
         self.assertEqual(result, {'tasks': {'plot': 'task1'}})
 
     def testForm(self):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        views = Views(self.request)
         views.celery.tasks = {'plot': 'task1'}
 
         result = views.form()
@@ -109,9 +103,8 @@ class TestViews(unittest.TestCase):
         formjs = NamedTemporaryFile(suffix='.js')
         task = PythonTask()
         task.js_form_location = Mock(return_value=formjs.name)
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        views = Views(self.request)
         views.celery.tasks = {'plot': task}
 
         result = views.jsform()
@@ -124,14 +117,13 @@ class TestViews(unittest.TestCase):
     def testSubmit(self, dr):
         dr.return_value = 'sqlite:///'
         self.config.add_route('result', '/{taskid}')
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.json_body = 1234
+        self.request.matchdict['script'] = 'plot'
+        self.request.json_body = 1234
         task = Mock(PythonTask)
         task_result = Mock(AsyncResult)
         task_result.id = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         task.apply_async.return_value = task_result
-        views = Views(request)
+        views = Views(self.request)
         views.celery.tasks = {'plot': task}
 
         result = views.submit()
@@ -145,12 +137,11 @@ class TestViews(unittest.TestCase):
     @patch('script_wrapper.views.db_url_from_request')
     def testSubmit_InvalidQuery(self, dr):
         dr.return_value = 'sqlite:///'
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.json_body = 1234
+        self.request.matchdict['script'] = 'plot'
+        self.request.json_body = 1234
         task = Mock(PythonTask)
         task.formfields2taskargs.side_effect = Invalid('Invalid query')
-        views = Views(request)
+        views = Views(self.request)
         views.celery.tasks = {'plot': task}
 
         result = views.submit()
@@ -161,10 +152,9 @@ class TestViews(unittest.TestCase):
 
     def testStateJson(self):
         self.config.add_route('result', '/{script}/{taskid}')
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        self.request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
+        views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'b3c84d96-4dc7-4532-a864-3573202f202a'
         task_result.state = 'PENDING'
@@ -192,9 +182,8 @@ class TestViews(unittest.TestCase):
                  'result': result_url,
                  'task': 'pythontask',
                  }
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        views = Views(self.request)
         views.statejson = Mock(return_value=state)
         views.celery.tasks = {'plot': 'pythontask'}
 
@@ -204,10 +193,9 @@ class TestViews(unittest.TestCase):
 
     @patch('os.listdir')
     def testResult(self, listdir):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        self.request.matchdict['taskid'] = 'mytaskid'
+        views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.ready.return_value = True
@@ -228,10 +216,9 @@ class TestViews(unittest.TestCase):
 
     @patch('os.listdir')
     def test_result_nofiles(self, listdir):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        self.request.matchdict['taskid'] = 'mytaskid'
+        views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.ready.return_value = True
@@ -242,8 +229,7 @@ class TestViews(unittest.TestCase):
 
         result = views.result()
 
-        eresult = {
-                   'result': task_result,
+        eresult = {'result': task_result,
                    'files': [],
                    'task': 'pythontask',
                    }
@@ -251,11 +237,10 @@ class TestViews(unittest.TestCase):
 
     @patch('script_wrapper.views.FileResponse')
     def testResultFile(self, fileresponse):
-        request = testing.DummyRequest()
-        request.matchdict['script'] = 'plot'
-        request.matchdict['taskid'] = 'mytaskid'
-        request.matchdict['filename'] = 'stdout.txt'
-        views = Views(request)
+        self.request.matchdict['script'] = 'plot'
+        self.request.matchdict['taskid'] = 'mytaskid'
+        self.request.matchdict['filename'] = 'stdout.txt'
+        views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
         task_result.ready.return_value = True
@@ -264,7 +249,7 @@ class TestViews(unittest.TestCase):
         views.result_file()
 
         epath = '/tmp/results/mytaskid/stdout.txt'
-        fileresponse.assert_called_with(epath, request)
+        fileresponse.assert_called_with(epath, self.request)
 
     @patch('script_wrapper.views.make_session_from_request')
     def testSpecies(self, sm):
@@ -273,8 +258,7 @@ class TestViews(unittest.TestCase):
         config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_species}
         session.configure_mock(**config)
         sm.return_value = session
-        request = testing.DummyRequest()
-        views = Views(request)
+        views = Views(self.request)
 
         species = views.species()
 
@@ -289,8 +273,7 @@ class TestViews(unittest.TestCase):
         config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_projects}
         session.configure_mock(**config)
         sm.return_value = session
-        request = testing.DummyRequest()
-        views = Views(request)
+        views = Views(self.request)
 
         projects = views.projects()
 
@@ -305,8 +288,7 @@ class TestViews(unittest.TestCase):
         config = {'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value.distinct.return_value': mock_trackers}
         session.configure_mock(**config)
         sm.return_value = session
-        request = testing.DummyRequest()
-        views = Views(request)
+        views = Views(self.request)
 
         trackers = views.trackers()
 
@@ -317,9 +299,8 @@ class TestViews(unittest.TestCase):
 
 
     def test_revoke_task(self):
-        request = testing.DummyRequest()
-        request.matchdict['taskid'] = 'mytaskid'
-        views = Views(request)
+        self.request.matchdict['taskid'] = 'mytaskid'
+        views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.failed.return_value = False
         views.celery = Mock()

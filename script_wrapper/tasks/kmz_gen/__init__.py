@@ -1,7 +1,3 @@
-import os
-import subprocess
-from celery import Task
-from celery import current_task
 from script_wrapper.tasks import MatlabTask
 
 
