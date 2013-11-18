@@ -30,6 +30,8 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
 
     results <- dbGetQuery(conn, sql)
 
+    dbDisconnect(conn)
+
     # Save as text
     write.table(results, sep=",", row.names=FALSE, quote=FALSE, file=file.path(outputDir, "result.csv"))
 }
