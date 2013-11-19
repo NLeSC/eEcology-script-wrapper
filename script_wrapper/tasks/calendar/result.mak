@@ -45,23 +45,24 @@ path.month {
   <body>
         <div id="legend"></div>
       <div id="header">
-        <div>Tracker: ${tracker_id}</div>
-        <span>Time range: ${start} - ${end}</span>
+        <div>GPS-tracker: ${tracker_id}</div>
+        <div>Time range: ${start.strftime('%Y-%m-%d %H:%M:%S')} - ${end.strftime('%Y-%m-%d %H:%M:%S')}</div>
+        <div>Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a></div>
       </div>
       <div id="footer">
-        <div class="hint">Use the pulldown to change shown metric</div>
+        <div class="hint">Use the pulldown to change the shown metric</div>
         <div><select>
-          <option  value="fixes">Nr. of GPS fixes</option>
-          <option  value="accels">Nr. of Accelerator measurements</option>
+          <option  value="fixes">Nr. of GPS measurements</option>
+          <option  value="accels">Nr. of accelerometer measurements</option>
+          <option  value="distance">2D distance travelled (km)</option>
           <option  value="maxalt">Maximum altitude (m)</option>
+          <option  value="avgalt">Average altitude (m)</option>
           <option  value="minalt">Minimum altitude (m)</option>
           <option  value="maxtemp">Maximum temperature (&deg;C)</option>
+          <option  value="avgtemp">Average temperature (&deg;C)</option>
           <option  value="mintemp">Minimum temperature (&deg;C)</option>
-          <option  value="maxpres">Maximum pressure</option>
-          <option  value="minpres">Minimum pressure</option>
-          <option  value="distance">2D Distance travelled (km)</option>
         </select></div>
-        <div>Mouse over day to see date and value.</div>
+        <div>Move mouse over day to see date and value.</div>
         <div id="years"></div>
       </div>
     <script type="text/javascript">
@@ -141,9 +142,8 @@ d3.csv('${csv}', function(csv) {
     'fixes',
     'distance',
     'accels',
-    'maxalt', 'minalt',
-    'maxtemp', 'mintemp',
-    'maxpres', 'minpres',
+    'maxalt', 'avgalt', 'minalt',
+    'maxtemp', 'avgtemp', 'mintemp',
   ];
 
   // Parse dates, numbers and handle NA's
@@ -249,8 +249,9 @@ var g = legend.append('g');
 
 g.append("text")
  .attr('id', 'high_label')
- .attr('x', 155)
+ .attr('x', 200)
  .attr('y', 40)
+ .attr('text-anchor', 'end')
  .text('High');
 
 g.append("text")

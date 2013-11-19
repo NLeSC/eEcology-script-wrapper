@@ -11,7 +11,7 @@ ${result.result['query']}
 %endif
 
 % if len(files)>0:
-<h2>Output files</h2>
+<h2>Output</h2>
 <ol>
 % for filename in files:
 <li><a target="_new" href="${request.route_path('result_file',script=task.name, taskid=result.id, filename=filename)}">${filename}</a>

@@ -11,20 +11,24 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
     # distance from http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis
     tpl <- paste("SELECT to_char(date(date_time), 'YYYY-MM-DD') as date, ",
        " count(*) as fixes, ",
+       " sum(nraccs) as accels, ",
+       " round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
        " max(altitude) as maxalt, ",
+       " round(avg(altitude)::numeric, 2) as avgalt, ",
        " min(altitude) as minalt, ",
        " max(temperature) as maxtemp, ",
-       " min(temperature) as mintemp, ",
-       " max(pressure) as maxpres, ",
-       " min(pressure) as minpres, ",
-       " round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
-       " sum(line_counter) as accels ",
+       " round(avg(temperature)::numeric, 2) as avgtemp, ",
+       " min(temperature) as mintemp ",
        "FROM gps.uva_tracking_limited ",
-       "LEFT JOIN gps.uva_acc_start_limited USING (device_info_serial, date_time) ",
+       "LEFT JOIN ( ",
+       "  SELECT device_info_serial, date_time, count(*) as nraccs FROM gps.uva_acceleration_limited ",
+       "  GROUP BY device_info_serial, date_time ",
+       "  ) a USING (device_info_serial, date_time) ",
        "WHERE device_info_serial=%s ",
        "AND date_time BETWEEN '%s' AND '%s' ",
        "AND longitude IS NOT NULL AND userflag<>1 ",
-       "GROUP BY date(date_time)", sep="")
+       "GROUP BY date(date_time) ",
+       "ORDER BY date(date_time) ", sep="")
 
     sql <- sprintf(tpl, spheroid, TrackerIdentifier, startTime, stopTime)
 
