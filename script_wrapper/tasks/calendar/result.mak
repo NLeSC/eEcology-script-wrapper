@@ -1,17 +1,6 @@
 ## -- encoding: utf-8 -
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <title>Calendar heatmap</title>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
-    <style type="text/css">
-
-body {
-  padding-top: 20px;
-  shape-rendering: crispEdges;
-}
-
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
+<style type="text/css">
 text.title {
   font-size: 22px;
 }
@@ -40,35 +29,34 @@ path.month {
   float: right;
 }
 
-    </style>
-  </head>
-  <body>
-        <div id="legend"></div>
-      <div id="header">
-        <div>GPS-tracker: ${tracker_id}</div>
-        <div>Time range: ${start.strftime('%Y-%m-%d %H:%M:%S')} - ${end.strftime('%Y-%m-%d %H:%M:%S')}</div>
-        <div>Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a></div>
-      </div>
-      <div id="footer">
-        <div class="hint">Use the pulldown to change the shown metric</div>
-        <div><select>
-          <option  value="fixes">Nr. of GPS measurements</option>
-          <option  value="accels">Nr. of accelerometer measurements</option>
-          <option  value="distance">2D distance travelled (km)</option>
-          <option  value="maxalt">Maximum altitude (m)</option>
-          <option  value="avgalt">Average altitude (m)</option>
-          <option  value="minalt">Minimum altitude (m)</option>
-          <option  value="maxtemp">Maximum temperature (&deg;C)</option>
-          <option  value="avgtemp">Average temperature (&deg;C)</option>
-          <option  value="mintemp">Minimum temperature (&deg;C)</option>
-        </select></div>
-        <div>Move mouse over day to see date and value.</div>
-        <div id="years"></div>
-      </div>
-    <script type="text/javascript">
+select {
+  width: 240px;
+}
 
-var m = [49, 20, 60, 19], // top right bottom left margin
-    w = 1420 - m[1] - m[3], // width
+</style>
+<div id="legend"></div>
+<div>
+  <div>GPS-tracker: ${query['tracker_id']}, </div>
+  <div>Time range: ${query['start'].strftime('%Y-%m-%d %H:%M:%S')} - ${query['end'].strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
+  <div class="hint">Use the pulldown to change the shown metric
+  <select>
+    <option  value="fixes">Nr. of GPS measurements</option>
+    <option  value="accels">Nr. of accelerometer measurements</option>
+    <option  value="distance">2D distance travelled (km)</option>
+    <option  value="maxalt">Maximum altitude (m)</option>
+    <option  value="avgalt">Average altitude (m)</option>
+    <option  value="minalt">Minimum altitude (m)</option>
+    <option  value="maxtemp">Maximum temperature (&deg;C)</option>
+    <option  value="avgtemp">Average temperature (&deg;C)</option>
+    <option  value="mintemp">Minimum temperature (&deg;C)</option>
+  </select></div>
+  <div>Move mouse over day to see date and value.</div>
+  <div id="years"></div>
+  <div>Download raw data <a href="${files['result.csv']}">here</a></div>
+</div>
+<script type="text/javascript">
+var m = [49, 20, 20, 19], // top right bottom left margin
+    w = 1220 - m[1] - m[3], // width
     h = 200 - m[0] - m[2], // height
     z = 22; // cell size
 
@@ -82,7 +70,7 @@ var day = d3.time.format("%w"),
     formatNumber = d3.format(",d"),
     formatPercent = d3.format("+.1%");
 
-var year_range = d3.range(${start.year}, ${end.year}+1);
+var year_range = d3.range(${query['start'].year}, ${query['end'].year}+1);
 
 var svg = d3.select("#years").selectAll(".year")
     .data(year_range)
@@ -137,7 +125,7 @@ d3.select("select").on("change", function() {
     display(this.value);
 });
 
-d3.csv('${csv}', function(csv) {
+d3.csv('${files['result.csv']}', function(csv) {
   var metrics = [
     'fixes',
     'distance',
@@ -277,7 +265,4 @@ function monthPath(t0) {
       + "H" + (w1 + 1) * z + "V" + 0
       + "H" + (w0 + 1) * z + "Z";
 }
-
-    </script>
-  </body>
-</html>
+</script>

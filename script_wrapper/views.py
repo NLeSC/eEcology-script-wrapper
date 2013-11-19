@@ -15,7 +15,7 @@
 import os
 import logging
 from celery import current_app as celery
-from pyramid.httpexceptions import HTTPFound
+from mako.template import Template
 from pyramid.response import FileResponse
 from pyramid.view import view_config
 from script_wrapper.models import make_session_from_request
@@ -128,20 +128,34 @@ class Views(object):
 
     @view_config(route_name='result', renderer='result.mak')
     def result(self):
+        task = self.tasks()[self.scriptid]
         result = self.task_result(True)
 
         result_dir = self.task_result_directory()
-        files = []
+        files = {}
         try:
-            files = sorted(os.listdir(result_dir))
+            for filename in sorted(os.listdir(result_dir)):
+                files[filename] = self.request.route_path('result_file',
+                                                          script=task.name,
+                                                          taskid=result.id,
+                                                          filename=filename,
+                                                          )
         except OSError:
             logger.warn('Task {} resulted in no files'.format(self.taskid))
 
-        return {
-                'task': self.tasks()[self.scriptid],
+        data = {
+                'task': task,
                 'files': files,
                 'result': result,
+                'query': result.result['query'],
                 }
+        if task.result_template is None:
+            data['result_html'] = None
+        else:
+            template = Template(filename=task.result_template_location(), output_encoding='utf-8')
+            data['result_html'] = template.render(**data)
+
+        return data
 
     @view_config(route_name='result_file')
     def result_file(self):

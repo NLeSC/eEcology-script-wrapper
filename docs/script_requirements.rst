@@ -15,7 +15,7 @@ Several pieces of information about the script are required:
 * **Id**, identifier of the script, will be used in package and url.
 * **Name**, Human readable name.
 * **Description**, short description of script.
-* **Arguments** that are required to run script. Includes order, format, possible choices, db credentials and db connection string.
+* **Arguments** that are required to run script. Includes order, format, possible choices, db credentials and db connection string. An input form will be made based on the arguments.
 
 Database
 ========

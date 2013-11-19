@@ -10,13 +10,17 @@ ${result.result['query']}
 -->
 %endif
 
-% if len(files)>0:
+% if result_html is None:
+% if len(files) > 0:
 <h2>Output</h2>
 <ol>
-% for filename in files:
-<li><a target="_new" href="${request.route_path('result_file',script=task.name, taskid=result.id, filename=filename)}">${filename}</a>
+% for filename, url in files.iteritems():
+<li><a target="_new" href="${url}">${filename}</a>
 % endfor
 </ol>
+% endif
+% else:
+${result_html|n}
 % endif
 
 % if result.failed():

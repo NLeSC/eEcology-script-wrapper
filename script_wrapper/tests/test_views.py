@@ -193,23 +193,31 @@ class TestViews(unittest.TestCase):
 
     @patch('os.listdir')
     def testResult(self, listdir):
+        self.config.add_route('result_file', '/{script}/{taskid}/{filename}')
         self.request.matchdict['script'] = 'plot'
         self.request.matchdict['taskid'] = 'mytaskid'
         views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
+        task_result.result = {'query': 'myquery'}
         task_result.ready.return_value = True
         task_result.failed.return_value = False
         views.celery.AsyncResult = Mock(return_value=task_result)
-        views.celery.tasks = {'plot': 'pythontask'}
+        task = PythonTask()
+        task.name = 'plot'
+        views.celery.tasks = {'plot': task}
         listdir.return_value = ['stderr.txt', 'stdout.txt']
 
         result = views.result()
 
         eresult = {
                    'result': task_result,
-                   'files': ['stderr.txt', 'stdout.txt'],
-                   'task': 'pythontask',
+                   'files': {'stderr.txt': '/plot/mytaskid/stderr.txt',
+                             'stdout.txt': '/plot/mytaskid/stdout.txt',
+                             },
+                   'task': task,
+                   'result_html': None,
+                   'query': 'myquery',
                    }
         self.assertEqual(result, eresult)
         listdir.assert_called_with('/tmp/results/mytaskid')
@@ -221,17 +229,22 @@ class TestViews(unittest.TestCase):
         views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
+        task_result.result = {'query': 'myquery'}
         task_result.ready.return_value = True
         task_result.failed.return_value = False
         views.celery.AsyncResult = Mock(return_value=task_result)
-        views.celery.tasks = {'plot': 'pythontask'}
+        task = PythonTask()
+        task.name = 'plot'
+        views.celery.tasks = {'plot': task}
         listdir.side_effect = OSError('[Errno 2] No such file or directory: /tmp/results/mytaskid')
 
         result = views.result()
 
         eresult = {'result': task_result,
-                   'files': [],
-                   'task': 'pythontask',
+                   'files': {},
+                   'task': task,
+                   'query': 'myquery',
+                   'result_html': None,
                    }
         self.assertEqual(result, eresult)
 

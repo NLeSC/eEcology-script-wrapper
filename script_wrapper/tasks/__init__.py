@@ -41,12 +41,21 @@ class PythonTask(Task):
         If disabled this task won't be registered automatically.
     js_form : string
         Filename of javascript form.
+    result_template: string
+        Filename of Mako template to render the script results.
+        With following variables available inside template:
+
+          * `task`, that is task object or self
+          * celery `result` object
+          * `query`, same a run script response['query']
+          * `files`, dictionary of with filename as key and url as value.
 
     """
     abstract = True
     label = None
     description = None
     js_form = 'form.js'
+    result_template = None
     autoregister = True  # Change to False to hide this task
 
     def output_dir(self):
@@ -139,9 +148,16 @@ class PythonTask(Task):
         """
         return fields
 
+    def _abs_file_name(self, filename):
+        return os.path.join(self.task_dir(), filename)
+
+    def result_template_location(self):
+        """Mako template to render result content"""
+        return self._abs_file_name(self.result_template)
+
     def js_form_location(self):
         """Javascript to render ExtJS form to div with 'form' id"""
-        return os.path.join(self.task_dir(), self.js_form)
+        return self._abs_file_name(self.js_form)
 
     def sslify_dbname(self, db_url):
         """To connect to postgresql database which requires ssl add query to db name."""
