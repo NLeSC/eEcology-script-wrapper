@@ -15,8 +15,8 @@ class PyKML(PythonTask):
     label = 'KMZ file'
     description = 'Generate a KMZ file with multiple trackers.'
     autoregister = True
-    MAX_FIX_COUNT = 1000
-    MAX_FIX_TOTAL_COUNT = 10000
+    MAX_FIX_COUNT = 50000
+    MAX_FIX_TOTAL_COUNT = 50000
 
     def run(self, db_url, trackers, start, end):
         self.update_state(state="RUNNING")
