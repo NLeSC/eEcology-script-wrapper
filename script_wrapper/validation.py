@@ -25,6 +25,7 @@ def validateRange(count, minimum, maximum):
     """
     if count > maximum:
         raise Invalid('Too many data points selected for this script, '
+                      + 'selected {} data point while maximum is {}, '.format(count, maximum)
                       + 'please reduce time range and/or number of trackers')
     if count <= minimum:
         raise Invalid('No data points selected for this script, '

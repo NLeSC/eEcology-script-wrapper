@@ -27,7 +27,7 @@ logger = get_task_logger(__name__)
 class Classification(MatlabTask):
     name = 'classification'
     label = "Classification"
-    description = """Classify behavior of track"""
+    description = """Classify accelerometer data of GPS-tracker"""
     script = 'run_classificator.sh'
     MAX_ACC_COUNT = 50000
 

@@ -38,7 +38,7 @@ select {
 <div>
   <div>GPS-tracker: ${query['tracker_id']}, </div>
   <div>Time range: ${query['start'].strftime('%Y-%m-%d %H:%M:%S')} - ${query['end'].strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
-  <div class="hint">Use the pulldown to change the shown metric
+  <div>Metric:
   <select>
     <option  value="fixes">Nr. of GPS measurements</option>
     <option  value="accels">Nr. of accelerometer measurements</option>
