@@ -63,6 +63,9 @@ var m = [49, 20, 20, 19], // top right bottom left margin
     h = 200 - m[0] - m[2], // height
     z = 22; // cell size
 
+var highColor = 'rgb(0,55,0)';
+var lowColor = 'rgb(0,255,0)';
+
 var day = d3.time.format("%w"),
     week = d3.time.format("%U"),
     month = d3.time.format("%B"),
@@ -158,13 +161,11 @@ d3.csv('${files['result.csv']}', function(csv) {
   });
 
   // Make color scales
-  var minc = 55;
-  var maxc = 255;
   metrics.forEach(function(m) {
       if (m === 'maxgpsinterval' || m === 'mingpsinterval') {
-          colors[m] =  d3.time.scale().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+          colors[m] =  d3.time.scale().domain(d3.extent(csv, function(d) { return d[m]; })).interpolate(d3.interpolateRgb).range([lowColor, highColor]);
       } else {
-          colors[m] =  d3.scale.linear().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+          colors[m] =  d3.scale.linear().domain(d3.extent(csv, function(d) { return d[m]; })).interpolate(d3.interpolateRgb).range([lowColor, highColor]);
       }
   });
 
@@ -187,7 +188,7 @@ d3.csv('${files['result.csv']}', function(csv) {
 
 
 function display(metric) {
-  var color = colors[metric];;
+  var color = colors[metric];
 
   function formatMetricValue(value) {
       if (value === null) {
@@ -205,9 +206,9 @@ function display(metric) {
       .attr("style", function(d) {
           if (year in data && d in data[year]) {
               if (data[year][d][metric] === null) {
-                return 'fill:lightgray;';
+                return 'fill: lightgray;';
               } else {
-                return 'fill:rgb(0,' + color(data[year][d][metric]) + ',0);';
+                return 'fill:' + color(data[year][d][metric]) + ';';
               }
           }
       })
@@ -242,12 +243,12 @@ var gradient = legend.append("defs")
 
 gradient.append("stop")
   .attr("offset", "0%")
-  .attr("stop-color", 'rgb(0,55,0)')
+  .attr("stop-color", lowColor)
   .attr("stop-opacity", 1);
 
 gradient.append("stop")
   .attr("offset", "100%")
-  .attr("stop-color", 'rgb(0,255,0)')
+  .attr("stop-color", highColor)
   .attr("stop-opacity", 1);
 
 legend.append("rect")
