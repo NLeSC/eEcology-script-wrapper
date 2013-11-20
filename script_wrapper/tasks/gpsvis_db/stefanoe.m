@@ -16,7 +16,7 @@ close all
 % Sometimes required to find postgresql driver
 % pg_settings()
 
-conn = pg_connectdb(db_name, 'host', host, 'user', username, 'pass', password, 'database_toolbox', 0);
+conn = pg_connectdb(db_name, 'host', host, 'user', username, 'pass', password);
 
 % SV: Use function argument
 % KDevice =[620 800];%[620 629 632 639 766 769 772 775 777 800];
@@ -59,7 +59,7 @@ imgHeight = imgHeightPix / imgResolution;
 % this line is necessary for rendering without openGL drivers/physical screen
 set(0, 'DefaultFigureRenderer', 'zbuffer');
 
-tic
+tbegin=clock;
 %% read data directly from the database
 for k=1:length(KDevice)
     clear Time doy Dist ISpeed TSpeed TotNrAcc
@@ -96,6 +96,7 @@ for k=1:length(KDevice)
                ' on (t.device_info_serial = a.device_info_serial AND t.date_time = a.date_time)' , ...
                ' where ( t.date_time >= ', start,  ')',...
                ' AND ( t.date_time <= ', stop,    ')' ,...
+               ' AND ( t.device_info_serial=' , device , ')', ...
                ' AND t.userflag<>1 AND t.longitude IS NOT NULL' ,...
                ' group by   t.device_info_serial, t.date_time, a.date_time, t.speed, t.longitude, ' , ...
                ' t.latitude, t.altitude, t.temperature, t.gps_fixtime, t.positiondop, t.satellites_used, t.location ' , ...
@@ -121,15 +122,15 @@ for k=1:length(KDevice)
 
     % this fetch command actually transfers the data from database table to matlab
     % SV: Openearth database combines exec and fetch into pg_fetch
-    curs1 = pg_fetch_struct(conn, sql1);
-    curs2 = pg_fetch_struct(conn, sql2);
-    %% get the data from the cursor
-    % because previously setdbprefs is set to 'structure' devices
-    % is a struct with array fields that have the same name as the
-    % database columns.  to get the column device_info_serial from
-    % the table as an matlab array type tracks.device_info_serial
-    tracks = curs1;
-    ener = curs2
+    tic
+    disp('Fetching GPS measurements');
+    tracks = pg_fetch_struct(conn, sql1);
+    toc
+    tic
+    disp('Fetching energy measurements');
+    ener = pg_fetch_struct(conn, sql2);
+    toc
+    tic
 
     %% close the database connection
     % ( unless running more queries )
@@ -246,12 +247,13 @@ for k=1:length(KDevice)
         end
     toc
     tic
+    disp('Making plot');
     % On server there is no display
     % scrsz = get(0,'ScreenSize');
     % figure('Position',[30 scrsz(4)/20 scrsz(3)-50 scrsz(4)/1.2]);
     figure('visible','off');
         subplot(4,4,1)
-        plot(Time,Long,'k.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','longitude']),TITLE (['\fontsize{12}','sensor :', num2str(ID(1))]); grid on
+        plot(Time,Long,'k.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','longitude']),title (['\fontsize{12}','sensor :', num2str(ID(1))]); grid on
         subplot(4,4,2)
         plot(Time,Lat,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','latitude']); grid on
         subplot(4,4,3)
@@ -304,7 +306,7 @@ for k=1:length(KDevice)
 
 
     tic
-    %% Make kmz-file
+    disp('Make kmz-file');
     numTime = datenum(Year,Month,Day,Hour,Minute,Second);
     Ix = find(Year<1900|Year>2015);
     numTime(Ix)=NaN;
@@ -314,10 +316,8 @@ for k=1:length(KDevice)
 
     % filename for kmz file
     Filename=['S',Filename, 'b.kmz']
-    % open the kml file, write the header
-    fh = ge_output_start(Filename);
-     kmlStr_line=''; % start with empty kml
-     kmlStr = '';
+    % start with empty kml
+    kmlStr = '';
 
 
     % set the icontype
@@ -344,10 +344,10 @@ for k=1:length(KDevice)
     colortable1 = Colortable(:,:,Colors(k));
 
     %This is the line that connects the points
-    kmlStr_line = [kmlStr_line,ge_plot(Long, Lat,...
+    kmlStr = [kmlStr,ge_plot(Long, Lat,...
                             'lineColor', colortable1(1,:),...
                             'lineWidth',1)];
-    ge_output_string(fh, kmlStr_line);
+
 
     % FOR-loop to add every datapoint to the kml-file
     for i=2:length(Long)-1
@@ -457,14 +457,14 @@ for k=1:length(KDevice)
                 'timeSpanStart',tStart,...
                 'timeSpanStop',tStop)];
         end
-        ge_output_string(fh, kmlStr);
-        kmlStr=[];
     end
 
-    % write the footer, close the file.
-    ge_output_finish(fh);
+    % write the kml.
+    ge_output(Filename,kmlStr);
     kmlStr=[];
     fh=[];
+    toc
 end
-toc
+disp('Total elapsed time: ');
+etime(clock, tbegin)
 

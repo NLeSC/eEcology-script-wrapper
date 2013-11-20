@@ -23,7 +23,7 @@ class TestClassification(unittest.TestCase):
 
     def test_matlab_version(self):
         task = GpsVisDB()
-        self.assertEqual(task.matlab_version, '2009b')
+        self.assertEqual(task.matlab_version, '2012a')
 
     def test_convert_colors_valids(self):
         task = GpsVisDB()

@@ -12,7 +12,7 @@ class ExampleMatlab(MatlabTask):
     """Perform a db query in a Matlab executable with postgresql query"""
     script = 'run_dbq.sh'
     autoregister = False
-    matlab_version = '2009b'
+    matlab_version = '2012a'
 
     def run(self, db_url, trackers, start, end):
         u = make_url(db_url)

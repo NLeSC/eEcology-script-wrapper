@@ -211,7 +211,6 @@ class TestSubProcessTask(unittest.TestCase):
 
     @patch('subprocess.Popen')
     def test_run_unsuccessfull_return_code(self, po):
-        from subprocess import CalledProcessError
         from tempfile import mkdtemp
         root_dir = mkdtemp()
         task = tasks.SubProcessTask()
@@ -220,7 +219,7 @@ class TestSubProcessTask(unittest.TestCase):
         from os import getpid
         po.return_value.pid = getpid()
 
-        with self.assertRaises(CalledProcessError) as e:
+        with self.assertRaises(tasks.CalledProcessError) as e:
             task.run('/bin/false')
 
         self.assertEqual(e.exception.returncode, 1)
