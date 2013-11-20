@@ -59,7 +59,7 @@ imgHeight = imgHeightPix / imgResolution;
 % this line is necessary for rendering without openGL drivers/physical screen
 set(0, 'DefaultFigureRenderer', 'zbuffer');
 
-tic
+tbegin=clock;
 %% read data directly from the database
 for k=1:length(KDevice)
     clear Time doy Dist ISpeed TSpeed TotNrAcc
@@ -121,15 +121,15 @@ for k=1:length(KDevice)
 
     % this fetch command actually transfers the data from database table to matlab
     % SV: Openearth database combines exec and fetch into pg_fetch
-    curs1 = pg_fetch_struct(conn, sql1);
-    curs2 = pg_fetch_struct(conn, sql2);
-    %% get the data from the cursor
-    % because previously setdbprefs is set to 'structure' devices
-    % is a struct with array fields that have the same name as the
-    % database columns.  to get the column device_info_serial from
-    % the table as an matlab array type tracks.device_info_serial
-    tracks = curs1;
-    ener = curs2
+    tic
+    disp('Fetching GPS measurements');
+    tracks = pg_fetch_struct(conn, sql1);
+    toc
+    tic
+    disp('Fetching energy measurements');
+    ener = pg_fetch_struct(conn, sql2);
+    toc
+    tic
 
     %% close the database connection
     % ( unless running more queries )
@@ -246,12 +246,13 @@ for k=1:length(KDevice)
         end
     toc
     tic
+    disp('Making plot');
     % On server there is no display
     % scrsz = get(0,'ScreenSize');
     % figure('Position',[30 scrsz(4)/20 scrsz(3)-50 scrsz(4)/1.2]);
     figure('visible','off');
         subplot(4,4,1)
-        plot(Time,Long,'k.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','longitude']),TITLE (['\fontsize{12}','sensor :', num2str(ID(1))]); grid on
+        plot(Time,Long,'k.'); xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','longitude']),title (['\fontsize{12}','sensor :', num2str(ID(1))]); grid on
         subplot(4,4,2)
         plot(Time,Lat,'k.');xlabel(['\fontsize{12}','time doy']); ylabel(['\fontsize{12}','latitude']); grid on
         subplot(4,4,3)
@@ -304,7 +305,7 @@ for k=1:length(KDevice)
 
 
     tic
-    %% Make kmz-file
+    disp('Make kmz-file');
     numTime = datenum(Year,Month,Day,Hour,Minute,Second);
     Ix = find(Year<1900|Year>2015);
     numTime(Ix)=NaN;
@@ -465,6 +466,8 @@ for k=1:length(KDevice)
     ge_output_finish(fh);
     kmlStr=[];
     fh=[];
+    toc
 end
-toc
+disp('Total elapsed time: ');
+etime(clock, tbegin)
 
