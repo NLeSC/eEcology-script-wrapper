@@ -30,7 +30,7 @@ path.month {
 }
 
 select {
-  width: 240px;
+  width: 350px;
 }
 
 </style>
@@ -40,15 +40,18 @@ select {
   <div>Time range: ${query['start'].strftime('%Y-%m-%d %H:%M:%S')} - ${query['end'].strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
   <div>Metric:
   <select>
-    <option  value="fixes">Nr. of GPS measurements</option>
-    <option  value="accels">Nr. of accelerometer measurements</option>
-    <option  value="distance">2D distance travelled (km)</option>
-    <option  value="maxalt">Maximum altitude (m)</option>
-    <option  value="avgalt">Average altitude (m)</option>
-    <option  value="minalt">Minimum altitude (m)</option>
-    <option  value="maxtemp">Maximum temperature (&deg;C)</option>
-    <option  value="avgtemp">Average temperature (&deg;C)</option>
-    <option  value="mintemp">Minimum temperature (&deg;C)</option>
+    <option value="fixes">Nr. of GPS measurements</option>
+    <option value="accels">Nr. of accelerometer measurements</option>
+    <option value="distance">2D distance travelled (km)</option>
+    <option value="maxalt">Maximum altitude (m)</option>
+    <option value="avgalt">Average altitude (m)</option>
+    <option value="minalt">Minimum altitude (m)</option>
+    <option value="maxtemp">Maximum temperature (&deg;C)</option>
+    <option value="avgtemp">Average temperature (&deg;C)</option>
+    <option value="mintemp">Minimum temperature (&deg;C)</option>
+    <option value="minvbat">Minimum voltage battery (V)</option>
+    <option value="maxgpsinterval">Maximum interval between GPS measurements (hh:mm:ss)</option>
+    <option value="mingpsinterval">Minimum interval between GPS measurements (hh:mm:ss)</option>
   </select></div>
   <div>Move mouse over day to see date and value.</div>
   <div id="years"></div>
@@ -68,7 +71,8 @@ var day = d3.time.format("%w"),
     colors = {},
     formatDate = d3.time.format("%Y-%m-%d"),
     formatNumber = d3.format(",d"),
-    formatPercent = d3.format("+.1%");
+    formatPercent = d3.format("+.1%"),
+    formatTime = d3.time.format('%H:%M:%S');
 
 var year_range = d3.range(${query['start'].year}, ${query['end'].year}+1);
 
@@ -132,6 +136,8 @@ d3.csv('${files['result.csv']}', function(csv) {
     'accels',
     'maxalt', 'avgalt', 'minalt',
     'maxtemp', 'avgtemp', 'mintemp',
+    'minvbat',
+    'maxgpsinterval', 'mingpsinterval'
   ];
 
   // Parse dates, numbers and handle NA's
@@ -141,7 +147,12 @@ d3.csv('${files['result.csv']}', function(csv) {
           if (d[m] === 'NA') {
               d[m] = null;
           } else {
-              d[m] = +d[m];
+              if (m === 'maxgpsinterval' || m === 'mingpsinterval') {
+                  // interval is in seconds, date require ms
+                  d[m] = new Date(d[m]*1000);
+              } else {
+                  d[m] = +d[m];
+              }
           }
       });
   });
@@ -150,7 +161,11 @@ d3.csv('${files['result.csv']}', function(csv) {
   var minc = 55;
   var maxc = 255;
   metrics.forEach(function(m) {
-      colors[m] =  d3.scale.linear().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+      if (m === 'maxgpsinterval' || m === 'mingpsinterval') {
+          colors[m] =  d3.time.scale().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+      } else {
+          colors[m] =  d3.scale.linear().domain(d3.extent(csv, function(d) { return d[m]; })).rangeRound([minc, maxc]);
+      }
   });
 
   // Group data per year
@@ -169,15 +184,22 @@ d3.csv('${files['result.csv']}', function(csv) {
   display('fixes');
 });
 
+
+
 function display(metric) {
-  var formatValue = formatNumber,
-       color;
+  var color = colors[metric];;
+
+  function formatMetricValue(value) {
+      if (value === null) {
+          return 'NA';
+      }
+      if (metric === 'maxgpsinterval' || metric === 'mingpsinterval') {
+          return formatTime(value);
+      }
+      return value;
+  }
 
   svg.each(function(year) {
-    color = colors[metric];
-
-    // TODO update legend with min and max domain
-
     d3.select(this).selectAll("rect.day")
       .attr("class", "day")
       .attr("style", function(d) {
@@ -192,15 +214,15 @@ function display(metric) {
       .select("title")
         .text(function(d) {
             if (year in data && d in data[year]) {
-                return formatDate(d) + ": " + data[year][d][metric];
+                return formatDate(d) + ": " + formatMetricValue(data[year][d][metric]);
             } else {
                 return formatDate(d) + ": NA";
             }
         });
   });
 
-  d3.select('#legend').select('#low_label').text(color.domain()[0]);
-  d3.select('#legend').select('#high_label').text(color.domain()[1]);
+  d3.select('#legend').select('#low_label').text(formatMetricValue(color.domain()[0]));
+  d3.select('#legend').select('#high_label').text(formatMetricValue(color.domain()[1]));
 }
 
 var lw = 200;
