@@ -32,7 +32,7 @@ class Classification(MatlabTask):
     matlab_version = '2012a'
     MAX_ACC_COUNT = 50000
 
-    def run(self, db_url, start, end, tracker_id):
+    def run(self, db_url, start, end, tracker_id, plot_accel):
         u = make_url(db_url)
         db_name = self.sslify_dbname(u)
 
@@ -48,6 +48,7 @@ class Classification(MatlabTask):
                                                  start.isoformat(),
                                                  end.isoformat(),
                                                  data_dir,
+                                                 str(plot_accel).lower()
                                                  )
 
         result['query'] = {'start': start,
@@ -61,6 +62,7 @@ class Classification(MatlabTask):
         start = iso8601.parse_date(fields['start'])
         end = iso8601.parse_date(fields['end'])
         tracker_id = fields['id']
+        plot_accel = fields['plot_accel']
 
         # Test if selection will give results
         validateRange(getAccelerationCount(db_url, tracker_id, start, end), 0, self.MAX_ACC_COUNT)
@@ -69,4 +71,5 @@ class Classification(MatlabTask):
                 'start': start,
                 'end': end,
                 'tracker_id': tracker_id,
+                'plot_accel': plot_accel,
                 }
