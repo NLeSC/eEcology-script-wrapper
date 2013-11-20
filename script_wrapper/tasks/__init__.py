@@ -238,6 +238,14 @@ class OctaveTask(PythonTask):
         """Add self.script to Octave path"""
         self.octave.addpath(os.path.join(self.task_dir(), self.script))
 
+class CalledProcessError(Exception):
+    def __init__(self, returncode, cmd):
+        self.returncode = returncode
+        self.cmd = cmd
+        Exception.__init__(self, self.__str__())
+
+    def __str__(self):
+        return "Command '{}' returned non-zero exit status {}".format(self.cmd, self.returncode)
 
 class SubProcessTask(PythonTask):
     """Abstract task to subprocess.Popen.
@@ -316,7 +324,7 @@ class SubProcessTask(PythonTask):
         cleanup()
 
         if return_code is not 0:
-            raise subprocess.CalledProcessError(return_code, 'script')
+            raise CalledProcessError(return_code, 'script')
 
         return {'return_code': return_code}
 

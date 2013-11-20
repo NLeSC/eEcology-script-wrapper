@@ -143,11 +143,15 @@ class Views(object):
         except OSError:
             logger.warn('Task {} resulted in no files'.format(self.taskid))
 
+        query = {}
+        if result.successful():
+            query = result.result['query']
+
         data = {
                 'task': task,
                 'files': files,
                 'result': result,
-                'query': result.result['query'],
+                'query': query,
                 }
         if task.result_template is None:
             data['result_html'] = None
