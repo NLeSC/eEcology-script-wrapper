@@ -15,7 +15,7 @@ Several pieces of information about the script are required:
 * **Id**, identifier of the script, will be used in package and url.
 * **Name**, Human readable name.
 * **Description**, short description of script.
-* **Arguments** that are required to run script. Includes order, format, possible choices, db credentials and db connection string.
+* **Arguments** that are required to run script. Includes order, format, possible choices, db credentials and db connection string. An input form will be made based on the arguments.
 
 Database
 ========
@@ -83,6 +83,8 @@ Example R script to find number of timepoints of a tracker in a certain date ran
 
         results <- dbGetQuery(conn, sql)
 
+        dbDisconnect(conn)
+
         # Save as text
         dump('results', file=file.path(outputDir, "results.txt"))
     }
@@ -98,10 +100,13 @@ Example Python run function to find number of timepoints of a tracker in a certa
 
     def run(self, db_url, tracker_id, start, end):
         # Perform a database query
-        q = DBSession(db_url).query(Tracking)
+        s = DBSession(db_url)()
+        q = s.query(Tracking)
         q = q.filter(Tracking.device_info_serial==tracker_id)
         q = q.filter(Tracking.date_time.between(start, end))
         count = q.count()
+
+        s.close()
 
         # Write results to text files
         fn = os.path.join(self.output_dir(), 'result.txt')

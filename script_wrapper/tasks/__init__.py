@@ -18,17 +18,9 @@ import signal
 import sys
 import subprocess
 from celery import Task
-from celery.signals import task_revoked
 from celery.utils.log import get_task_logger
-import iso8601
 from rpy2.robjects import IntVector
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
-from sqlalchemy.engine.url import make_url
-from sqlalchemy import engine_from_config
-from sqlalchemy import MetaData
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import scoped_session
-import script_wrapper.models as models
 
 logger = get_task_logger(__name__)
 
@@ -49,12 +41,21 @@ class PythonTask(Task):
         If disabled this task won't be registered automatically.
     js_form : string
         Filename of javascript form.
+    result_template: string
+        Filename of Mako template to render the script results.
+        With following variables available inside template:
+
+          * `task`, that is task object or self
+          * celery `result` object
+          * `query`, same a run script response['query']
+          * `files`, dictionary of with filename as key and url as value.
 
     """
     abstract = True
     label = None
     description = None
     js_form = 'form.js'
+    result_template = None
     autoregister = True  # Change to False to hide this task
 
     def output_dir(self):
@@ -147,9 +148,16 @@ class PythonTask(Task):
         """
         return fields
 
+    def _abs_file_name(self, filename):
+        return os.path.join(self.task_dir(), filename)
+
+    def result_template_location(self):
+        """Mako template to render result content"""
+        return self._abs_file_name(self.result_template)
+
     def js_form_location(self):
         """Javascript to render ExtJS form to div with 'form' id"""
-        return os.path.join(self.task_dir(), self.js_form)
+        return self._abs_file_name(self.js_form)
 
     def sslify_dbname(self, db_url):
         """To connect to postgresql database which requires ssl add query to db name."""
@@ -348,7 +356,7 @@ class MatlabTask(SubProcessTask):
         Fetched from celery config with 'matlab.location' key.
         """
         if self._matlab is None:
-            self._matlab = self.app.conf['matlab.location.'+self.matlab_version]
+            self._matlab = self.app.conf['matlab.location.' + self.matlab_version]
         return self._matlab
 
     def pargs(self):

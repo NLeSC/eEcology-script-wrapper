@@ -82,7 +82,21 @@ The response is a dict with the following keys:
 1. query, the query object used as input for the script
 2. return_code, the posix return code of a executable started. Implemented when task is subclassed from SubProcessTask or MatlabTask class.
 
-7. Add unit tests
+7. Custom result page
+=====================
+
+By default the result page will consist out of a list of output files and a message whether script completed successfully.
+
+The list of output files can be replaced with an string with html.
+1. Set `result_template` in task class to a Mako template file.
+2. Construct template, the variables available inside the template are:
+
+  * `task`, that is task object or self
+  * `celery` result object
+  * `query`, same a run script response['query']
+  * `files`, dictionary of with filename as key and url as value.
+
+8. Add unit tests
 =================
 
 When script contains a lot of Python code write unit tests for it.

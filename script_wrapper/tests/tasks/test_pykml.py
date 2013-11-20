@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
 
     @patch('script_wrapper.tasks.pykml.getGPSCount')
     def test_formfields2taskargs_noerrors(self, gpscount):
-        gpscount.return_value = 10000
+        gpscount.return_value = 400
         task = PyKML()
         formfields = {
                       'start': '2013-05-14T10:11:12Z',

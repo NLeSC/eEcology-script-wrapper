@@ -1,7 +1,3 @@
-import os
-import subprocess
-from celery import Task
-from celery import current_task
 from celery.utils.log import get_task_logger
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.models import make_url
