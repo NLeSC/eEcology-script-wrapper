@@ -316,10 +316,8 @@ for k=1:length(KDevice)
 
     % filename for kmz file
     Filename=['S',Filename, 'b.kmz']
-    % open the kml file, write the header
-    fh = ge_output_start(Filename);
-     kmlStr_line=''; % start with empty kml
-     kmlStr = '';
+    % start with empty kml
+    kmlStr = '';
 
 
     % set the icontype
@@ -346,10 +344,10 @@ for k=1:length(KDevice)
     colortable1 = Colortable(:,:,Colors(k));
 
     %This is the line that connects the points
-    kmlStr_line = [kmlStr_line,ge_plot(Long, Lat,...
+    kmlStr = [kmlStr,ge_plot(Long, Lat,...
                             'lineColor', colortable1(1,:),...
                             'lineWidth',1)];
-    ge_output_string(fh, kmlStr_line);
+
 
     % FOR-loop to add every datapoint to the kml-file
     for i=2:length(Long)-1
@@ -459,12 +457,10 @@ for k=1:length(KDevice)
                 'timeSpanStart',tStart,...
                 'timeSpanStop',tStop)];
         end
-        ge_output_string(fh, kmlStr);
-        kmlStr=[];
     end
 
-    % write the footer, close the file.
-    ge_output_finish(fh);
+    % write the kml.
+    ge_output(Filename,kmlStr);
     kmlStr=[];
     fh=[];
     toc
