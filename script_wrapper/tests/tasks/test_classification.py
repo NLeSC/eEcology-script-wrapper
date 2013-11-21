@@ -35,6 +35,7 @@ class TestClassification(unittest.TestCase):
                      'id': 1234,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
+                     'plot_accel': False,
                      }
 
         taskargs = task.formfields2taskargs(formquery,
@@ -45,6 +46,7 @@ class TestClassification(unittest.TestCase):
                      'start': datetime(2013, 1, 1, tzinfo=UTC),
                      'end': datetime(2013, 10, 10, tzinfo=UTC),
                      'tracker_id': 1234,
+                     'plot_accel': False,
                      }
 
         self.assertEqual(taskargs, etaskargs)
@@ -58,6 +60,7 @@ class TestClassification(unittest.TestCase):
                      'id': 1234,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
+                     'plot_accel': False,
                      }
 
         with self.assertRaises(Invalid):
