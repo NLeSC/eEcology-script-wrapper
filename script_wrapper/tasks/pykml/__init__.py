@@ -20,6 +20,7 @@ class PyKML(PythonTask):
 
     def run(self, db_url, trackers, start, end):
         self.update_state(state="RUNNING")
+        db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])

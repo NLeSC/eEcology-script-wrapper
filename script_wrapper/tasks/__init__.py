@@ -21,6 +21,7 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from rpy2.robjects import IntVector
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
+from sqlalchemy.engine.url import make_url
 
 logger = get_task_logger(__name__)
 
@@ -76,6 +77,17 @@ class PythonTask(Task):
                 raise e
 
         return directory
+
+    def local_db_url(self, db_url):
+        """Returns db url from local worker 'sqlalchemy.url' configuration.
+
+        Takes credentials from db_url and other items (hostname, database name, port, etc.) from the configuration.
+        """
+        front_db_url = make_url(db_url)
+        worker_db_url = make_url(self.app.conf['sqlalchemy.url'])
+        worker_db_url.username = front_db_url.username
+        worker_db_url.password = front_db_url.password
+        return worker_db_url
 
     def task_dir(self):
         """Directory in which Task is defined
