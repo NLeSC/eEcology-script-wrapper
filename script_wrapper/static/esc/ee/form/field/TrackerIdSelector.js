@@ -1,3 +1,9 @@
+/**
+ * Available and selected multi select list of tracker identifiers.
+ * Tracker identifiers can be drag/drop, move buttons or double clicked to swap between selected and available.
+ *
+ * On submission will return a array of selected tracker identifiers.
+ */
 Ext.define('Esc.ee.form.field.TrackerIdSelector', {
     extend: 'Ext.ux.form.ItemSelector',
     alias: 'widget.trackerselector',

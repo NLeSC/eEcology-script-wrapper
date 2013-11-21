@@ -1,3 +1,9 @@
+/**
+ * Available and selected grids of trackers.
+ * Trackers can be drag/drop, move buttons or double clicked to swap between selected and available.
+ *
+ * On submission will return a jsonified version of selected trackers.
+ */
 Ext.define('Esc.ee.form.field.TrackerGridSelector', {
     extend: 'Ext.form.FieldContainer',
     alias: 'widget.trackergridselector',
