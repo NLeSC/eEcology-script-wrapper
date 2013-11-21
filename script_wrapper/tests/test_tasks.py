@@ -15,6 +15,7 @@
 import unittest
 import os
 from mock import patch, Mock, ANY
+from celery.result import AsyncResult
 import script_wrapper.tasks as tasks
 
 
@@ -123,6 +124,47 @@ class TestPythonTask(unittest.TestCase):
             exp += '?ssl=true&'
             exp += 'sslfactory=org.postgresql.ssl.NonValidatingFactory'
             self.assertEqual(db_name, exp)
+
+    def test_render_result_notemplate_none(self):
+        task = tasks.PythonTask()
+        task.result_template = None
+        result = Mock(AsyncResult)
+        result.successful.return_value = True
+
+        html = task.render_result(result, [])
+
+        self.assertIsNone(html)
+
+
+    def test_render_result_resultnotsuccessful_none(self):
+        task = tasks.PythonTask()
+        task.result_template = 'result.mak'
+        result = Mock(AsyncResult)
+        result.successful.return_value = False
+
+        html = task.render_result(result, [])
+
+        self.assertIsNone(html)
+
+    @patch('script_wrapper.tasks.Template')
+    def test_render_result(self, mako_template):
+        task = tasks.PythonTask()
+        task.result_template = 'result.mak'
+        task.task_dir = Mock(return_value='/tmp/task')
+        result = Mock(AsyncResult)
+        result.successful.return_value = True
+        result.result = {'query': 'myquery'}
+        from mako.template import Template
+        tpl = Mock(Template)
+        tpl.render.return_value = 'mytemplate'
+        mako_template.return_value = tpl
+        files = ['result.csv']
+
+        html = task.render_result(result, files)
+
+        self.assertEquals(html, 'mytemplate')
+        mako_template.assert_called_with(filename='/tmp/task/result.mak', output_encoding='utf-8')
+        tpl.render.assert_called_with(query='myquery', files=files)
 
 
 class TestOctaveTask(unittest.TestCase):

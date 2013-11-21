@@ -18,17 +18,17 @@ import script_wrapper.validation as swv
 
 class TestValidateRange(unittest.TestCase):
 
-    def testInRange(self):
+    def test_inrange(self):
         self.assertTrue(swv.validateRange(5, 0, 10))
 
-    def testTooLow(self):
+    def test_toolow(self):
         with self.assertRaises(swv.Invalid) as e:
             swv.validateRange(-5, 0, 10)
 
         self.assertEquals(e.exception.message,
                           'No data points selected for this script, please increase or shift time range')
 
-    def testTooHigh(self):
+    def test_toohigh(self):
         with self.assertRaises(swv.Invalid) as e:
             swv.validateRange(15, 0, 10)
 

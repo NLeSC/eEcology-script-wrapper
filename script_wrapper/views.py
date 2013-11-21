@@ -15,7 +15,6 @@
 import os
 import logging
 from celery import current_app as celery
-from mako.template import Template
 from pyramid.response import FileResponse
 from pyramid.view import view_config
 from script_wrapper.models import make_session_from_request
@@ -44,8 +43,13 @@ class Views(object):
         return self.request.matchdict['taskid']
 
     def tasks(self):
+        """Return dict of available tasks, key is task name and value is task object"""
         return {k: v for k, v in self.celery.tasks.iteritems()
                     if not k.startswith('celery.')}
+
+    def task(self):
+        """Returns current task object"""
+        return self.tasks()[self.scriptid]
 
     def task_result(self, must_be_ready=False):
         """Fetches result for `self.taskid`.
@@ -74,17 +78,16 @@ class Views(object):
 
     @view_config(route_name='apply', request_method='GET', renderer='form.mak')
     def form(self):
-        task = self.tasks()[self.scriptid]
-        return {'task': task}
+        return {'task': self.task()}
 
     @view_config(route_name='jsform')
     def jsform(self):
-        task = self.tasks()[self.scriptid]
+        task = self.task()
         return FileResponse(task.js_form_location(), self.request)
 
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
-        task = self.tasks()[self.scriptid]
+        task = self.task()
         db_url = db_url_from_request(self.request)
         try:
             kwargs = task.formfields2taskargs(self.request.json_body, db_url)
@@ -115,7 +118,7 @@ class Views(object):
     @view_config(renderer='state.mak', context=TaskNotReady)
     def statehtml(self):
         response = self.statejson()
-        response['task'] = self.tasks()[self.scriptid]
+        response['task'] = self.task()
         return response
 
     @view_config(route_name='state.json',
@@ -126,39 +129,36 @@ class Views(object):
         result.revoke(terminate=True)
         return {'success': True}
 
-    @view_config(route_name='result', renderer='result.mak')
-    def result(self):
-        task = self.tasks()[self.scriptid]
-        result = self.task_result(True)
 
-        result_dir = self.task_result_directory()
+    def result_files(self):
+        """Returns files of current result
+
+        Returns dict with key is filename and value is url to file."""
         files = {}
+        result_dir = self.task_result_directory()
         try:
             for filename in sorted(os.listdir(result_dir)):
-                files[filename] = self.request.route_path('result_file',
-                                                          script=task.name,
-                                                          taskid=result.id,
-                                                          filename=filename,
-                                                          )
+                files[filename] = self.request.route_path('result_file', script=self.scriptid,
+                    taskid=self.taskid,
+                    filename=filename)
+
         except OSError:
             logger.warn('Task {} resulted in no files'.format(self.taskid))
+        return files
 
-        query = {}
-        if result.successful():
-            query = result.result['query']
+    @view_config(route_name='result', renderer='result.mak')
+    def result(self):
+        task = self.task()
+        result = self.task_result(True)
+        files = self.result_files()
+        result_html = task.render_result(result, files)
 
         data = {
                 'task': task,
                 'files': files,
                 'result': result,
-                'query': query,
+                'result_html': result_html,
                 }
-        if task.result_template is None:
-            data['result_html'] = None
-        else:
-            template = Template(filename=task.result_template_location(), output_encoding='utf-8')
-            data['result_html'] = template.render(**data)
-
         return data
 
     @view_config(route_name='result_file')

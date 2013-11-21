@@ -19,6 +19,7 @@ import sys
 import subprocess
 from celery import Task
 from celery.utils.log import get_task_logger
+from mako.template import Template
 from rpy2.robjects import IntVector
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 from sqlalchemy.engine.url import make_url
@@ -166,6 +167,17 @@ class PythonTask(Task):
     def result_template_location(self):
         """Mako template to render result content"""
         return self._abs_file_name(self.result_template)
+
+    def render_result(self, result, files):
+        """Returns result html based on the task result and it's output files.
+
+        Returns None when there is no result_template or the result did not complete successfully.
+        """
+        if self.result_template is not None and result.successful():
+            template = Template(filename=self.result_template_location(), output_encoding='utf-8')
+            return template.render(query=result.result['query'], files=files)
+        else:
+            return None
 
     def js_form_location(self):
         """Javascript to render ExtJS form to div with 'form' id"""

@@ -34,13 +34,13 @@ class TestViews(unittest.TestCase):
     def tearDown(self):
         testing.tearDown()
 
-    def testScriptId(self):
+    def test_scriptid(self):
         self.request.matchdict = {'script': 'plot'}
         views = Views(self.request)
 
         self.assertEqual(views.scriptid, 'plot')
 
-    def testTaskId(self):
+    def test_taskid(self):
         self.request.matchdict = {'taskid': 'b3c84d96-4dc7-4532-a864-3573202f202a'}
         views = Views(self.request)
 
@@ -81,7 +81,7 @@ class TestViews(unittest.TestCase):
         with self.assertRaises(TaskNotReady):
             views.task_result(True)
 
-    def testIndex(self):
+    def test_index(self):
         views = Views(self.request)
         views.celery.tasks = {'plot': 'task1'}
 
@@ -89,7 +89,7 @@ class TestViews(unittest.TestCase):
 
         self.assertEqual(result, {'tasks': {'plot': 'task1'}})
 
-    def testForm(self):
+    def test_form(self):
         self.request.matchdict['script'] = 'plot'
         views = Views(self.request)
         views.celery.tasks = {'plot': 'task1'}
@@ -98,7 +98,7 @@ class TestViews(unittest.TestCase):
 
         self.assertEqual(result, {'task': 'task1'})
 
-    def testJsForm(self):
+    def test_jsform(self):
         from tempfile import NamedTemporaryFile
         formjs = NamedTemporaryFile(suffix='.js')
         task = PythonTask()
@@ -114,7 +114,7 @@ class TestViews(unittest.TestCase):
         formjs.close()
 
     @patch('script_wrapper.views.db_url_from_request')
-    def testSubmit(self, dr):
+    def test_submit(self, dr):
         dr.return_value = 'sqlite:///'
         self.config.add_route('result', '/{taskid}')
         self.request.matchdict['script'] = 'plot'
@@ -135,7 +135,7 @@ class TestViews(unittest.TestCase):
         task.formfields2taskargs.assert_called_with(1234, 'sqlite:///')
 
     @patch('script_wrapper.views.db_url_from_request')
-    def testSubmit_InvalidQuery(self, dr):
+    def test_submit_InvalidQuery(self, dr):
         dr.return_value = 'sqlite:///'
         self.request.matchdict['script'] = 'plot'
         self.request.json_body = 1234
@@ -150,7 +150,7 @@ class TestViews(unittest.TestCase):
                    'msg': 'Invalid query'}
         self.assertEqual(result, eresult)
 
-    def testStateJson(self):
+    def test_statejson(self):
         self.config.add_route('result', '/{script}/{taskid}')
         self.request.matchdict['script'] = 'plot'
         self.request.matchdict['taskid'] = 'b3c84d96-4dc7-4532-a864-3573202f202a'
@@ -173,7 +173,7 @@ class TestViews(unittest.TestCase):
                            'result': result_url}
         self.assertDictEqual(result, expected_result)
 
-    def testStateHtml(self):
+    def test_statehtml(self):
         result_url = '/plot/b3c84d96-4dc7-4532-a864-3573202f202a'
         state = {'state': 'PENDING',
                  'success': False,
@@ -192,14 +192,13 @@ class TestViews(unittest.TestCase):
         self.assertDictEqual(result, state)
 
     @patch('os.listdir')
-    def testResult(self, listdir):
+    def test_result(self, listdir):
         self.config.add_route('result_file', '/{script}/{taskid}/{filename}')
         self.request.matchdict['script'] = 'plot'
         self.request.matchdict['taskid'] = 'mytaskid'
         views = Views(self.request)
         task_result = Mock(AsyncResult)
         task_result.id = 'mytaskid'
-        task_result.result = {'query': 'myquery'}
         task_result.ready.return_value = True
         task_result.failed.return_value = False
         views.celery.AsyncResult = Mock(return_value=task_result)
@@ -217,7 +216,6 @@ class TestViews(unittest.TestCase):
                              },
                    'task': task,
                    'result_html': None,
-                   'query': 'myquery',
                    }
         self.assertEqual(result, eresult)
         listdir.assert_called_with('/tmp/results/mytaskid')
@@ -228,8 +226,6 @@ class TestViews(unittest.TestCase):
         self.request.matchdict['taskid'] = 'mytaskid'
         views = Views(self.request)
         task_result = Mock(AsyncResult)
-        task_result.id = 'mytaskid'
-        task_result.result = {'query': 'myquery'}
         task_result.ready.return_value = True
         task_result.failed.return_value = False
         views.celery.AsyncResult = Mock(return_value=task_result)
@@ -243,13 +239,33 @@ class TestViews(unittest.TestCase):
         eresult = {'result': task_result,
                    'files': {},
                    'task': task,
-                   'query': 'myquery',
                    'result_html': None,
                    }
         self.assertEqual(result, eresult)
 
+    def test_result_template(self):
+        self.request.matchdict['script'] = 'plot'
+        self.request.matchdict['taskid'] = 'mytaskid'
+        views = Views(self.request)
+        task_result = Mock(AsyncResult)
+        views.task_result = Mock(return_value=task_result)
+        task = PythonTask()
+        task.render_result = Mock(return_value='mytemplate')
+        views.task = Mock(return_value=task)
+        files = {'result.csv': '/plot/mytaskid/result.csv',}
+        views.result_files = Mock(return_value=files)
+
+        result = views.result()
+
+        eresult = {'result': task_result,
+                   'files': files,
+                   'task': task,
+                   'result_html': 'mytemplate',
+                   }
+        self.assertEqual(result, eresult)
+
     @patch('script_wrapper.views.FileResponse')
-    def testResultFile(self, fileresponse):
+    def test_result_file(self, fileresponse):
         self.request.matchdict['script'] = 'plot'
         self.request.matchdict['taskid'] = 'mytaskid'
         self.request.matchdict['filename'] = 'stdout.txt'
@@ -265,7 +281,7 @@ class TestViews(unittest.TestCase):
         fileresponse.assert_called_with(epath, self.request)
 
     @patch('script_wrapper.views.make_session_from_request')
-    def testSpecies(self, sm):
+    def test_species(self, sm):
         session = Mock()
         mock_species = ['Lesser Black-backed Gull']
         config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_species}
@@ -280,7 +296,7 @@ class TestViews(unittest.TestCase):
                                     }])
 
     @patch('script_wrapper.views.make_session_from_request')
-    def testProjects(self, sm):
+    def test_projects(self, sm):
         session = Mock()
         mock_projects = [('Project1')]
         config = {'return_value.query.return_value.distinct.return_value.order_by.return_value': mock_projects}
@@ -295,7 +311,7 @@ class TestViews(unittest.TestCase):
                                     }])
 
     @patch('script_wrapper.views.make_session_from_request')
-    def testTrackers(self, sm):
+    def test_trackers(self, sm):
         session = Mock()
         mock_trackers = [(1, 'Project1', 'Lesser Black-backed Gull')]
         config = {'return_value.query.return_value.join.return_value.join.return_value.order_by.return_value.distinct.return_value': mock_trackers}
