@@ -1,15 +1,17 @@
 Ext.require([
     'Esc.ee.form.Panel',
     'NLeSC.form.field.DateTimeRange',
-    'Esc.ee.store.TrackerIds',
-    'Esc.ee.form.field.TrackerCombo',
+    'Ext.ux.grid.FiltersFeature',
+    'NLeSC.eEcology.store.Trackers',
+    'NLeSC.eEcology.form.field.TrackerGrid',
     'Ext.form.field.Checkbox'
 ]);
 
 Ext.onReady(function() {
     Ext.QuickTips.init();
 
-    var store = Ext.create('Esc.ee.store.TrackerIds');
+    var tracker_store = Ext.create('NLeSC.eEcology.store.Trackers');
+    tracker_store.load();
 
     Ext.create('Esc.ee.form.Panel', {
        items: [{
@@ -21,8 +23,7 @@ Ext.onReady(function() {
            fieldLabel: 'Plot',
            boxLabel: 'Make accelerometer charts inside kml popup'
        }, {
-           xtype: 'trackercombo',
-           store: store
+           xtype: 'trackergridfield'
        }, {xtype: 'displayfield', value:'Example 355 on 2010-06-28'}]
    });
 });

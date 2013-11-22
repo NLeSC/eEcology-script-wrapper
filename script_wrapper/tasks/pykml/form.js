@@ -1,8 +1,9 @@
 Ext.require([
     'Esc.ee.form.Panel',
     'NLeSC.form.field.DateTimeRange',
-    'Esc.ee.form.field.Color',
-    'Esc.ee.form.field.TrackerGridSelector',
+    'NLeSC.eEcology.form.field.Color',
+    'Ext.ux.grid.FiltersFeature',
+    'NLeSC.eEcology.form.field.TrackerSelector',
     'Ext.grid.plugin.CellEditing',
     'Ext.form.RadioGroup',
     'Ext.form.field.Radio'
@@ -11,18 +12,41 @@ Ext.require([
 Ext.onReady(function() {
     Ext.QuickTips.init();
 
-    Ext.define('Esc.eEcology.model.Tracker', {
-        extend: 'Ext.data.Model',
-        fields: ['id',
-                 'species',
-                 'project',
-                 {name: 'color', defaultValue: 'FFFF50'},
-                 ]
+    var tracker_store = Ext.create('NLeSC.eEcology.store.Trackers');
+    tracker_store.load();
+
+    Ext.define('ColoredTracker', {
+        extend: 'NLeSC.eEcology.model.Tracker',
+        fields: [{
+            name: 'color',
+            defaultValue: 'FFFF50'
+        }, {
+            name: 'size',
+            defaultValue: 'small'
+        }, {
+            name: 'speed',
+            defaultValue: 4
+        }]
     });
 
-   var sstore = Ext.create('Ext.data.Store', {
-       model: 'Esc.eEcology.model.Tracker'
-   });
+    var colors = ['FFFF50', 'F7E8AA', 'FFA550', '5A5AFF', 'BEFFFF', '8CFF8C',
+            'FF8CFF', 'AADD96', 'FFD3AA', 'C6C699', 'E5BFC6', 'DADADA',
+            'C6B5C4', 'C1D1BF', '000000'];
+
+    var sstore = Ext.create('Ext.data.Store', {
+        model: 'ColoredTracker',
+        listeners: {
+            add: function(s, records) {
+                // Cycle through colors when selecting a tracker
+                records.forEach(function(record) {
+                    if (!('color' in record.data)) {
+                        record.set('color',
+                                colors[record.index % colors.length]);
+                    }
+                });
+            }
+        }
+    });
 
    var selected_trackers = {
        title            : 'Selected',

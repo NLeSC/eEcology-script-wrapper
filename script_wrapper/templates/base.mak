@@ -14,6 +14,7 @@
 <link rel="stylesheet" type="text/css" href="${request.static_path('script_wrapper:static/ext/examples/ux/grid/css/RangeMenu.css')}" />
 <script type="text/javascript" src="${request.static_path('script_wrapper:static/ext/ext-all.js')}"></script>
 <script type="text/javascript" src="${request.static_path('script_wrapper:static/js/datetime.js')}"></script>
+<script type="text/javascript" src="${request.static_path('script_wrapper:static/js/eecology-shared.js')}"></script>
 <%block name="header"/>
 </head>
 <body>

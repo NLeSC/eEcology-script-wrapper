@@ -1,20 +1,16 @@
-Ext.require([
-    'Esc.ee.store.TrackerIds',
-    'Esc.ee.form.field.TrackerIdSelector',
-    'Esc.ee.form.Panel'
-]);
+Ext.require(['Ext.ux.grid.FiltersFeature',
+        'NLeSC.eEcology.form.field.TrackerSelector', 'Esc.ee.form.Panel']);
 
 Ext.onReady(function() {
-	Ext.QuickTips.init();
+    Ext.QuickTips.init();
 
-	var store = Ext.create('Esc.ee.store.TrackerIds');
+    var tracker_store = Ext.create('NLeSC.eEcology.store.Trackers');
+    tracker_store.load();
 
-	Ext.create('Esc.ee.form.Panel', {
-       items: [{
-    	   xtype: 'trackerselector',
-    	   allowBlank: false,
-    	   store: store,
-    	   height: 300,
-       }],
-   });
+    Ext.create('Esc.ee.form.Panel', {
+        items: [{
+            xtype: 'trackergridselector',
+            height: 300
+        }]
+    });
 });
