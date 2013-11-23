@@ -1,7 +1,6 @@
 from celery.utils.log import get_task_logger
 import iso8601
 from script_wrapper.tasks import MatlabTask
-from script_wrapper.models import make_url
 from script_wrapper.models import getGPSCount
 from script_wrapper.validation import validateRange
 
@@ -34,7 +33,7 @@ class GpsVisDB(MatlabTask):
 
         # TODO pass tracker_ids as '[1 2]' and in Matlab eval
         # See http://blogs.mathworks.com/loren/2011/01/06/matlab-data-types-as-arguments-to-standalone-applications/
-        db_url = make_url(db_url)
+        db_url = self.local_db_url(db_url)
         db_name = self.sslify_dbname(db_url)
 
         # execute

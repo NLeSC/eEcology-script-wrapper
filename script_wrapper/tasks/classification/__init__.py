@@ -17,7 +17,6 @@ import os
 from celery.utils.log import get_task_logger
 import iso8601
 from script_wrapper.tasks import MatlabTask
-from script_wrapper.models import make_url
 from script_wrapper.models import getAccelerationCount
 from script_wrapper.validation import validateRange
 
@@ -33,7 +32,7 @@ class Classification(MatlabTask):
     MAX_ACC_COUNT = 50000
 
     def run(self, db_url, start, end, tracker_id, plot_accel):
-        u = make_url(db_url)
+        u = self.local_db_url(db_url)
         db_name = self.sslify_dbname(u)
 
         # Data directory, classification requires a classification model

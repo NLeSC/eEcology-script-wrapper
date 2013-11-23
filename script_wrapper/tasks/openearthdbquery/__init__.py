@@ -1,6 +1,5 @@
 from celery.utils.log import get_task_logger
 from script_wrapper.tasks import MatlabTask
-from script_wrapper.models import make_url
 
 logger = get_task_logger(__name__)
 
@@ -15,7 +14,7 @@ class OpenEarthDbQuery(MatlabTask):
     matlab_version = '2012a'
 
     def run(self, db_url):
-        u = make_url(db_url)
+        u = self.local_db_url(db_url)
         username = u.username
         password = u.password
         dbname = self.sslify_dbname(u)
