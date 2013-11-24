@@ -98,8 +98,11 @@ Example Python run function to find number of timepoints of a tracker in a certa
 
 .. code-block:: python
 
+    from script_wrapper.models import DBSession, Tracking
+
     def run(self, db_url, tracker_id, start, end):
         # Perform a database query
+        db_url = self.local_db_url(db_url)
         s = DBSession(db_url)()
         q = s.query(Tracking)
         q = q.filter(Tracking.device_info_serial==tracker_id)

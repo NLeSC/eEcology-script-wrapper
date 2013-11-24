@@ -1,7 +1,6 @@
 import os.path
 from celery.utils.log import get_task_logger
 import iso8601
-from script_wrapper.models import make_url
 from script_wrapper.models import getGPSCount
 from script_wrapper.tasks import RTask
 from script_wrapper.validation import validateRange
@@ -26,7 +25,7 @@ class Calendar(RTask):
                           }
                 }
 
-        u = make_url(db_url)
+        u = self.local_db_url(db_url)
 
         # create csv
         self.r.calendar(u.username, u.password, u.database, u.host,

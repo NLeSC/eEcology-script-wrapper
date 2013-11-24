@@ -17,6 +17,7 @@ class ExamplePython(PythonTask):
 
     def run(self, db_url, trackers, start, end):
         # Perform a database query
+        db_url = self.local_db_url(db_url)
         s = DBSession(db_url)()
         tid = Tracking.device_info_serial
         dt = Tracking.date_time

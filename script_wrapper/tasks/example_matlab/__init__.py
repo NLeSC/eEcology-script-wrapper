@@ -1,9 +1,9 @@
 import os
 from celery.utils.log import get_task_logger
-from script_wrapper.models import make_url
 from script_wrapper.tasks import MatlabTask
 
 logger = get_task_logger(__name__)
+
 
 class ExampleMatlab(MatlabTask):
     name = 'examplematlab'
@@ -15,7 +15,7 @@ class ExampleMatlab(MatlabTask):
     matlab_version = '2012a'
 
     def run(self, db_url, trackers, start, end):
-        u = make_url(db_url)
+        u = self.local_db_url(db_url)
         db_name = self.sslify_dbname(u)
 
         # execute
