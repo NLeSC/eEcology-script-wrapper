@@ -18,7 +18,7 @@ class PyKML(PythonTask):
     MAX_FIX_COUNT = 50000
     MAX_FIX_TOTAL_COUNT = 50000
 
-    def run(self, db_url, trackers, start, end):
+    def run(self, db_url, trackers, start, end, icon):
         self.update_state(state="RUNNING")
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
@@ -35,7 +35,7 @@ class PyKML(PythonTask):
         for tracker in trackers:
             self.track2kml(kml, session, styles,
                            tracker['id'], tracker['color'],
-                           start, end)
+                           start, end, icon)
 
         session.close()
         kml.savekmz(fn)
@@ -44,6 +44,7 @@ class PyKML(PythonTask):
         result['query'] = {'start': start.isoformat(),
                            'end': end.isoformat(),
                            'trackers': trackers,
+                           'icon': icon,
                            }
         return result
 
@@ -152,6 +153,7 @@ class PyKML(PythonTask):
         start = iso8601.parse_date(fields['start'])
         end = iso8601.parse_date(fields['end'])
         trackers = fields['trackers']
+        icon = fields['icon']
 
         # Test if selection will give results
         total_gps_count = 0
@@ -165,4 +167,5 @@ class PyKML(PythonTask):
                 'start': start,
                 'end': end,
                 'trackers': trackers,
+                'icon': icon,
                 }
