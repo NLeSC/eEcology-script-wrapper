@@ -26,6 +26,8 @@ This means only use table/views everyone can use eg. only use ``\*_limited`` vie
 The database stores datetime with UTC timezone. Datetimes from the submit form are also in UTC timezone.
 Inside script make sure you use **UTC timezone** when quering database and generating output.
 
+The script will be called with database credentials, hostname and database name.
+
 Matlab
 ======
 

@@ -18,7 +18,7 @@ class PyKML(PythonTask):
     MAX_FIX_COUNT = 50000
     MAX_FIX_TOTAL_COUNT = 50000
 
-    def run(self, db_url, trackers, start, end):
+    def run(self, db_url, trackers, start, end, icon):
         self.update_state(state="RUNNING")
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
@@ -31,11 +31,13 @@ class PyKML(PythonTask):
                                        )
         fn = os.path.join(self.output_dir(), filename)
         kml = simplekml.Kml(open=0)
+        if icon == 'arrow':
+            kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
         styles = self.create_styles()
         for tracker in trackers:
             self.track2kml(kml, session, styles,
                            tracker['id'], tracker['color'],
-                           start, end)
+                           start, end, icon)
 
         session.close()
         kml.savekmz(fn)
@@ -44,12 +46,13 @@ class PyKML(PythonTask):
         result['query'] = {'start': start.isoformat(),
                            'end': end.isoformat(),
                            'trackers': trackers,
+                           'icon': icon,
                            }
         return result
 
     def track2kml(self, kml, session, styles,
                   tracker_id, base_color,
-                  start, end):
+                  start, end, icon='circle'):
         # Perform a database query
         tid = Speed.device_info_serial
         dt = Speed.date_time
@@ -83,7 +86,10 @@ class PyKML(PythonTask):
         for tid, dt, lon, lat, alt, spd, dire in q.all():
             parts.append((lon, lat))
             pnt = folder.newpoint()
-            pnt.style = self.speed2style(styles, base_color, spd)
+            if icon == 'arrow':
+                pnt.style = self.direction2style(styles, base_color, spd, dire)
+            else:
+                pnt.style = self.speed2style(styles, base_color, spd)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
                                          spd=spd, dir=dire,
@@ -148,10 +154,21 @@ class PyKML(PythonTask):
 
         return style
 
+    def direction2style(self, styles, base_color, spd, heading):
+        style = simplekml.Style()
+        style.iconstyle.icon.href = 'files/arrow.png'
+        style.iconstyle.heading = heading
+        style.iconstyle.scale = 0.8
+        # Copy color from speed style
+        speed_style = self.speed2style(styles, base_color, spd)
+        style.iconstyle.color = speed_style.iconstyle.color
+        return style
+
     def formfields2taskargs(self, fields, db_url):
         start = iso8601.parse_date(fields['start'])
         end = iso8601.parse_date(fields['end'])
         trackers = fields['trackers']
+        icon = fields['icon']
 
         # Test if selection will give results
         total_gps_count = 0
@@ -165,4 +182,5 @@ class PyKML(PythonTask):
                 'start': start,
                 'end': end,
                 'trackers': trackers,
+                'icon': icon,
                 }

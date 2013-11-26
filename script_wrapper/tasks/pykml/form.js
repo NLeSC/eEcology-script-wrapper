@@ -103,6 +103,15 @@ Ext.onReady(function() {
        items: [{
            xtype: 'datetimerange'
        }, {
+           xtype: 'radiogroup',
+           fieldLabel: 'Icon shape',
+           columns: 2,
+           items: [{
+               boxLabel: 'Circle', name: 'icon', inputValue: 'circle', checked: true
+           }, {
+               boxLabel: 'Direction arrow', name: 'icon', inputValue: 'arrow'
+           }]
+       }, {
            xtype: 'trackergridselector',
            id: 'trackers',
            buttons: ['add', 'remove'],
