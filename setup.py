@@ -24,6 +24,7 @@ requires = [
     'rst2pdf',  # to create PDF of documentation
     'sphinx_bootstrap_theme',  # to create nice looking html documentation
     'simplekml',  # for pykml task
+    'gpxdata', # for gpx task
 ]
 
 setup(name='script_wrapper',
