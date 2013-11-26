@@ -109,7 +109,7 @@ Ext.onReady(function() {
            items: [{
                boxLabel: 'Circle', name: 'icon', inputValue: 'circle', checked: true
            }, {
-               boxLabel: 'Direction arrow', name: 'icon', inputValue: 'arrow'
+               boxLabel: 'Arrow', name: 'icon', inputValue: 'arrow'
            }]
        }, {
            xtype: 'trackergridselector',
