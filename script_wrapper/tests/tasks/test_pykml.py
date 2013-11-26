@@ -45,7 +45,8 @@ class Test(unittest.TestCase):
         formfields = {
                       'start': '2013-05-14T10:11:12Z',
                       'end': '2013-05-15T08:33:34Z',
-                      'trackers': [{'id': 1234, 'color': '1177FF'}]
+                      'trackers': [{'id': 1234, 'color': '1177FF'}],
+                      'icon': 'circle'
                       }
         db_url = 'postgresql://localhost/eecology'
         taskargs = task.formfields2taskargs(formfields, db_url)
@@ -53,6 +54,7 @@ class Test(unittest.TestCase):
         etaskargs = {'db_url': 'postgresql://localhost/eecology',
                      'end': datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                      'start': datetime(2013, 5, 14, 10, 11, 12, tzinfo=UTC),
-                     'trackers': [{'color': '1177FF', 'id': 1234}]
+                     'trackers': [{'color': '1177FF', 'id': 1234}],
+                     'icon': 'circle',
                      }
         self.assertDictEqual(taskargs, etaskargs)

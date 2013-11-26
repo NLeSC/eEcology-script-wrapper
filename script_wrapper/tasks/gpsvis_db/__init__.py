@@ -89,7 +89,7 @@ class GpsVisDB(MatlabTask):
         for tracker in trackers:
             gps_count = getGPSCount(db_url, tracker['id'], start, end)
             total_gps_count += gps_count
-            validateRange(gps_count, 0, self.MAX_FIX_COUNT)
+            validateRange(gps_count, 0, self.MAX_FIX_COUNT, tracker['id'])
             tracker['color'] = self.convert_colors(tracker)
         validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
 

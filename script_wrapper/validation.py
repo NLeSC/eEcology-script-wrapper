@@ -17,17 +17,26 @@ class Invalid(Exception):
     pass
 
 
-def validateRange(count, minimum, maximum):
+def validateRange(count, minimum, maximum, tracker_id=None):
     """Validator which succeeds if the value it is passed is greater
     or equal to ``minimum`` and less than or equal to ``maximum``.
 
     Validator fails by raising a :exc:`Invalid` exception.
     """
-    if count > maximum:
-        raise Invalid('Too many data points selected for this script, '
-                      + 'selected {} data points while maximum is {}, '.format(count, maximum)
-                      + 'please reduce time range and/or number of trackers')
-    if count <= minimum:
-        raise Invalid('No data points selected for this script, '
-                      + 'please increase or shift time range')
+    if tracker_id is None:
+        if count > maximum:
+            raise Invalid('Too many data points selected for this script, '
+                          + 'selected {} data points while maximum is {}, '.format(count, maximum)
+                          + 'please reduce time range and/or number of trackers')
+        if count <= minimum:
+            raise Invalid('No data points selected for this script, '
+                          + 'please increase or shift time range')
+    else:
+        if count > maximum:
+            raise Invalid('Too many data points selected for this script, '
+                          + 'selected {} data points while maximum is {} for tracker {}, '.format(count, maximum, tracker_id)
+                          + 'please reduce time range and/or number of trackers')
+        if count <= minimum:
+            raise Invalid('No data points selected for tracker {} for this script, '.format(tracker_id)
+                          + 'please increase or shift time range')
     return True
