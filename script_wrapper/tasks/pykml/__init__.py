@@ -31,6 +31,8 @@ class PyKML(PythonTask):
                                        )
         fn = os.path.join(self.output_dir(), filename)
         kml = simplekml.Kml(open=0)
+        if icon == 'arrow':
+            kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
         styles = self.create_styles()
         for tracker in trackers:
             self.track2kml(kml, session, styles,
@@ -50,7 +52,7 @@ class PyKML(PythonTask):
 
     def track2kml(self, kml, session, styles,
                   tracker_id, base_color,
-                  start, end):
+                  start, end, icon='circle'):
         # Perform a database query
         tid = Speed.device_info_serial
         dt = Speed.date_time
@@ -84,7 +86,10 @@ class PyKML(PythonTask):
         for tid, dt, lon, lat, alt, spd, dire in q.all():
             parts.append((lon, lat))
             pnt = folder.newpoint()
-            pnt.style = self.speed2style(styles, base_color, spd)
+            if icon == 'arrow':
+                pnt.style = self.direction2style(styles, base_color, spd, dire)
+            else:
+                pnt.style = self.speed2style(styles, base_color, spd)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
                                          spd=spd, dir=dire,
@@ -147,6 +152,16 @@ class PyKML(PythonTask):
         if spd < 5:
             style = color_scheme[3]
 
+        return style
+
+    def direction2style(self, styles, base_color, spd, heading):
+        style = simplekml.Style()
+        style.iconstyle.icon.href = 'files/arrow.png'
+        style.iconstyle.heading = heading
+        style.iconstyle.scale = 0.8
+        # Copy color from speed style
+        speed_style = self.speed2style(styles, base_color, spd)
+        style.iconstyle.color = speed_style.iconstyle.color
         return style
 
     def formfields2taskargs(self, fields, db_url):
