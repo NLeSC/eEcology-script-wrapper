@@ -118,7 +118,7 @@ Have multiple slaves with celery workers and local database. Script results will
 
    description     "Script wrapper worker"
 
-   start on filesystem or runlevel [2345]
+   start on (mounted MOUNTPOINT=/shared)
    stop on runlevel [!2345]
 
    setuid verhoes
