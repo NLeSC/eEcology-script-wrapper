@@ -20,6 +20,6 @@ Ext.Loader.setConfig({
 
 <h2>${task.label}</h2>
 <div id="description">
-${task.description}
+${task.description|n}
 </div>
 <div id="form"></div>
