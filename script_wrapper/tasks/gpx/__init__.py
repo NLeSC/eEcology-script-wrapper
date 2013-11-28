@@ -33,6 +33,7 @@ class Gpx(PythonTask):
         doc = gpxdata.Document([], 'eEcology')
         self.track2gpx(doc, session, tracker_id, start, end)
         doc.writeGPX(fn)
+        session.close()
 
         result = {}
         result['query'] = {'start': start.isoformat(),
