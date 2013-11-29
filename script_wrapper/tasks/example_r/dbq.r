@@ -11,7 +11,8 @@ exampler <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
 
     tpl <- paste("SELECT device_info_serial, count(*) FROM gps.uva_tracking_limited ",
        "WHERE device_info_serial IN (%s) ",
-       "AND date_time BETWEEN '%s' AND '%s'",
+       "AND date_time BETWEEN '%s' AND '%s' ",
+       "AND userflag <> 1 AND longitude IS NOT NULL",
        "GROUP BY device_info_serial")
     sql = sprintf(tpl, TrackerIdentifiersCommaJoined, startTime, stopTime)
 

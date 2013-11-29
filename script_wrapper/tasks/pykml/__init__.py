@@ -67,6 +67,7 @@ class PyKML(PythonTask):
         q = q.filter(dt.between(start, end))
         q = q.filter(Speed.longitude != None)
         q = q.filter(Speed.direction != None)
+        q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt)
 
         tpl = """

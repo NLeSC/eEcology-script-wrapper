@@ -3,7 +3,7 @@ from celery.utils.log import get_task_logger
 import iso8601
 import simplekml
 from script_wrapper.tasks import PythonTask
-from script_wrapper.models import DBSession, Speed, getGPSCount
+from script_wrapper.models import DBSession, Tracking, getGPSCount
 from script_wrapper.validation import validateRange
 import gpxdata
 
@@ -44,23 +44,23 @@ class Gpx(PythonTask):
 
     def track2gpx(self, doc, session, tracker_id, start, end):
         # Perform a database query
-        tid = Speed.device_info_serial
-        dt = Speed.date_time
+        tid = Tracking.device_info_serial
+        dt = Tracking.date_time
         q = session.query(tid, dt,
-                          Speed.longitude,
-                          Speed.latitude,
-                          Speed.altitude,
+                          Tracking.longitude,
+                          Tracking.latitude,
+                          Tracking.altitude,
                           )
         q = q.filter(tid == tracker_id)
         q = q.filter(dt.between(start, end))
-        q = q.filter(Speed.longitude != None)
-        q = q.filter(Speed.direction != None)
+        q = q.filter(Tracking.longitude != None)
+        q = q.filter(Tracking.userflag == 0)
         q = q.order_by(dt)
 
         track = gpxdata.Track("Tracker "+str(tracker_id))
         trkseg = gpxdata.TrackSegment()
         for tid, dt, lon, lat, alt in q.all():
-            point = gpxdata.Point(lat,lon, alt, dt)
+            point = gpxdata.Point(lat, lon, alt, dt)
             trkseg.append(point)
         track.append(trkseg)
         doc.append(track)

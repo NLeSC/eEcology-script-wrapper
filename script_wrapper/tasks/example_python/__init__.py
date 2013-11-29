@@ -24,6 +24,8 @@ class ExamplePython(PythonTask):
         q = s.query(tid, func.count(tid))
         q = q.filter(tid.in_(trackers))
         q = q.filter(dt.between(start, end))
+        q = q.filter(Tracking.userflag == 0)
+        q = q.filter(Tracking.longitude != None)
         q = q.group_by(tid)
         r = q.all()
         msg = json.dumps(r)

@@ -82,6 +82,7 @@ class Tracking(Base):
     z_speed = Column(Float)
     speed_accuracy = Column(Float)
     location = GeometryColumn(Geometry(2))
+    userflag = Column(Integer)
 
 
 class Speed(Base):
@@ -111,6 +112,7 @@ class Speed(Base):
     speed = Column(Float)
     speed3d = Column(Float)
     direction = Column(Float)
+    userflag = Column(Integer)
 
 
 class Acceleration(Base):
@@ -247,6 +249,11 @@ def populate(session):
         # edit dump.sql.gz so search_path includes public schema
         gunzip -c gps_dump.sql.gz | psql -U eecology -W eecology
 
+        # sync rights
+        pg_dump -h ***** -U ***** -t gps.uva_access_device -t gps.uva_access_individual --inserts eecology > rights.sql
+        psql -U eecology eecology < rights.sql
+        rm rights.sql
+
     """
     engine = session.get_bind()
     # Create schema
@@ -321,6 +328,7 @@ def getGPSCount(db_url, device_info_serial, start, end):
     q = s.query(Tracking)
     q = q.filter(Tracking.device_info_serial == device_info_serial)
     q = q.filter(Tracking.date_time.between(start, end))
+    q = q.filter(Tracking.userflag == 0)
     gcount = q.count()
     s.close()
     return gcount
