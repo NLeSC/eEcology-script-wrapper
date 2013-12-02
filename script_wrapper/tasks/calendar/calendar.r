@@ -8,37 +8,53 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
 
     spheroid = 'SPHEROID["WGS 84",6378137,298.257223563]'
 
-    # distance from http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis
-    tpl <- paste("SELECT to_char(date(date_time), 'YYYY-MM-DD') as date, ",
-       " count(*) as fixes, ",
-       " sum(nraccs) as accels, ",
-       " round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
-       " max(altitude) as maxalt, ",
-       " round(avg(altitude)::numeric, 2) as avgalt, ",
-       " min(altitude) as minalt, ",
-       " max(t.temperature) as maxtemp, ",
-       " round(avg(t.temperature)::numeric, 2) as avgtemp, ",
-       " min(t.temperature) as mintemp, ",
-       " min(vbat) as minvbat, ",
-       " date_part('epoch', min(gpsinterval)) as mingpsinterval, date_part('epoch', max(gpsinterval)) as maxgpsinterval ",
-       "FROM gps.uva_tracking_limited t ",
-       "LEFT JOIN gps.uva_energy_limited e USING (device_info_serial, date_time) ",
-       "LEFT JOIN ( ",
-       "  SELECT device_info_serial, date_time, count(*) as nraccs FROM gps.uva_acceleration_limited ",
-       "  GROUP BY device_info_serial, date_time ",
-       "  ) a USING (device_info_serial, date_time) ",
-       "LEFT JOIN ( ",
-       "  SELECT device_info_serial, date_time, date_time - lag(date_time) over (order by device_info_serial, date_time) as gpsinterval ",
-       "  FROM gps.uva_tracking_limited ",
-       "  WHERE device_info_serial=%s AND  ",
-       "  date_time BETWEEN '%s' AND '%s' AND longitude IS NOT NULL AND userflag<>1 ",
-       ") i USING (device_info_serial, date_time) ",
-       "WHERE device_info_serial=%s ",
-       "AND date_time BETWEEN '%s' AND '%s' AND longitude IS NOT NULL AND userflag<>1 ",
-       "GROUP BY date(date_time) ",
-       "ORDER BY date(date_time) ", sep="")
+    tpl <- paste(
+        "SELECT ",
+        "* ",
+        "FROM (",
+        "  SELECT ",
+        "    date(date_time) as date, ",
+        "    count(*) as fixes, ",
+        "    -- Lengt of line of point == distance, see http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis",
+        "    round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
+        "    max(altitude) as maxalt, round(avg(altitude)::numeric, 2) as avgalt, min(altitude) as minalt, ",
+        "    max(tr.temperature) as maxtemp, round(avg(tr.temperature)::numeric, 2) as avgtemp, min(tr.temperature) as mintemp, ",
+        "    min(vbat) as minvbat ",
+        "  FROM gps.uva_tracking_limited tr ",
+        "  LEFT JOIN gps.uva_energy_limited USING (device_info_serial, date_time) ",
+        "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
+        "  AND longitude IS NOT NULL AND userflag<>1 ",
+        "  GROUP BY date(date_time) ",
+        ") t ",
+        "-- Add accelerometer",
+        "LEFT JOIN ( ",
+        "  SELECT date(date_time) as date, count(*) as accels ",
+        "  FROM gps.uva_tracking_limited ",
+        "  JOIN gps.uva_acceleration_limited USING (device_info_serial, date_time) ",
+        "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
+        "  AND longitude IS NOT NULL AND userflag<>1 ",
+        "  GROUP BY date(date_time) ",
+        ") a USING (date) ",
+        "-- Add intervals",
+        "LEFT JOIN ( ",
+        "  -- cannot use group by and lag in same query so do nested query",
+        "  SELECT date(date_time) as date, date_part('epoch', min(gpsinterval)) as mingpsinterval, date_part('epoch', max(gpsinterval)) as maxgpsinterval ",
+        "    FROM ( ",
+        "    SELECT date_time, date_time - lag(date_time) over (order by device_info_serial, date_time) as gpsinterval ",
+        "    FROM gps.uva_tracking_limited ",
+        "    WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
+        "    AND longitude IS NOT NULL AND userflag<>1 ",
+        "  ) ti ",
+        "  GROUP BY date(date_time) ",
+        " ) i USING (date) ",
+        "ORDER BY date"
+    , sep="")
 
-    sql <- sprintf(tpl, spheroid, TrackerIdentifier, startTime, stopTime, TrackerIdentifier, startTime, stopTime)
+    sql <- sprintf(tpl, spheroid,
+                   TrackerIdentifier, startTime, stopTime,
+                   TrackerIdentifier, startTime, stopTime,
+                   TrackerIdentifier, startTime, stopTime
+                   )
 
     results <- dbGetQuery(conn, sql)
 
