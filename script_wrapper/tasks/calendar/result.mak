@@ -75,7 +75,7 @@ var day = d3.time.format("%w"),
     formatDate = d3.time.format("%Y-%m-%d"),
     formatNumber = d3.format(",d"),
     formatPercent = d3.format("+.1%"),
-    formatTime = d3.time.format('%H:%M:%S');
+    formatTime = d3.time.format.utc('%H:%M:%S');
 
 var year_range = d3.range(${query['start'].year}, ${query['end'].year}+1);
 
