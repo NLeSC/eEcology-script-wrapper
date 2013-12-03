@@ -20,10 +20,11 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "    max(altitude) as maxalt, round(avg(altitude)::numeric, 2) as avgalt, min(altitude) as minalt, ",
         "    max(tr.temperature) as maxtemp, round(avg(tr.temperature)::numeric, 2) as avgtemp, min(tr.temperature) as mintemp, ",
         "    min(vbat) as minvbat ",
-        "  FROM gps.uva_tracking_limited tr ",
-        "  LEFT JOIN gps.uva_energy_limited USING (device_info_serial, date_time) ",
+        # Make sure locations are ordered by date_time, see http://postgis.refractions.net/documentation/manual-1.5/ST_MakeLine.html
+        "  FROM (SELECT * FROM gps.uva_tracking_limited ",
         "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
-        "  AND longitude IS NOT NULL AND userflag<>1 ",
+        "  AND longitude IS NOT NULL AND userflag<>1 ORDER BY date_time ) tr",
+        "  LEFT JOIN gps.uva_energy_limited USING (device_info_serial, date_time) ",
         "  GROUP BY date(date_time) ",
         ") t ",
         # Add accelerometer
