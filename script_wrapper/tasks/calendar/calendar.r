@@ -15,7 +15,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "  SELECT ",
         "    date(date_time) as date, ",
         "    count(*) as fixes, ",
-        "    -- Lengt of line of point == distance, see http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis",
+        # Lengt of line of point == distance, see http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis
         "    round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
         "    max(altitude) as maxalt, round(avg(altitude)::numeric, 2) as avgalt, min(altitude) as minalt, ",
         "    max(tr.temperature) as maxtemp, round(avg(tr.temperature)::numeric, 2) as avgtemp, min(tr.temperature) as mintemp, ",
@@ -26,7 +26,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "  AND longitude IS NOT NULL AND userflag<>1 ",
         "  GROUP BY date(date_time) ",
         ") t ",
-        "-- Add accelerometer",
+        # Add accelerometer
         "LEFT JOIN ( ",
         "  SELECT date(date_time) as date, count(*) as accels ",
         "  FROM gps.uva_tracking_limited ",
@@ -35,9 +35,9 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "  AND longitude IS NOT NULL AND userflag<>1 ",
         "  GROUP BY date(date_time) ",
         ") a USING (date) ",
-        "-- Add intervals",
+        # Add intervals
         "LEFT JOIN ( ",
-        "  -- cannot use group by and lag in same query so do nested query",
+        # cannot use group by and lag in same query so do nested query
         "  SELECT date(date_time) as date, date_part('epoch', min(gpsinterval)) as mingpsinterval, date_part('epoch', max(gpsinterval)) as maxgpsinterval ",
         "    FROM ( ",
         "    SELECT date_time, date_time - lag(date_time) over (order by device_info_serial, date_time) as gpsinterval ",
