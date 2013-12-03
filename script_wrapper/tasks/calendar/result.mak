@@ -195,7 +195,14 @@ function display(metric) {
           return 'NA';
       }
       if (metric === 'maxgpsinterval' || metric === 'mingpsinterval') {
-          return formatTime(value);
+          // Interval can be longer than one day, so prepend number of days
+          if (value < (1000*60*60*24)) {
+              return formatTime(value);
+          } else {
+              var day_part = formatTime(value);
+              var days = Math.floor(value/(1000*60*60*24));
+              return days + " days " + day_part;
+          }
       }
       return value;
   }
