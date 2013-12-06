@@ -26,7 +26,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "  GROUP BY date(date_time) ",
         ") t ",
         # Add energy
-        "LEFT JOIN ( ",
+        "FULL JOIN ( ",
         "  SELECT date(date_time) as date, min(vbat) as minvbat ",
         "  FROM gps.uva_energy_limited ",
         "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
