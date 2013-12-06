@@ -18,15 +18,20 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         # Lengt of line of point == distance, see http://gis.stackexchange.com/questions/19369/total-great-circle-distance-along-a-path-of-points-postgis
         "    round((ST_Length_Spheroid(ST_MakeLine(location),'%s')/1000.0)::numeric, 3) AS distance, ",
         "    max(altitude) as maxalt, round(avg(altitude)::numeric, 2) as avgalt, min(altitude) as minalt, ",
-        "    max(tr.temperature) as maxtemp, round(avg(tr.temperature)::numeric, 2) as avgtemp, min(tr.temperature) as mintemp, ",
-        "    min(vbat) as minvbat ",
+        "    max(tr.temperature) as maxtemp, round(avg(tr.temperature)::numeric, 2) as avgtemp, min(tr.temperature) as mintemp ",
         # Make sure locations are ordered by date_time, see http://postgis.refractions.net/documentation/manual-1.5/ST_MakeLine.html
         "  FROM (SELECT * FROM gps.uva_tracking_limited ",
         "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
         "  AND longitude IS NOT NULL AND userflag<>1 ORDER BY date_time ) tr",
-        "  LEFT JOIN gps.uva_energy_limited USING (device_info_serial, date_time) ",
         "  GROUP BY date(date_time) ",
         ") t ",
+        # Add energy
+        "LEFT JOIN ( ",
+        "  SELECT date(date_time) as date, min(vbat) as minvbat ",
+        "  FROM gps.uva_energy_limited ",
+        "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
+        "  GROUP BY date(date_time) ",
+        ") e USING (date) ",
         # Add accelerometer
         "LEFT JOIN ( ",
         "  SELECT date(date_time) as date, count(*) as accels ",
@@ -52,6 +57,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
     , sep="")
 
     sql <- sprintf(tpl, spheroid,
+                   TrackerIdentifier, startTime, stopTime,
                    TrackerIdentifier, startTime, stopTime,
                    TrackerIdentifier, startTime, stopTime,
                    TrackerIdentifier, startTime, stopTime
