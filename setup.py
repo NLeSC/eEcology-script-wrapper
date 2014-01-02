@@ -7,7 +7,7 @@ requires = [
     'Paste',
     'pyramid_debugtoolbar',
     'psycopg2',  # eecology is Postresql
-    'sqlalchemy',
+    'sqlalchemy==0.8.4',
     'geoalchemy',  # required for PostGIS geometry column type
     'pyramid_celery',
     'celery',
