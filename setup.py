@@ -28,8 +28,10 @@ requires = [
     'gpxdata', # for gpx task
 ]
 
+from script_wrapper import __version__
+
 setup(name='script_wrapper',
-      version='0.0',
+      version=__version__,
       description='Run Matlab, R scripts via web front-end',
       long_description="",
       classifiers=[

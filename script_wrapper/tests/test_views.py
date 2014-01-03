@@ -15,6 +15,7 @@
 import unittest
 from mock import Mock, patch
 from pyramid import testing
+from pyramid.exceptions import HTTPNotFound
 from pyramid.response import FileResponse
 from celery.result import AsyncResult
 from script_wrapper.tasks import PythonTask
@@ -39,6 +40,20 @@ class TestViews(unittest.TestCase):
         views = Views(self.request)
 
         self.assertEqual(views.scriptid, 'plot')
+
+    def test_task(self):
+        self.request.matchdict = {'script': 'plot'}
+        views = Views(self.request)
+        views.celery.tasks = {'plot': 'task1'}
+
+        self.assertEqual(views.task(), 'task1')
+
+    def test_task_invalidtaskname_notfound(self):
+        self.request.matchdict = {'script': 'plotblablabla'}
+        views = Views(self.request)
+
+        with self.assertRaises(HTTPNotFound):
+            views.task()
 
     def test_taskid(self):
         self.request.matchdict = {'taskid': 'b3c84d96-4dc7-4532-a864-3573202f202a'}
