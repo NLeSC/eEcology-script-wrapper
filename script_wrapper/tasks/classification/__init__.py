@@ -29,6 +29,7 @@ class Classification(MatlabTask):
     description = """Classify accelerometer data of GPS-tracker"""
     script = 'run_classificator.sh'
     matlab_version = '2012a'
+    autoregister = False
     MAX_ACC_COUNT = 50000
 
     def run(self, db_url, start, end, tracker_id, plot_accel):
