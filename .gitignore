@@ -11,3 +11,4 @@ data/
 /.coverage
 docs/_build
 script_wrapper/static/ext*
+dist/

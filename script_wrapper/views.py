@@ -15,6 +15,7 @@
 import os
 import logging
 from celery import current_app as celery
+from pyramid.exceptions import HTTPNotFound
 from pyramid.response import FileResponse
 from pyramid.view import view_config
 from script_wrapper.models import make_session_from_request
@@ -49,7 +50,10 @@ class Views(object):
 
     def task(self):
         """Returns current task object"""
-        return self.tasks()[self.scriptid]
+        try:
+            return self.tasks()[self.scriptid]
+        except KeyError:
+            raise HTTPNotFound
 
     def task_result(self, must_be_ready=False):
         """Fetches result for `self.taskid`.
@@ -128,7 +132,6 @@ class Views(object):
         result = self.task_result()
         result.revoke(terminate=True)
         return {'success': True}
-
 
     def result_files(self):
         """Returns files of current result

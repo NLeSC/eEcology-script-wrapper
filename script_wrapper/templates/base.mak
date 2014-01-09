@@ -35,6 +35,7 @@
 </li>
                 </ul>
             </div>
+            <span style="color: grey;"><%! from script_wrapper import __version__ %>v${__version__}</span>
             <div id="lifewatch">
                 <a href="http://www.lifewatch.eu" target="_new"><img
                     src="${request.static_path('script_wrapper:static/images/lifewatch4.png')}"

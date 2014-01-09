@@ -20,12 +20,16 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS, DENY_ALL
 from sqlalchemy import engine_from_config
 
+__version_info__ = ('2', '0', '0')
+__version__ = '.'.join(__version_info__)
+
 
 class RootFactory(object):
     __acl__ = [(Allow, Authenticated, ALL_PERMISSIONS), DENY_ALL]
 
     def __init__(self, request):
         pass
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
