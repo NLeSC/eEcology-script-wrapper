@@ -111,21 +111,21 @@ class PyKML(PythonTask):
 
     def create_styles(self):
         color_schemes = [
-                           ['FFFFFF50','FFFDD017','FFC68E17', 'FF733C00'],  # OK GEEL -DONKERGEEL
-                           ['FFF7E8AA','FFF9E070','FFFCB514', 'FFA37F14'],  # OK GEEL -GEELGROEN
-                           ['FFFFA550','FFEB4100','FFFF0000', 'FF7D0000'],  # OK ORANJE ROOD
-                           ['FF5A5AFF','FF0000FF','FF0000AF', 'FF00004B'],  # OK FEL BLAUW
-                           ['FFBEFFFF','FF00FFFF','FF00B9B9', 'FF007373'],  # OK LICHT BLAUW
-                           ['FF8CFF8C','FF00FF00','FF00B900', 'FF004B00'],  #  FEL GROEN
-                           ['FFFF8CFF','FFFF00FF','FFA500A5', 'FF4B004B'],  #  OK PAARS
-                           ['FFAADD96','FF60C659','FF339E35', 'FF3A7728'],  # OK GROEN
-                           ['FFFFD3AA','FFF9BA82','FFF28411', 'FFBF5B00'],  # OK
-                           ['FFC6C699','FFAAAD75','FF6B702B', 'FF424716'],  # OK
-                           ['FFE5BFC6','FFD39EAF','FFA05175', 'FF7F284F'],  # OK  ROZE-PAARS
-                           ['FFDADADA','FFC3C3C3','FF999999', 'FF3C3C3C'],  #  VAN WIT NAAR DONKERGRIJS
-                           ['FFC6B5C4','FFA893AD','FF664975', 'FF472B59'],  # OK BLAUWPAARS
-                           ['FFC1D1BF','FF7FA08C','FF5B8772', 'FF21543F'],  # OK GRIJSGROEN
-                           ['FF000000','FF000000','7D000000', '10000000'],  # BLACK
+                           ['FFFFFF50', 'FFFDD017', 'FFC68E17', 'FF733C00'],  # OK GEEL -DONKERGEEL
+                           ['FFF7E8AA', 'FFF9E070', 'FFFCB514', 'FFA37F14'],  # OK GEEL -GEELGROEN
+                           ['FFFFA550', 'FFEB4100', 'FFFF0000', 'FF7D0000'],  # OK ORANJE ROOD
+                           ['FF5A5AFF', 'FF0000FF', 'FF0000AF', 'FF00004B'],  # OK FEL BLAUW
+                           ['FFBEFFFF', 'FF00FFFF', 'FF00B9B9', 'FF007373'],  # OK LICHT BLAUW
+                           ['FF8CFF8C', 'FF00FF00', 'FF00B900', 'FF004B00'],  #  FEL GROEN
+                           ['FFFF8CFF', 'FFFF00FF', 'FFA500A5', 'FF4B004B'],  #  OK PAARS
+                           ['FFAADD96', 'FF60C659', 'FF339E35', 'FF3A7728'],  # OK GROEN
+                           ['FFFFD3AA', 'FFF9BA82', 'FFF28411', 'FFBF5B00'],  # OK
+                           ['FFC6C699', 'FFAAAD75', 'FF6B702B', 'FF424716'],  # OK
+                           ['FFE5BFC6', 'FFD39EAF', 'FFA05175', 'FF7F284F'],  # OK  ROZE-PAARS
+                           ['FFDADADA', 'FFC3C3C3', 'FF999999', 'FF3C3C3C'],  #  VAN WIT NAAR DONKERGRIJS
+                           ['FFC6B5C4', 'FFA893AD', 'FF664975', 'FF472B59'],  # OK BLAUWPAARS
+                           ['FFC1D1BF', 'FF7FA08C', 'FF5B8772', 'FF21543F'],  # OK GRIJSGROEN
+                           ['FF000000', 'FF000000', '7D000000', '10000000'],  # BLACK
                         ]
 
         styles = {}
@@ -179,7 +179,7 @@ class PyKML(PythonTask):
             validateRange(gps_count, 0, self.MAX_FIX_COUNT, tracker['id'])
         validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
 
-        return {'db_url':  db_url,
+        return {'db_url': db_url,
                 'start': start,
                 'end': end,
                 'trackers': trackers,
