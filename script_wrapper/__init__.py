@@ -19,9 +19,7 @@ from pyramid.authentication import RemoteUserAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import Allow, Authenticated, ALL_PERMISSIONS, DENY_ALL
 from sqlalchemy import engine_from_config
-
-__version_info__ = ('2', '0', '0')
-__version__ = '.'.join(__version_info__)
+from .version import __version__
 
 
 class RootFactory(object):

@@ -13,17 +13,27 @@ Octave, R, redis are available in epel repo::
   chkconfig redis on
   /etc/init.d/redis start
 
-Python-2.7 is needed for R integration, it is not-standard on rh6 so use a repo.
-See http://developerblog.redhat.com/2013/02/14/setting-up-django-and-python-2-7-on-red-hat-enterprise-6-the-easy-way/
+Python-2.7 is needed for R integration, it is not-standard on rh6 so use compile it by hand.
 
 As root::
 
-  sh -c 'wget -qO- http://people.redhat.com/bkabrda/scl_python27.repo >> /etc/yum.repos.d/scl.repo'
-  yum install python27
+  yum groupinstall "Development tools"
+  yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel xz
+  wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz
+  xz -d Python-2.7.6.tar.xz
+  tar -xf Python-2.7.6.tar
+  cd Python-2.7.6
+  ./configure
+  make
+  make altinstall
+  wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+  python2.7 ez_setup.py
+  wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+  python2.7 get-pip.py
+  pip install virtualenv
 
 As application runner::
 
-  scl enable python27 bash
   cd $APPHOME
   virtualenv env
   . env/bin/activate

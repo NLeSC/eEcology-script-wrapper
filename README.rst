@@ -16,7 +16,7 @@ Issue tracker at https://services.e-ecology.sara.nl/redmine/projects/uvagps with
 Copyrights & Disclaimers
 ------------------------
 
-Octopus is copyrighted by the Netherlands eScience Center and releases under
+eEcology script wrapper is copyrighted by the Netherlands eScience Center and releases under
 the Apache License, Version 2.0.
 
 See <http://www.esciencecenter.nl> for more information on the Netherlands

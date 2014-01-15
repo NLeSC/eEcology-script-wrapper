@@ -24,11 +24,11 @@ requires = [
     'rst2pdf',  # to create PDF of documentation
     'sphinx_bootstrap_theme',  # to create nice looking html documentation
     'simplekml',  # for pykml task
-    'python_dateutil', # requirement for gpxdata
+    'python_dateutil',  # requirement for gpxdata
     'gpxdata', # for gpx task
 ]
 
-from script_wrapper import __version__
+exec(open('script_wrapper/version.py').read())
 
 setup(name='script_wrapper',
       version=__version__,
