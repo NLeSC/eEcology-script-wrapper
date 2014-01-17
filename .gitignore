@@ -12,3 +12,4 @@ data/
 docs/_build
 script_wrapper/static/ext*
 dist/
+script_wrapper/static/docs

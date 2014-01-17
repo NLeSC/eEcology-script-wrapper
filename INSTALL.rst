@@ -55,18 +55,21 @@ And edit it to fit needs.
 Web application start/stop
 --------------------------
 
-Copy `extras/init.d/script-wrapper` into `/etc/init.d/`.
+Copy `extras/init/script-wrapper-web.conf` into `/etc/init/`.
 Edit the application root and config filename variable.
-Start with `/etc/init.d/script-wrapper start`.
-Start during boot with `chkconfig script-wrapper on`.
+Start with `start script-wrapper-web`.
 
 Worker start/stop
 -----------------
 
-Copy `extras/init.d/script-wrapper-worker` into `/etc/init.d`.
+Copy `extras/init/script-wrapper-worker` into `/etc/init`.
 Edit the application root and config filename variable.
-Start with `/etc/init.d/script-wrapper-worker start`.
-Start during boot with `chkconfig script-wrapper-worker on`.
+Start with `start script-wrapper-worker`.
+
+Monitoring web application and work
+-----------------------------------
+
+Nagios plugins are available in `extras/nagios`.
 
 Apache configuration
 --------------------
@@ -105,8 +108,8 @@ Enable it by restarting apache with `/etc/init.d/httpd restart`.
 
 See https://services.e-ecology.sara.nl/redmine/projects/uvagps/wiki/Apache_authentication_against_DB to add db authentication.
 
-Script wrapper worker
----------------------
+Script wrapper distributed workers
+----------------------------------
 
 To distribute work in cloud have one master machine with the web front-end and redis server.
 Have multiple slaves with celery workers and local database. Script results will be shared over NFS.
