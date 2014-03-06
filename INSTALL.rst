@@ -50,6 +50,10 @@ Appliction configuration
 
   cp development.ini-dist development.ini
 
+Or
+  
+  cp production.ini-dist production.ini
+
 And edit it to fit needs.
 
 Web application start/stop
@@ -74,7 +78,7 @@ Nagios plugins are available in `extras/nagios`.
 Apache configuration
 --------------------
 
-Create `/etc/httpd/conf.d/script-wrapper.conf` with following content::
+Create `/etc/httpd/conf.d/script-wrapper.conf` with following content or copy `extras/apache/script-wrapper-web.conf`::
 
   <Location /sw>
     AuthType basic

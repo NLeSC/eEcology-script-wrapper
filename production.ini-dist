@@ -1,0 +1,83 @@
+[app:main]
+use = egg:script_wrapper
+
+pyramid.reload_templates = false
+pyramid.debug_authorization = false
+pyramid.debug_notfound = false
+pyramid.debug_routematch = false
+pyramid.debug_templates = false
+pyramid.default_locale_name = en
+pyramid.includes = pyramid_celery
+#                   pyramid_debugtoolbar
+#                   pyramid_tm
+
+# sqlalchemy.url = sqlite:///celery.db
+
+mako.directories = script_wrapper:templates
+
+# Use redis as broker+resultstore
+BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+# Use sqlite as broker+resultstore
+# !!! DO NOT USE sqlite broker as it has memory leak !!!
+#BROKER_URL = "sqla+sqlite:///%(here)s/data/celery.broker.db"
+#CELERY_RESULT_BACKEND = database
+#CELERY_RESULT_DBURI = sqlite:///%(here)s/data/celery.results.db
+
+CELERY_IMPORTS = ("script_wrapper.tasks", )
+CELERY_DISABLE_RATE_LIMITS = True
+# Must be able to send revoke signal to cancel a task
+CELERY_SEND_EVENTS = True
+# Task expire in 12 weeks
+CELERY_TASK_RESULT_EXPIRES = 7257600
+
+sqlalchemy.url = postgresql://db.e-ecology.sara.nl/eecology?sslmode=require
+matlab.location.2012a = /opt/MATLAB/MATLAB_Compiler_Runtime/v717
+task_output_directory = %(here)s/data
+
+[server:main]
+use = egg:gunicorn#main
+host = 0.0.0.0
+port = 6543
+workers = 4
+user = script-wrapper
+
+# Begin logging configuration
+
+[loggers]
+keys = root, script_wrapper, sqlalchemy
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = DEBUG
+handlers = console
+
+[logger_script_wrapper]
+level = DEBUG
+handlers =
+qualname = script_wrapper
+
+[logger_sqlalchemy]
+level = INFO
+handlers =
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s
+
+# End logging configuration

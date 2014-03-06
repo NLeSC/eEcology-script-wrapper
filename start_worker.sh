@@ -1,5 +1,6 @@
 #!/bin/sh
+. env/bin/activate
+pceleryd production.ini
 
-echo '. env/bin/activate;pceleryd development.ini' | scl enable python27 -
 
 

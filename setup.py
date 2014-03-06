@@ -19,13 +19,14 @@ requires = [
     'scipy',  # required by oct2py
     'numpy',  # required by scipy
     'mock',
-    'nose',
+    'nose',  # to run tests
     'sphinx',
     'rst2pdf',  # to create PDF of documentation
     'sphinx_bootstrap_theme',  # to create nice looking html documentation
     'simplekml',  # for pykml task
     'python_dateutil',  # requirement for gpxdata
     'gpxdata', # for gpx task
+    'gunicorn',  # production wsgi server
 ]
 
 exec(open('script_wrapper/version.py').read())
