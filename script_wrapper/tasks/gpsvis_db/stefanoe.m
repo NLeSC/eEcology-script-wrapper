@@ -79,7 +79,7 @@ for k=1:length(KDevice)
     % SV: Openearth database fetch has no setdbprefs
     % setdbprefs('DataReturnFormat','structure');
 
-	% SV: Only use uva_*_limited views, so everyone using scripts wrapper can execute queries
+	% SV: Only use ee_*_limited views, so everyone using scripts wrapper can execute queries
     % sql queries
     sql1 = strcat('select t.device_info_serial, t.date_time, a.date_time, ', ...
                ' date_part(''year''::text, t.date_time) AS year, ',...

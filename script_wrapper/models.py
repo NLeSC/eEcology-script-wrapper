@@ -87,7 +87,7 @@ class Tracking(Base):
 
 
 class Speed(Base):
-    __tablename__ = 'ee_tracking_speed_limited'  # uva_tracking_speed
+    __tablename__ = 'ee_tracking_speed_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -117,7 +117,7 @@ class Speed(Base):
 
 
 class Acceleration(Base):
-    __tablename__ = 'ee_acceleration_limited'  # uva_acceleration101
+    __tablename__ = 'ee_acceleration_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     key_name = Column(String)
@@ -127,7 +127,7 @@ class Acceleration(Base):
 
 
 class Energy(Base):
-    __tablename__ = 'ee_energy_limited'  # uva_energy101
+    __tablename__ = 'ee_energy_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     key_name = Column(String)
@@ -212,15 +212,15 @@ def populate(session):
     Grant other users select rights::
 
         GRANT USAGE ON SCHEMA gps TO public;
-        GRANT SELECT ON TABLE gps.uva_device_limited_device_info_serial_seq TO public;
-        GRANT SELECT ON TABLE gps.uva_tracking_limited_device_info_serial_seq TO public;
-        GRANT SELECT ON TABLE gps.uva_device_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_individual_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_track_session_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_tracking_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_tracking_speed_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_tracking_acceleration_limited TO public;
-        GRANT SELECT ON TABLE gps.uva_energy_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_tracker_limited_device_info_serial_seq TO public;
+        GRANT SELECT ON TABLE gps.ee_tracking_limited_device_info_serial_seq TO public;
+        GRANT SELECT ON TABLE gps.ee_tracker_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_individual_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_track_session_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_tracking_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_tracking_speed_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_tracking_acceleration_limited TO public;
+        GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
 
         -- Create elevation schema
         CREATE SCHEMA elevation;
@@ -253,10 +253,7 @@ def populate(session):
         gunzip -c gps_dump.sql.gz | psql -U eecology -W eecology
 
         # sync rights
-        pg_dump -h ***** -U ***** -t gps.uva_access_device -t gps.uva_access_individual --inserts eecology > rights.sql
-        psql -U eecology eecology < rights.sql
-        rm rights.sql
-
+        # TODO 2 acces tables have been replaced with admin schema, dump and import admin schema
     """
     engine = session.get_bind()
     # Create schema
@@ -270,8 +267,8 @@ def populate(session):
     Base.metadata.create_all(engine)
     # Fill tables
     for tid in range(1, 10):
-        device = Tracker(device_info_serial=tid)
-        session.add(device)
+        tracker = Tracker(device_info_serial=tid)
+        session.add(tracker)
         rn = 'C-{}'.format(tid)
         individual = Individual(ring_number=rn,
                                 species='Lesser Black-backed Gull',
