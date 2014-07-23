@@ -11,6 +11,6 @@ function testdb(dbname, host, username, password)
 
 conn = pg_connectdb(dbname, 'host', host, 'user', username, 'pass', password);
 
-res = pg_fetch(conn, 'SELECT * FROM gps.uva_individual');
+res = pg_fetch(conn, 'SELECT * FROM gps.ee_tracker_limited');
 
 display(res);

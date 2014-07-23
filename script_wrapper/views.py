@@ -20,7 +20,7 @@ from pyramid.response import FileResponse
 from pyramid.view import view_config
 from script_wrapper.models import make_session_from_request
 from script_wrapper.models import db_url_from_request
-from script_wrapper.models import Device, Individual, TrackSession
+from script_wrapper.models import Tracker, Individual, TrackSession
 from script_wrapper.validation import Invalid
 
 logger = logging.getLogger(__package__)
@@ -177,12 +177,12 @@ class Views(object):
     def trackers(self):
         Session = make_session_from_request(self.request)()
 
-        q = Session.query(Device.device_info_serial,
-                          TrackSession.project_leader,
+        q = Session.query(Tracker.device_info_serial,
+                          TrackSession.key_name,
                           Individual.species,
                           )
         q = q.join(TrackSession).join(Individual)
-        q = q.order_by(Device.device_info_serial).distinct()
+        q = q.order_by(Tracker.device_info_serial).distinct()
         trackers = []
         for tid, project, species in q:
             trackers.append({'id': tid,
@@ -211,8 +211,8 @@ class Views(object):
     def projects(self):
         Session = make_session_from_request(self.request)()
 
-        q = Session.query(TrackSession.project_leader).distinct()
-        q = q.order_by(TrackSession.project_leader)
+        q = Session.query(TrackSession.key_name).distinct()
+        q = q.order_by(TrackSession.key_name)
         projects = []
         for pid in q:
             projects.append({'id': pid, 'text': pid})

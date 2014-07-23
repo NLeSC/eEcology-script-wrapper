@@ -26,7 +26,7 @@ display(getenv('DB_PASSWORD'));
 % dburl = 'jdbc:postgresql://localhost:5432/flysafe';
 
 conn = database(dbname, username, password, 'org.postgresql.Driver',dburl);
-sql1 = 'SELECT device_info_serial, date_time FROM gps.uva_device_limited';
+sql1 = 'SELECT device_info_serial, date_time FROM gps.ee_device_limited';
 results = fetch(conn,sql1);
 display(sql1);
 display(results)

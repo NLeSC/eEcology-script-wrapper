@@ -31,15 +31,15 @@ logger = logging.getLogger('script_wrapper')
 GPS_SCHEMA = 'gps'
 
 
-class Device(Base):
-    __tablename__ = 'uva_device_limited'
+class Tracker(Base):
+    __tablename__ = 'ee_tracker_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
 
 
 class Individual(Base):
-    __tablename__ = 'uva_individual_limited'
+    __tablename__ = 'ee_individual_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
     ring_number = Column(String, primary_key=True)
@@ -47,26 +47,27 @@ class Individual(Base):
 
 
 class TrackSession(Base):
-    __tablename__ = 'uva_track_session_limited'
+    __tablename__ = 'ee_track_session_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
+    key_name = Column(String)
     device_info_serial = Column(Integer,
-                                ForeignKey(Device.device_info_serial),
+                                ForeignKey(Tracker.device_info_serial),
                                 primary_key=True,
                                 )
     ring_number = Column(String,
                          ForeignKey(Individual.ring_number),
                          primary_key=True,
                          )
-    project_leader = Column(String)
 
 
 class Tracking(Base):
-    __tablename__ = 'uva_tracking_limited'
+    __tablename__ = 'ee_tracking_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
 
+    key_name = Column(String)
     device_info_serial = Column(Integer, primary_key=True)
-    date_time = Column(DateTime)
+    date_time = Column(DateTime, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
     altitude = Column(Integer)
@@ -86,7 +87,7 @@ class Tracking(Base):
 
 
 class Speed(Base):
-    __tablename__ = 'uva_tracking_speed_limited'  # uva_tracking_speed
+    __tablename__ = 'ee_tracking_speed_limited'  # uva_tracking_speed
     __table_args__ = {'schema': GPS_SCHEMA}
 
     device_info_serial = Column(Integer, primary_key=True)
@@ -116,20 +117,22 @@ class Speed(Base):
 
 
 class Acceleration(Base):
-    __tablename__ = 'uva_acceleration_limited'  # uva_acceleration101
+    __tablename__ = 'ee_acceleration_limited'  # uva_acceleration101
     __table_args__ = {'schema': GPS_SCHEMA}
 
+    key_name = Column(String)
     device_info_serial = Column(Integer, primary_key=True)
-    date_time = Column(DateTime)
-    index = Column(Integer)
+    date_time = Column(DateTime, primary_key=True)
+    index = Column(Integer, primary_key=True)
 
 
 class Energy(Base):
-    __tablename__ = 'uva_energy_limited'  # uva_energy101
+    __tablename__ = 'ee_energy_limited'  # uva_energy101
     __table_args__ = {'schema': GPS_SCHEMA}
 
+    key_name = Column(String)
     device_info_serial = Column(Integer, primary_key=True)
-    date_time = Column(DateTime)
+    date_time = Column(DateTime, primary_key=True)
     vsll = Column(Float)
     vbat = Column(Float)
     ssw = Column(Integer)
@@ -267,7 +270,7 @@ def populate(session):
     Base.metadata.create_all(engine)
     # Fill tables
     for tid in range(1, 10):
-        device = Device(device_info_serial=tid)
+        device = Tracker(device_info_serial=tid)
         session.add(device)
         rn = 'C-{}'.format(tid)
         individual = Individual(ring_number=rn,
