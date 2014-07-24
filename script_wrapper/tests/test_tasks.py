@@ -200,7 +200,7 @@ class TestMatlabTask(unittest.TestCase):
 
     def test_matlab(self):
         task = tasks.MatlabTask()
-        task.app.conf['matlab.location.2012a'] = '/opt/matlab'
+        task.app.conf['matlab.location.2012b'] = '/opt/matlab'
 
         self.assertEqual(task.matlab, '/opt/matlab')
         # matlab location from cache
@@ -208,7 +208,7 @@ class TestMatlabTask(unittest.TestCase):
 
     def test_pargs(self):
         task = tasks.MatlabTask()
-        task.app.conf['matlab.location.2012a'] = '/opt/matlab'
+        task.app.conf['matlab.location.2012b'] = '/opt/matlab'
         task.script = 'runme.sh'
 
         taskdir = os.path.dirname(os.path.abspath(tasks.__file__))
