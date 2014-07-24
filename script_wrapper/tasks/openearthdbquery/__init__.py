@@ -10,8 +10,8 @@ class OpenEarthDbQuery(MatlabTask):
     description = """Perform a db query in a Matlab executable
                   with postgresql query using OpenEarth toolkit"""
     script = 'run_test.sh'
-    autoregister = False
-    matlab_version = '2012a'
+    autoregister = True
+    matlab_version = '2012b'
 
     def run(self, db_url):
         u = self.local_db_url(db_url)

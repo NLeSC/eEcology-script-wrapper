@@ -11,10 +11,10 @@ class ExampleMatlab(MatlabTask):
     description = 'Example in Matlab'
     """Perform a db query in a Matlab executable with postgresql query"""
     script = 'run_dbq.sh'
-    autoregister = False
-    matlab_version = '2012a'
+    autoregister = True
+    matlab_version = '2012b'
 
-    def run(self, db_url, trackers, start, end):
+    def run(self, db_url, tracker, start, end):
         u = self.local_db_url(db_url)
         db_name = self.sslify_dbname(u)
 
@@ -23,14 +23,14 @@ class ExampleMatlab(MatlabTask):
                                                 u.password,
                                                 db_name,
                                                 u.host,
-                                                self.list2vector_string(trackers),
+                                                self.list2vector_string([tracker]),
                                                 start,
                                                 end,
                                                 )
 
         result['query'] = {'start': start,
                            'end': end,
-                           'trackers': trackers,
+                           'tracker': tracker,
                            }
 
         return result
@@ -38,7 +38,7 @@ class ExampleMatlab(MatlabTask):
     def formfields2taskargs(self, fields, db_url):
         return {'start': fields['start'],
                 'end': fields['end'],
-                'trackers': fields['trackers'],
+                'tracker': fields['id'],
                 # below example of adding argument values
                 'db_url':  db_url,
                 }

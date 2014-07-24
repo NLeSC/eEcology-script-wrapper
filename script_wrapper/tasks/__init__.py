@@ -378,7 +378,7 @@ class MatlabTask(SubProcessTask):
     abstract = True
     _matlab = None
     script = None
-    matlab_version = '2012a'
+    matlab_version = '2012b'
 
     @property
     def matlab(self):

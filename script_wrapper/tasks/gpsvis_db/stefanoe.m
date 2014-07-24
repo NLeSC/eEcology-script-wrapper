@@ -16,7 +16,7 @@ close all
 % Sometimes required to find postgresql driver
 % pg_settings()
 
-conn = pg_connectdb(db_name, 'host', host, 'user', username, 'pass', password);
+conn = pg_connectdb(db_name, 'host', host, 'user', username, 'pass', password, 'database_toolbox', 0);
 
 % SV: Use function argument
 % KDevice =[620 800];%[620 629 632 639 766 769 772 775 777 800];
