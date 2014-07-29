@@ -8,9 +8,6 @@ Ext.require(['Esc.ee.form.Panel', 'NLeSC.form.field.DateTimeRange',
 Ext.onReady(function() {
     Ext.QuickTips.init();
 
-    var tracker_store = Ext.create('NLeSC.eEcology.store.Trackers');
-    tracker_store.load();
-
     Ext.define('ColoredTracker', {
         extend: 'NLeSC.eEcology.model.Tracker',
         fields: [{

@@ -51,7 +51,7 @@ Example Matlab script to find number of timepoints of a tracker in a certain dat
     conn = pg_connectdb(dbName, 'host', databaseHost,...
                         'user', dbUsername, 'pass', dbPassword);
     sql_tpl = ['SELECT device_info_serial, count(*) ',...
-           'FROM gps.uva_tracking_limited ',...
+           'FROM gps.ee_tracking_speed_limited ',...
            'WHERE device_info_serial=%d ',...
            'AND date_time BETWEEN ''%s'' AND %s'' ',...
            'GROUP BY device_info_serial'];
@@ -77,7 +77,7 @@ Example R script to find number of timepoints of a tracker in a certain date ran
         conn = dbConnect(drv, user=dbUsername, password=dbPassword,
                          dbname=dbName, host=databaseHost)
 
-        tpl <- paste("SELECT device_info_serial, count(*) FROM gps.uva_tracking_limited ",
+        tpl <- paste("SELECT device_info_serial, count(*) FROM gps.ee_tracking_speed_limited ",
            "WHERE device_info_serial="%s ",
            "AND date_time BETWEEN '%s' AND '%s' ",
            "GROUP BY device_info_serial")
@@ -100,15 +100,15 @@ Example Python run function to find number of timepoints of a tracker in a certa
 
 .. code-block:: python
 
-    from script_wrapper.models import DBSession, Tracking
+    from script_wrapper.models import DBSession, Speed
 
     def run(self, db_url, tracker_id, start, end):
         # Perform a database query
         db_url = self.local_db_url(db_url)
         s = DBSession(db_url)()
-        q = s.query(Tracking)
-        q = q.filter(Tracking.device_info_serial==tracker_id)
-        q = q.filter(Tracking.date_time.between(start, end))
+        q = s.query(Speed)
+        q = q.filter(Speed.device_info_serial==tracker_id)
+        q = q.filter(Speed.date_time.between(start, end))
         count = q.count()
 
         s.close()
