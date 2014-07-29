@@ -4,7 +4,7 @@ from celery.utils.log import get_task_logger
 import iso8601
 from sqlalchemy import func
 from script_wrapper.tasks import PythonTask
-from script_wrapper.models import DBSession, Tracking
+from script_wrapper.models import DBSession, Speed
 
 logger = get_task_logger(__name__)
 
@@ -19,13 +19,13 @@ class ExamplePython(PythonTask):
         # Perform a database query
         db_url = self.local_db_url(db_url)
         s = DBSession(db_url)()
-        tid = Tracking.device_info_serial
-        dt = Tracking.date_time
+        tid = Speed.device_info_serial
+        dt = Speed.date_time
         q = s.query(tid, func.count(tid))
         q = q.filter(tid.in_(trackers))
         q = q.filter(dt.between(start, end))
-        q = q.filter(Tracking.userflag == 0)
-        q = q.filter(Tracking.longitude != None)
+        q = q.filter(Speed.userflag == 0)
+        q = q.filter(Speed.longitude != None)
         q = q.group_by(tid)
         r = q.all()
         msg = json.dumps(r)
