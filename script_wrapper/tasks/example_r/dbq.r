@@ -9,7 +9,7 @@ exampler <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
 
     TrackerIdentifiersCommaJoined <- str_c(TrackerIdentifiers, collapse=",")
 
-    tpl <- paste("SELECT device_info_serial, count(*) FROM gps.ee_tracking_limited ",
+    tpl <- paste("SELECT device_info_serial, count(*) FROM gps.ee_tracking_speed_limited ",
        "WHERE device_info_serial IN (%s) ",
        "AND date_time BETWEEN '%s' AND '%s' ",
        "AND userflag <> 1 AND longitude IS NOT NULL",

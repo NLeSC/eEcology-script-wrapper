@@ -188,11 +188,9 @@ def populate(session):
 
         GRANT USAGE ON SCHEMA gps TO public;
         GRANT SELECT ON TABLE gps.ee_tracker_limited_device_info_serial_seq TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_limited_device_info_serial_seq TO public;
         GRANT SELECT ON TABLE gps.ee_tracker_limited TO public;
         GRANT SELECT ON TABLE gps.ee_individual_limited TO public;
         GRANT SELECT ON TABLE gps.ee_track_session_limited TO public;
-        GRANT SELECT ON TABLE gps.ee_tracking_limited TO public;
         GRANT SELECT ON TABLE gps.ee_tracking_speed_limited TO public;
         GRANT SELECT ON TABLE gps.ee_tracking_acceleration_limited TO public;
         GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
@@ -300,10 +298,10 @@ def getGPSCount(db_url, device_info_serial, start, end):
     """Returns the number of gps rows for selected tracker and time range.
     """
     s = DBSession(db_url)()
-    q = s.query(Tracking)
-    q = q.filter(Tracking.device_info_serial == device_info_serial)
-    q = q.filter(Tracking.date_time.between(start, end))
-    q = q.filter(Tracking.userflag == 0)
+    q = s.query(Speed)
+    q = q.filter(Speed.device_info_serial == device_info_serial)
+    q = q.filter(Speed.date_time.between(start, end))
+    q = q.filter(Speed.userflag == 0)
     gcount = q.count()
     s.close()
     return gcount
