@@ -61,6 +61,31 @@ class TrackSession(Base):
                          )
 
 
+class Tracking(Base):
+    __tablename__ = 'ee_tracking_limited'
+    __table_args__ = {'schema': GPS_SCHEMA}
+
+    key_name = Column(String)
+    device_info_serial = Column(Integer, primary_key=True)
+    date_time = Column(DateTime, primary_key=True)
+    latitude = Column(Float)
+    longitude = Column(Float)
+    altitude = Column(Integer)
+    pressure = Column(Integer)
+    temperature = Column(Float)
+    satellites_used = Column(Integer)
+    gps_fixtime = Column(Float)
+    positiondop = Column(Float)
+    h_accuracy = Column(Float)
+    v_accuracy = Column(Float)
+    x_speed = Column(Float)
+    y_speed = Column(Float)
+    z_speed = Column(Float)
+    speed_accuracy = Column(Float)
+    location = GeometryColumn(Geometry(2))
+    userflag = Column(Integer)
+
+
 class Speed(Base):
     __tablename__ = 'ee_tracking_speed_limited'
     __table_args__ = {'schema': GPS_SCHEMA}
