@@ -11,8 +11,8 @@ logger = get_task_logger(__name__)
 
 class PyKML(PythonTask):
     """Generate a KMZ file with multiple trackers using simplekml package"""
-    name = 'kmlpy'
-    label = 'KMZ file'
+    name = 'kmzgen'
+    label = 'KMZ generator'
     description = 'Generate a KMZ file with multiple trackers.'
     autoregister = True
     MAX_FIX_COUNT = 50000
