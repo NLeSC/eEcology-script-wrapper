@@ -23,7 +23,6 @@ class Gpx(PythonTask):
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
 
-
         filename_tpl = "{start}-{end}-{id}.gpx"
         filename = filename_tpl.format(start=start,
                                        end=end,
@@ -44,18 +43,18 @@ class Gpx(PythonTask):
 
     def track2gpx(self, doc, session, tracker_id, start, end):
         # Perform a database query
-        tid = Speed.device_info_serial
-        dt = Speed.date_time
-        q = session.query(tid, dt,
+        tid_col = Speed.device_info_serial
+        dt_col = Speed.date_time
+        q = session.query(tid_col, dt_col,
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
                           )
-        q = q.filter(tid == tracker_id)
-        q = q.filter(dt.between(start, end))
+        q = q.filter(tid_col == tracker_id)
+        q = q.filter(dt_col.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.longitude != None)
         q = q.filter(Speed.userflag == 0)
-        q = q.order_by(dt)
+        q = q.order_by(dt_col)
 
         track = gpxdata.Track("Tracker " + str(tracker_id))
         trkseg = gpxdata.TrackSegment()

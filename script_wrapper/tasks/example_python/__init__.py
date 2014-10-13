@@ -23,7 +23,7 @@ class ExamplePython(PythonTask):
         dt = Speed.date_time
         q = s.query(tid, func.count(tid))
         q = q.filter(tid.in_(trackers))
-        q = q.filter(dt.between(start, end))
+        q = q.filter(dt.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.userflag == 0)
         q = q.filter(Speed.longitude != None)
         q = q.group_by(tid)

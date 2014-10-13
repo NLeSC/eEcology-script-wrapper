@@ -288,7 +288,7 @@ def getAccelerationCount(db_url, device_info_serial, start, end):
     s = DBSession(db_url)()
     q = s.query(Acceleration)
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
-    q = q.filter(Acceleration.date_time.between(start, end))
+    q = q.filter(Acceleration.date_time.between(start.isoformat(), end.isoformat()))
     acount = q.count()
     s.close()
     return acount
@@ -300,7 +300,7 @@ def getGPSCount(db_url, device_info_serial, start, end):
     s = DBSession(db_url)()
     q = s.query(Speed)
     q = q.filter(Speed.device_info_serial == device_info_serial)
-    q = q.filter(Speed.date_time.between(start, end))
+    q = q.filter(Speed.date_time.between(start.isoformat(), end.isoformat()))
     q = q.filter(Speed.userflag == 0)
     gcount = q.count()
     s.close()

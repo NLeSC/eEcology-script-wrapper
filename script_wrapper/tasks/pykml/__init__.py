@@ -64,7 +64,7 @@ class PyKML(PythonTask):
                           Speed.direction,
                           )
         q = q.filter(tid == tracker_id)
-        q = q.filter(dt.between(start, end))
+        q = q.filter(dt.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.longitude != None)
         q = q.filter(Speed.direction != None)
         q = q.filter(Speed.userflag == 0)
