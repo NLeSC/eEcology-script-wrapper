@@ -16,7 +16,7 @@ Ext.onReady(function() {
         extend: 'NLeSC.eEcology.model.Tracker',
         fields: [{
             name: 'color',
-            defaultValue: 'FFFF50'
+            defaultValue: 1
         }, {
             name: 'size',
             defaultValue: 'small'
@@ -26,26 +26,95 @@ Ext.onReady(function() {
         }]
     });
 
-    var colors = ['FFFF50', 'F7E8AA', 'FFA550', '5A5AFF', 'BEFFFF', '8CFF8C',
-            'FF8CFF', 'AADD96', 'FFD3AA', 'C6C699', 'E5BFC6', 'DADADA',
-            'C6B5C4', 'C1D1BF', '000000'];
-
+    var colorschemes = Ext.create('Ext.data.ArrayStore', {
+        fields: ['id', 'col1', 'col2', 'col3', 'col4'],
+        data: [
+            [1, '#FFFF50', '#FDD017', '#C68E17', '#733C00'], // OK GEEL -DONKERGEEL
+            [2, '#F7E8AA', '#F9E070', '#FCB514', '#A37F14'], // OK GEEL -GEELGROEN
+            [3, '#FFA550', '#EB4100', '#FF0000', '#7D0000'], // OK ORANJE ROOD
+            [4, '#5A5AFF', '#0000FF', '#0000AF', '#00004B'], // OK FEL BLAUW
+            [5, '#BEFFFF', '#00FFFF', '#00B9B9', '#007373'], // OK LICHT BLAUW
+            [6, '#8CFF8C', '#00FF00', '#00B900', '#004B00'], //  FEL GROEN
+            [7, '#FF8CFF', '#FF00FF', '#A500A5', '#4B004B'], //  OK PAARS
+            [8, '#AADD96', '#60C659', '#339E35', '#3A7728'], // OK GROEN
+            [9, '#FFD3AA', '#F9BA82', '#F28411', '#BF5B00'], // OK
+            [10, '#C6C699', '#AAAD75', '#6B702B', '#424716'], // OK
+            [11, '#E5BFC6', '#D39EAF', '#A05175', '#7F284F'], // OK  ROZE-PAARS
+            [12, '#DADADA', '#C3C3C3', '#999999', '#3C3C3C'], //  VAN WIT NAAR DONKERGRIJS
+            [13, '#C6B5C4', '#A893AD', '#664975', '#472B59'], // OK BLAUWPAARS
+            [14, '#C1D1BF', '#7FA08C', '#5B8772', '#21543F'], // OK GRIJSGROEN
+            [15, '#000000', '#000000', 'rgba(0,0,0, 0,5)', 'rgb(0,0,0,0.05)'], // BLACK
+            ]
+    });
+    
+    var colorSchemeTpl = Ext.create('Ext.XTemplate',
+    '<table><tr><td style="background:{col1};width: 30px;">&nbsp;</td><td style="background:{col2};width: 30px;">&nbsp;</td><td style="background:{col3};width: 30px;">&nbsp;</td><td style="background:{col4};width: 30px;">&nbsp;</td></tr></table>');
+    
+    var colorSchemeComboTpl = Ext.create('Ext.XTemplate',
+    '<tpl for=".">',
+    '<div class="x-boundlist-item"><table><tr><td style="background:{col1};width: 30px;">&nbsp;</td><td style="background:{col2};width: 30px;">&nbsp;</td><td style="background:{col3};width: 30px;">&nbsp;</td><td style="background:{col4};width: 30px;">&nbsp;</td></tr></table></div>',
+    '</tpl>');
+    
+    Ext.define('My.ColorSchemePicker', {
+        extend: 'Ext.form.ComboBox',
+        alias: 'widget.mycolorschemepicker',
+        store: colorschemes,
+        queryMode: 'local',
+        displayField: 'col3',
+        valueField: 'id',
+        tpl: colorSchemeComboTpl,
+        // wanted to use html as display, but html is not allowed, so using the middle color
+        displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{col3}</tpl>'),
+        listeners: {
+            select: function (combo, record, index) {
+                var color = record[0].data.col3;
+                combo.inputEl.setStyle('background', color);
+            }
+        }
+    });
+    
+    Ext.define('My.ColorPicker', {
+        extend: 'Ext.form.ComboBox',
+        alias: 'widget.mycolorpicker',
+        store: colorschemes,
+        queryMode: 'local',
+        displayField: 'col3',
+        valueField: 'id',
+        tpl: '<span style="background:{col3};width: 30px;>&nbsp;</span>',
+        // wanted to use html as display, but html is not allowed, so using the middle color
+        displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{col3}</tpl>'),
+        listeners: {
+            select: function (combo, record, index) {
+                var color = record[0].data.col3;
+                combo.inputEl.setStyle('background', color);
+            }
+        }
+    });
+    
     var sstore = Ext.create('Ext.data.Store', {
         model: 'ColoredTracker',
         listeners: {
-            add: function(s, records) {
+            add: function(store, records) {
                 // Cycle through colors when selecting a tracker
                 records.forEach(function(record) {
+                	var idx = store.indexOf(record);
                     if (!('color' in record.data)) {
-                        record.set('color',
-                                colors[record.index % colors.length]);
+                    	var next_color = colorschemes.getAt(idx % colorschemes.getCount());
+                        record.set(
+                    		'color',
+                    		next_color.data.id
+                        );
                     }
                 });
             }
         }
     });
+    
+    var editing = Ext.create('Ext.grid.plugin.CellEditing', {
+        triggerEvent: 'cellclick'
+    });
 
-   var selected_trackers = {
+    var selected_trackers = {
        title            : 'Selected',
        store            : sstore,
        columns          : [{
@@ -57,57 +126,114 @@ Ext.onReady(function() {
            text: "Project", flex: 1, sortable: true, dataIndex: 'project',
            hidden: true
        }, {
-           text: "Base color", flex: 1, sortable: true, dataIndex: 'color',
+           text: "Color", flex: 1, sortable: true, dataIndex: 'color',
            editor: {
-               xtype: 'colorfield',
-               pickerCls: 'color-picker16',
-               colors: [
-                'FFFF50',
-                'F7E8AA',
-                'FFA550',
-                '5A5AFF',
-                'BEFFFF',
-                '8CFF8C',
-                'FF8CFF',
-                'AADD96',
-                'FFD3AA',
-                'C6C699',
-                'E5BFC6',
-                'DADADA',
-                'C6B5C4',
-                'C1D1BF',
-                '000000'
-               ]
+               xtype: 'mycolorschemepicker'
            },
-           renderer: function(v, m) {
-               m.style = 'cursor: pointer;background: #'+v;
-               return v;
+           renderer: function (v, m, r) {
+               var color = colorschemes.getById(v);
+               m.style = 'cursor: pointer;';
+               var html = colorSchemeTpl.apply(color.data);
+               return html;
            }
+       }, {
+    	   text: 'Edit',
+           xtype: 'actioncolumn',
+           width: 50,
+           items: [{
+               icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH8SURBVDjLjZPfS1NhGMdXf0VEQhDUhdCN4X0IYT8ghIJQM0KoC4vushZddLELKyRhQQkSFIKEGEkUCI2oxVhepG5zi1xbc0u3cDs7Z+ec/ezT+x62scmmHvhwDrzP93Pe57znsQE2cR0SdAm6d+GwYL/M1LBVBV35fF4plUqVcrlMK8Q6TqdzYrukJuiW4Vwuh67rdbLZLJlMhmQyaUnigVlC05f4+dbB0tQplp92DsnwPimQBaZpUigUrLtE0zQURSGVSqHF37DhGkVZeQdagszKLJ7HvZtNAhmuIQWGYaCqKps/ZkivPqCwPs/Gp0cYvjnKUTe+F9fMJoFoo96zfJZ9K+sLpP33qRhujPANtr7dJPhqmO/PBxX3+PljTYLtqImPpH13qZge9LUrmLEB1FU7sZd9jJw5MljNthYk/KLnxdFqeAjzdz9Z/z3Ck2fRE36qx9pakAjME1y4Lbb9GTMyTD52GUXsZO3ZadTkL6umrSD4ZZrAezvLH54Q915EjwywtXSH8FQf+t+I9V12FLwe6wE1SmjyAi77Qb6Kt3rGe9H+hKzwrgLH9eMUPE4K3gm8jpPMjRwlHfNTLBbr7Cjo7znA2NVOXA/PsThzi2wyah1pI+0E/9rNQQsqMtM4CyfE36fLhb2ERa0mB7BR0CElexjnGnL0O2T2PyFunSz8jchwAAAAAElFTkSuQmCC',
+               tooltip: 'Edit',
+               handler: function (view, index, id, item, event, record) {
+                   editing.startEdit(record, 1);
+               }
+           }]
        }],
        multiSelect: false, // Editing is weird with multiselect=true
-       plugins: [
-           Ext.create('Ext.grid.plugin.CellEditing', {
-               triggerEvent: 'cellclick'
-           })
-       ],
+       plugins: [editing],
        viewConfig: {
            markDirty: false
        }
    };
-
+    
    var form = Ext.create('Esc.ee.form.Panel', {
        id:'myform',
        items: [{
            xtype: 'datetimerange'
        }, {
            xtype: 'radiogroup',
-           fieldLabel: 'Icon shape',
+           fieldLabel: 'Shape',
            columns: 2,
            items: [{
-               boxLabel: 'Circle', name: 'icon', inputValue: 'circle', checked: true
+               boxLabel: 'Circle', name: 'shape', inputValue: 'circle', checked: true
            }, {
-               boxLabel: 'Arrow', name: 'icon', inputValue: 'arrow'
+               boxLabel: 'Instantaneous directional arrow', name: 'shape', inputValue: 'iarrow'
+           }, {
+               boxLabel: 'Traject directional arrow', name: 'shape', inputValue: 'iarrow'
            }]
+       }, {
+    	   xtype: 'radiogroup',
+    	   fieldLabel: 'Size',
+    	   items: [{
+    		   boxLabel: 'Small', name: 'size', inputValue: 'small'
+    	   }, {
+    		   boxLabel: 'Medium', name: 'size', inputValue: 'medium', checked: true, fieldStyle: 'font-size: 140%;'
+    	   }, {
+    		   boxLabel: 'Large', name: 'size', inputValue: 'large', fieldStyle: 'font-size: 170%;'
+    	   }]
+       }, {
+    	   xtype: 'checkbox',
+    	   fieldLabel: 'Size based on altitude',
+    	   name: 'sizebyalt'
+       }, {
+    	   xtype: 'radiogroup',
+    	   fieldLabel: 'Color based on',
+    	   items: [{
+    		   boxLabel: 'One color for each tracker', name: 'colorby', inputValue: 'fixed'
+    	   }, {
+    		   boxLabel: 'Instantaneous speed', name: 'colorby', inputValue: 'ispeed', checked: true
+    	   }, {
+    		   boxLabel: 'Traject speed', name: 'colorby', inputValue: 'tspeed'
+    	   }],
+    	   listeners: {
+    		   change: function(field, value) {
+    			   var colorby = value.colorby;
+				   field.up('form').down('#speedthresholds').setVisible(colorby === 'ispeed' || colorby === 'tspeed');
+				   // TODO force color column in selected trackers grid to reflect value as display and edit combo.
+				   debugger
+				   selected_trackers.updateLayout();
+    		   }
+    	   }
+       }, {
+    	   xtype: 'fieldcontainer',
+    	   id: 'speedthresholds',
+    	   fieldLabel: 'Speed thresholds (m/s)',
+    	   layout: {
+               type: 'hbox',
+               defaultMargins: {top: 0, right: 5, bottom: 0, left: 0}
+           },
+    	   items: [{
+    		   xtype: 'displayfield', value:'Slowest', fieldStyle: 'background: #FFFFE6'
+    	   }, {
+    		   xtype: 'numberfield', name: 'speedthreshold1', value: 5, minValue: 0, maxValue: 100, width: 50
+    	   }, {
+    		   xtype: 'displayfield', value:'Slow', fieldStyle: 'background: #FFFFB2'
+    	   }, {
+    		   xtype: 'numberfield', name: 'speedthreshold2', value: 10, minValue: 0, maxValue: 100, width: 50
+    	   }, {
+    		   xtype: 'displayfield', value:'Fast', fieldStyle: 'background: #FFFF33'
+    	   }, {
+    		   xtype: 'numberfield', name: 'speedthreshold3', value: 20, minValue: 0, maxValue: 100, width: 50
+    	   }, {
+    		   xtype: 'displayfield', value:'Fastest', fieldStyle: 'background:	#CCCC00'
+    	   }]
+       }, {
+    	   xtype: 'numberfield',
+    	   fieldLabel: 'Transparancy (%)',
+    	   tooltip: '100% is fully transparent',
+    	   width: 155,
+    	   value: 100,
+    	   minValue: 0,
+    	   maxValue: 100 
        }, {
            xtype: 'trackergridselector',
            id: 'trackers',
