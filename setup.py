@@ -27,6 +27,7 @@ requires = [
     'python_dateutil',  # requirement for gpxdata
     'gpxdata', # for gpx task
     'gunicorn',  # production wsgi server
+    'colander',
 ]
 
 exec(open('script_wrapper/version.py').read())

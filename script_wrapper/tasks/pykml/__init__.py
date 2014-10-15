@@ -1,12 +1,64 @@
 import os
+from math import ceil
 from celery.utils.log import get_task_logger
 import iso8601
 import simplekml
+import colander
 from script_wrapper.tasks import PythonTask
 from script_wrapper.models import DBSession, Speed, getGPSCount
 from script_wrapper.validation import validateRange
 
+
 logger = get_task_logger(__name__)
+
+
+def colorValidator(node, value):
+    if (value[0] != '#'):
+        raise colander.Invalid(node,
+              '%r is not a color, should be #RRGGBB' % value)
+
+    if int('000000', 16) <= int(value[1:], 16) <= int('FFFFFF', 16):
+        pass
+    else:
+        raise colander.Invalid(node,
+              '%r is not a color, should be #RRGGBB' % value)
+
+
+class Color(colander.MappingSchema):
+    slowest = colander.SchemaNode(colander.String())
+    slow = colander.SchemaNode(colander.String())
+    fast = colander.SchemaNode(colander.String())
+    fastest = colander.SchemaNode(colander.String())
+
+
+class Tracker(colander.MappingSchema):
+    id = colander.SchemaNode(colander.Int())
+    color = Color()
+
+
+class Trackers(colander.SequenceSchema):
+    tracker = Tracker()
+
+
+class Schema(colander.MappingSchema):
+    start = colander.SchemaNode(colander.DateTime())
+    end = colander.SchemaNode(colander.DateTime())
+    trackers = Trackers()
+    shape = colander.SchemaNode(colander.String(),
+                                validator=colander.OneOf(['circle', 'iarrow', 'tarrow']))
+    size = colander.SchemaNode(colander.String(),
+                               validator=colander.OneOf(['small', 'medium', 'large']))
+    sizebyalt = colander.SchemaNode(colander.String(), missing='off')
+    colorby = colander.SchemaNode(colander.String(),
+                               validator=colander.OneOf(['fixed', 'ispeed', 'tspeed']))
+    speedthreshold1 = colander.SchemaNode(colander.Int())
+    speedthreshold2 = colander.SchemaNode(colander.Int())
+    speedthreshold3 = colander.SchemaNode(colander.Int())
+    alpha = colander.SchemaNode(colander.Int(),
+                                validator=colander.Range(0, 100))
+    valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
+    altitudemode = colander.SchemaNode(colander.String(),
+                               validator=colander.OneOf(valid_alt_modes))
 
 
 class PyKML(PythonTask):
@@ -17,8 +69,12 @@ class PyKML(PythonTask):
     autoregister = True
     MAX_FIX_COUNT = 50000
     MAX_FIX_TOTAL_COUNT = 50000
+    pointstylecache = {}
 
-    def run(self, db_url, trackers, start, end, icon):
+    def run(self, db_url, trackers, start, end,
+            shape, size, sizebyalt, colorby,
+            speedthreshold1, speedthreshold2, speedthreshold3,
+            alpha):
         self.update_state(state="RUNNING")
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
@@ -31,13 +87,23 @@ class PyKML(PythonTask):
                                        )
         fn = os.path.join(self.output_dir(), filename)
         kml = simplekml.Kml(open=0)
-        if icon == 'arrow':
-            kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
-        styles = self.create_styles()
+
+        self.pointstylecache = {}
+        style = {'shape': shape,
+                 'size': size,
+                 'sizebyalt': sizebyalt,
+                 'colorby': colorby,
+                 'speedthresholds': [speedthreshold1,
+                                    speedthreshold2,
+                                    speedthreshold3],
+                 'alpha': alpha
+                 }
+        self.addIcon2kml(kml, style)
         for tracker in trackers:
-            self.track2kml(kml, session, styles,
-                           tracker['id'], tracker['color'],
-                           start, end, icon)
+            self.track2kml(kml, session,
+                           start, end,
+                           tracker,
+                           style)
 
         session.close()
         kml.savekmz(fn)
@@ -46,21 +112,30 @@ class PyKML(PythonTask):
         result['query'] = {'start': start.isoformat(),
                            'end': end.isoformat(),
                            'trackers': trackers,
-                           'icon': icon,
+                           'style': style,
                            }
         return result
 
-    def track2kml(self, kml, session, styles,
-                  tracker_id, base_color,
-                  start, end, icon='circle'):
-        # Perform a database query
+    def addIcon2kml(self, kml, style):
+        if style['shape'] == 'circle':
+            return kml.addfile(os.path.join(self.task_dir(), 'circle.png'))
+        else:
+            return kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
+
+    def fetchtrack(self, session,
+                   tracker_id, start, end,
+                   need_traject_speed,
+                   need_traject_direction):
+        """Fetch track data from db"""
         tid = Speed.device_info_serial
         dt = Speed.date_time
         q = session.query(tid, dt,
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
+                          # TODO switch between traject and instant speed based on style['colorby']
                           Speed.speed,
+                          # TODO switch between traject and instant direction based on style['shape']
                           Speed.direction,
                           )
         q = q.filter(tid == tracker_id)
@@ -69,28 +144,45 @@ class PyKML(PythonTask):
         q = q.filter(Speed.direction != None)
         q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt)
+        return q
 
+    def track2kml(self, kml, session,
+                  start, end,
+                  tracker,
+                  style):
+        need_traject_speed = style['colorby'] == 'tspeed'
+        need_traject_direction = style['shape'] == 'tarrow'
+        tracker_id = tracker['id']
+        rows = self.fetchtrack(session,
+                               tracker_id, start, end,
+                               need_traject_speed,
+                               need_traject_direction)
+
+        self.trackrows2kml(kml, rows, tracker, style)
+
+    def trackrows2kml(self, kml, rows, tracker, style):
         tpl = """
         <table border="0">
         <tr><td>ID</td><td>{tid}</td></tr>
-        <tr><td>Time (UTC)</td><td>{dt}</td></tr>
+        <tr><td>Time</td><td>{dt}</td></tr>
         <tr><td>Lon, Lat (&deg;)</td><td>{lon:.3f}, {lat:.3f}</td></tr>
         <tr><td>Altitude (m)</td><td>{alt}</td></tr>
-        <tr><td>Speed (km/h)</td><td>{spd:.1f}</td></tr>
-        <tr><td>Heading (&deg;)</td><td>{dir:.1f}</td></tr>
+        <tr><td>Speed (m/s)</td><td>{spd:.1f}</td></tr>
+        <tr><td>Direction (&deg;)</td><td>{dir:.1f}</td></tr>
         </table>
         """
 
-        folder = kml.newfolder(name=str(tracker_id), open=1)
+        color_scheme = tracker['color']
+        alpha = style['alpha']
+
+        folder = kml.newfolder(name='tracker-' + str(tracker['id']), open=1)
+        pfolder = folder.newfolder(name='points', open=0)
 
         parts = []
-        for tid, dt, lon, lat, alt, spd, dire in q.all():
+        for tid, dt, lon, lat, alt, spd, dire in rows:
             parts.append((lon, lat))
-            pnt = folder.newpoint()
-            if icon == 'arrow':
-                pnt.style = self.direction2style(styles, base_color, spd, dire)
-            else:
-                pnt.style = self.speed2style(styles, base_color, spd)
+            pnt = pfolder.newpoint()
+            pnt.style = self.kmlstyle4point(spd, dire, alt, style, color_scheme)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
                                          spd=spd, dir=dire,
@@ -98,90 +190,99 @@ class PyKML(PythonTask):
             pnt.timestamp.when = dt.isoformat()
             pnt.coords = [(lon, lat, alt)]
             pnt.extrude = 1
-            if alt > 2:
-                pnt.altitudemode = simplekml.AltitudeMode.absolute
-            else:
+
+            pnt.altitudemode = style['altitudemode']
+            if (style['altitudemode'] == 'absolute' and alt < 10):
                 # Don't put point under ground
                 pnt.altitudemode = simplekml.AltitudeMode.clamptoground
 
         line = folder.newlinestring()
         line.style.linestyle.width = 1
-        line.style.linestyle.color = 'ff00ffff'
+        line.style.linestyle.color = self.color4line(color_scheme, alpha)
         line.coords = parts
 
-    def create_styles(self):
-        color_schemes = [
-                           ['FFFFFF50', 'FFFDD017', 'FFC68E17', 'FF733C00'],  # OK GEEL -DONKERGEEL
-                           ['FFF7E8AA', 'FFF9E070', 'FFFCB514', 'FFA37F14'],  # OK GEEL -GEELGROEN
-                           ['FFFFA550', 'FFEB4100', 'FFFF0000', 'FF7D0000'],  # OK ORANJE ROOD
-                           ['FF5A5AFF', 'FF0000FF', 'FF0000AF', 'FF00004B'],  # OK FEL BLAUW
-                           ['FFBEFFFF', 'FF00FFFF', 'FF00B9B9', 'FF007373'],  # OK LICHT BLAUW
-                           ['FF8CFF8C', 'FF00FF00', 'FF00B900', 'FF004B00'],  #  FEL GROEN
-                           ['FFFF8CFF', 'FFFF00FF', 'FFA500A5', 'FF4B004B'],  #  OK PAARS
-                           ['FFAADD96', 'FF60C659', 'FF339E35', 'FF3A7728'],  # OK GROEN
-                           ['FFFFD3AA', 'FFF9BA82', 'FFF28411', 'FFBF5B00'],  # OK
-                           ['FFC6C699', 'FFAAAD75', 'FF6B702B', 'FF424716'],  # OK
-                           ['FFE5BFC6', 'FFD39EAF', 'FFA05175', 'FF7F284F'],  # OK  ROZE-PAARS
-                           ['FFDADADA', 'FFC3C3C3', 'FF999999', 'FF3C3C3C'],  #  VAN WIT NAAR DONKERGRIJS
-                           ['FFC6B5C4', 'FFA893AD', 'FF664975', 'FF472B59'],  # OK BLAUWPAARS
-                           ['FFC1D1BF', 'FF7FA08C', 'FF5B8772', 'FF21543F'],  # OK GRIJSGROEN
-                           ['FF000000', 'FF000000', '7D000000', '10000000'],  # BLACK
-                        ]
+    def color4line(self, color_scheme, alpha):
+        color = color_scheme['fast']
+        return self.webcolor2kmlcolor(color, alpha)
 
-        styles = {}
-        for idx, color_scheme in enumerate(color_schemes):
-            styles[color_scheme[0][2:8]] = []
-            for color in color_scheme:
-                style = simplekml.Style()
-                style.iconstyle.icon.href = 'http://maps.google.com/mapfiles/kml/pal2/icon26.png'
-                style.iconstyle.scale = 0.4
-                # convert frgb to fbgr
-                style.iconstyle.color = color[0:2] + color[6:8] + color[4:6] + color[2:4]
-                styles[color_scheme[0][2:8]].insert(idx, style)
+    def webcolor2kmlcolor(self, webcolor, alpha):
+        webcolor = webcolor.lower()
+        opacity = hex(int(ceil(alpha * 2.55)))[2:4]
+        # convert #rrggbb to aabbggrr
+        kmlcolor = opacity + webcolor[5:7] + webcolor[3:5] + webcolor[1:3]
+        return kmlcolor
 
-        return styles
+    def kmlcolor4point(self, color_scheme, style, speed):
+        if style['colorby'] in ('ispeed', 'tspeed'):
+            webcolor = color_scheme['fastest']
+            if speed < style['speedthresholds'][2]:
+                webcolor = color_scheme['fast']
+            if speed < style['speedthresholds'][1]:
+                webcolor = color_scheme['slow']
+            if speed < style['speedthresholds'][0]:
+                webcolor = color_scheme['slowest']
+        else:
+            webcolor = color_scheme['fast']
+        return self.webcolor2kmlcolor(webcolor, style['alpha'])
 
-    def speed2style(self, styles, base_color, spd):
-        """Color of point is dependent on base_color and speed"""
-        color_scheme = styles[base_color]
+    def hashcode4pointstyle(self, color, direction, scale, style):
+        return str([color, direction, scale, style])
 
-        style = color_scheme[0]
-        if spd < 20:
-            style = color_scheme[1]
-        if spd < 10:
-            style = color_scheme[2]
-        if spd < 5:
-            style = color_scheme[3]
+    def size2iconscale(self, size, sizebyalt, altitude):
+        if (sizebyalt != 'on'):
+            altitude = 0
 
-        return style
+        # default size == medium
+        scale = altitude * 0.6 + 0.1
+        if (size == 'small'):
+            scale = altitude * 0.3 + 0.2
+        if (size == 'large'):
+            scale = altitude * 0.7 + 0.4
 
-    def direction2style(self, styles, base_color, spd, heading):
-        style = simplekml.Style()
-        style.iconstyle.icon.href = 'files/arrow.png'
-        style.iconstyle.heading = heading
-        style.iconstyle.scale = 0.8
-        # Copy color from speed style
-        speed_style = self.speed2style(styles, base_color, spd)
-        style.iconstyle.color = speed_style.iconstyle.color
-        return style
+        # icon shouldnt be too small
+        minimum_scale = 0.4
+        if scale < minimum_scale:
+            scale = minimum_scale
+
+        return scale
+
+    def kmlstyle4point(self, speed, direction, altitude, style, color_scheme):
+        import sys
+
+        scale = self.size2iconscale(style['size'], style['sizebyalt'], altitude)
+        color = self.kmlcolor4point(color_scheme, style, speed)
+
+        id = self.hashcode4pointstyle(color, direction, scale, style)
+        if id in self.pointstylecache:
+            return self.pointstylecache[id]
+
+        kmlstyle = simplekml.Style()
+
+        kmlstyle.iconstyle.scale = scale
+
+        if style['shape'] in ('iarrow', 'tarrow'):
+            kmlstyle.iconstyle.icon.href = 'files/arrow.png'
+            kmlstyle.iconstyle.heading = direction
+        else:
+            kmlstyle.iconstyle.icon.href = 'files/circle.png'
+
+        kmlstyle.iconstyle.color = color
+
+        self.pointstylecache[id] = kmlstyle
+        return kmlstyle
 
     def formfields2taskargs(self, fields, db_url):
-        start = iso8601.parse_date(fields['start'])
-        end = iso8601.parse_date(fields['end'])
-        trackers = fields['trackers']
-        icon = fields['icon']
+        schema = Schema()
+        taskargs = schema.deserialize(fields)
 
         # Test if selection will give results
         total_gps_count = 0
-        for tracker in trackers:
-            gps_count = getGPSCount(db_url, tracker['id'], start, end)
+        for tracker in taskargs['trackers']:
+            gps_count = getGPSCount(db_url, tracker['id'],
+                                    taskargs['start'], taskargs['end'])
             total_gps_count += gps_count
             validateRange(gps_count, 0, self.MAX_FIX_COUNT, tracker['id'])
         validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
 
-        return {'db_url': db_url,
-                'start': start,
-                'end': end,
-                'trackers': trackers,
-                'icon': icon,
-                }
+        taskargs['db_url'] = db_url
+        return taskargs
