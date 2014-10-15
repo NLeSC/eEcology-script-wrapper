@@ -172,13 +172,15 @@ def populate(session):
 
         sudo -u postgres -i
         createdb -O stefanv eecology
-        psql -d eecology -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql
-        psql -d eecology -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql
+        psql -d eecology -c "CREATE EXTENSION postgis;"
+
+        # as yourself
+        CREATE SCHEMA gps;
 
     In python shell::
 
         import script_wrapper.models as m
-        u = 'postgresql://localhost/eecology?sslmode=require'
+        u = 'postgresql://username:password@localhost/eecology?sslmode=require'
         Session = m.DBSession(u)
         session = Session()
         m.populate(session)
@@ -250,24 +252,20 @@ def populate(session):
         session.flush()
         session.add(TrackSession(device_info_serial=tid,
                                  ring_number=rn,
-                                 project_leader='Someone, someone@example.com'
+                                 key_name='Someone, someone@example.com'
                                  ))
         dt = datetime.datetime.utcnow()
         offset = tid * 0.1
         lon = 4.830617 + offset
         lat = 52.979970 + offset
         loc = WKTSpatialElement('POINT({} {})'.format(lon, lat))
-        session.add(Tracking(device_info_serial=tid,
-                             date_time=dt,
-                             longitude=lon,
-                             latitude=lat,
-                             location=loc,
-                             ))
         session.add(Speed(device_info_serial=tid,
                           date_time=dt,
                           longitude=lon,
                           latitude=lat,
                           location=loc,
+                          speed=15,
+                          direction=45,
                           ))
         session.add(Acceleration(device_info_serial=tid,
                                  date_time=dt,
