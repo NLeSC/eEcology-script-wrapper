@@ -8,9 +8,8 @@ ${task.label}
 <script type="text/javascript">
 Ext.Loader.setConfig({
     enabled: true,
-  //  disableCaching: false, // uncomment to use firebug breakpoints
+   // disableCaching: false, // uncomment to use firebug breakpoints
     paths: {
-      'Ext.ux': '${request.static_path('script_wrapper:static/ext/examples/ux')}',
       'Esc': '${request.static_path('script_wrapper:static/esc')}'
     }
   });
