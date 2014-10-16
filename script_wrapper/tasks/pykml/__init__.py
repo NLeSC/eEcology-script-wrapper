@@ -58,7 +58,7 @@ class Schema(colander.MappingSchema):
                                 validator=colander.Range(0, 100))
     valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
     altitudemode = colander.SchemaNode(colander.String(),
-                               validator=colander.OneOf(valid_alt_modes))
+                                       validator=colander.OneOf(valid_alt_modes))
 
 
 class PyKML(PythonTask):
@@ -74,7 +74,7 @@ class PyKML(PythonTask):
     def run(self, db_url, trackers, start, end,
             shape, size, sizebyalt, colorby,
             speedthreshold1, speedthreshold2, speedthreshold3,
-            alpha):
+            alpha, altitudemode):
         self.update_state(state="RUNNING")
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
@@ -96,7 +96,8 @@ class PyKML(PythonTask):
                  'speedthresholds': [speedthreshold1,
                                     speedthreshold2,
                                     speedthreshold3],
-                 'alpha': alpha
+                 'alpha': alpha,
+                 'altitudemode': altitudemode,
                  }
         self.addIcon2kml(kml, style)
         for tracker in trackers:
@@ -231,6 +232,13 @@ class PyKML(PythonTask):
     def size2iconscale(self, size, sizebyalt, altitude):
         if (sizebyalt != 'on'):
             altitude = 0
+
+        # matlab 0.3+log10(max(1,Alt(i)))/10
+
+        # old kmz gen
+        # $scale = $height < 10 ? 0.6 : $height < 100 ? 0.75 : 0.9;
+        # $scale *= 0.5 if $icon eq 'Circle';
+
 
         # default size == medium
         scale = altitude * 0.6 + 0.1
