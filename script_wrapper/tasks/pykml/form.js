@@ -43,7 +43,7 @@ Ext.onReady(function() {
             [12, '#DADADA', '#C3C3C3', '#999999', '#3C3C3C'], //  VAN WIT NAAR DONKERGRIJS
             [13, '#C6B5C4', '#A893AD', '#664975', '#472B59'], // OK BLAUWPAARS
             [14, '#C1D1BF', '#7FA08C', '#5B8772', '#21543F'], // OK GRIJSGROEN
-            [15, '#000000', '#000000', 'rgba(0,0,0, 0,5)', 'rgb(0,0,0,0.05)'], // BLACK
+//            [15, '#000000', '#000000', 'rgba(0,0,0, 0,5)', 'rgb(0,0,0,0.05)'], // BLACK
             ]
     });
 
@@ -138,8 +138,12 @@ Ext.onReady(function() {
         triggerEvent: 'cellclick'
     });
 
+    var getSelectedTrackersGrid = function() {
+        return Ext.ComponentMgr.get('selected_trackers');
+    }
+    
     var getColorColumn = function() {
-        var sgrid = Ext.ComponentMgr.get('selected_trackers');
+        var sgrid = getSelectedTrackersGrid();
         var color_column = sgrid.columns.filter(function(d) {return d.dataIndex === 'colorid';})[0];
         return color_column;
     }
@@ -230,8 +234,7 @@ Ext.onReady(function() {
 				       color_column.renderer = mycolorrenderer;
 				   }
 				   // trigger column redraw
-				   color_column.hide();
-			       color_column.show();
+				   getSelectedTrackersGrid().view.refresh();
     		   }
     	   }
        }, {

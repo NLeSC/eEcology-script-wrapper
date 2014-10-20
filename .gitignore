@@ -4,7 +4,7 @@ development.ini
 env/
 *.egg-info/
 *.pyc
-data/
+/data
 /build
 /.settings
 /cover

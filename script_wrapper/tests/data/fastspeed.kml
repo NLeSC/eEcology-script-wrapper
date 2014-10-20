@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="feat_1">
+        <Folder id="feat_2">
+            <Style id="stylesel_1">
+                <LineStyle id="substyle_1">
+                    <color>ff178ec6</color>
+                    <colorMode>normal</colorMode>
+                    <width>1</width>
+                </LineStyle>
+            </Style>
+            <name>tracker-355</name>
+            <open>1</open>
+            <Folder id="feat_3">
+                <Style id="stylesel_0">
+                    <IconStyle id="substyle_0">
+                        <color>ff178ec6</color>
+                        <colorMode>normal</colorMode>
+                        <scale>0.35</scale>
+                        <heading>0</heading>
+                        <Icon id="link_0">
+                            <href>files/circle.png</href>
+                        </Icon>
+                    </IconStyle>
+                </Style>
+                <name>points</name>
+                <open>0</open>
+                <Placemark id="feat_4">
+                    <description>
+        &lt;table border=&quot;0&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt;&lt;td&gt;355&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Time&lt;/td&gt;&lt;td&gt;2013-05-15 08:33:34+00:00&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Lon, Lat (&amp;deg;)&lt;/td&gt;&lt;td&gt;4.486, 52.412&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;84&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Speed (m/s)&lt;/td&gt;&lt;td&gt;18.9&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.1&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;
+        </description>
+                    <TimeStamp id="time_0">
+                        <when>2013-05-15T08:33:34+00:00</when>
+                    </TimeStamp>
+                    <styleUrl>#stylesel_0</styleUrl>
+                    <Point id="geom_0">
+                        <coordinates>4.485608,52.412252,84</coordinates>
+                        <extrude>1</extrude>
+                        <altitudeMode>absolute</altitudeMode>
+                    </Point>
+                </Placemark>
+            </Folder>
+            <Placemark id="feat_5">
+                <styleUrl>#stylesel_1</styleUrl>
+                <LineString id="geom_1">
+                    <coordinates>4.485608,52.412252,0.0</coordinates>
+                </LineString>
+            </Placemark>
+        </Folder>
+    </Document>
+</kml>

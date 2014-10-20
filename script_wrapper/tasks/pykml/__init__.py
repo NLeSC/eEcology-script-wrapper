@@ -1,5 +1,5 @@
 import os
-from math import ceil
+from math import ceil, log10
 from celery.utils.log import get_task_logger
 import iso8601
 import simplekml
@@ -48,7 +48,7 @@ class Schema(colander.MappingSchema):
                                 validator=colander.OneOf(['circle', 'iarrow', 'tarrow']))
     size = colander.SchemaNode(colander.String(),
                                validator=colander.OneOf(['small', 'medium', 'large']))
-    sizebyalt = colander.SchemaNode(colander.String(), missing='off')
+    sizebyalt = colander.SchemaNode(colander.Boolean(), missing=False)
     colorby = colander.SchemaNode(colander.String(),
                                validator=colander.OneOf(['fixed', 'ispeed', 'tspeed']))
     speedthreshold1 = colander.SchemaNode(colander.Int())
@@ -230,27 +230,20 @@ class PyKML(PythonTask):
         return str([color, direction, scale, style])
 
     def size2iconscale(self, size, sizebyalt, altitude):
-        if (sizebyalt != 'on'):
-            altitude = 0
+        # default altitude, when sizebyalt is not requested
+        if not sizebyalt:
+            altitude = 10
 
-        # matlab 0.3+log10(max(1,Alt(i)))/10
-
-        # old kmz gen
-        # $scale = $height < 10 ? 0.6 : $height < 100 ? 0.75 : 0.9;
-        # $scale *= 0.5 if $icon eq 'Circle';
-
-
-        # default size == medium
-        scale = altitude * 0.6 + 0.1
-        if (size == 'small'):
-            scale = altitude * 0.3 + 0.2
-        if (size == 'large'):
-            scale = altitude * 0.7 + 0.4
-
-        # icon shouldnt be too small
-        minimum_scale = 0.4
-        if scale < minimum_scale:
-            scale = minimum_scale
+        # cant have log10 < 1, so clip alt to 1
+        if altitude < 1:
+            altitude = 1
+        
+        if size == 'small':
+            scale = 0.3 * log10(altitude) + 0.2
+        elif size == 'medium':
+            scale = 0.6 * log10(altitude) + 0.1
+        elif size == 'large':
+            scale = 0.7 * log10(altitude) + 0.4
 
         return scale
 
@@ -266,14 +259,14 @@ class PyKML(PythonTask):
 
         kmlstyle = simplekml.Style()
 
-        kmlstyle.iconstyle.scale = scale
-
         if style['shape'] in ('iarrow', 'tarrow'):
             kmlstyle.iconstyle.icon.href = 'files/arrow.png'
             kmlstyle.iconstyle.heading = direction
         else:
             kmlstyle.iconstyle.icon.href = 'files/circle.png'
+            scale = scale * 0.5
 
+        kmlstyle.iconstyle.scale = scale
         kmlstyle.iconstyle.color = color
 
         self.pointstylecache[id] = kmlstyle
