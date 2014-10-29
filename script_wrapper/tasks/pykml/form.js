@@ -70,12 +70,17 @@ Ext.onReady(function() {
         displayField: 'fast',
         valueField: 'id',
         tpl: colorSchemeComboTpl,
+        selectOnFocus: true,
+        forceSelection: true,
         // wanted to use html as display, but html is not allowed, so using the middle color
         displayTpl: Ext.create('Ext.XTemplate', '<tpl for=".">{fast}</tpl>'),
         listeners: {
             select: function (combo, record, index) {
                 var color = record[0].data.fast;
                 combo.inputEl.setStyle('background', color);
+            },
+            focus: function(comp) {
+            	comp.expand();
             }
         }
     });
