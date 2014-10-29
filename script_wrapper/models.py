@@ -14,7 +14,7 @@
 
 import logging
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, text
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import ProgrammingError
@@ -30,6 +30,13 @@ logger = logging.getLogger('script_wrapper')
 
 GPS_SCHEMA = 'gps'
 
+class TrajectDirection(Float):
+    def column_expression(self, col):
+        return text('round(degrees(ST_Azimuth(lag(location) over (order by device_info_serial, date_time), location))::numeric, 2)')
+
+class TrajectSpeed(Float):
+    def column_expression(self, col):
+        return text("round((ST_Length_Spheroid(ST_MakeLine(location, lag(location) over (order by device_info_serial, date_time)), 'SPHEROID["WGS 84",6378137,298.257223563]')/EXTRACT(EPOCH FROM (date_time - lag(date_time) over (order by device_info_serial, date_time))))::numeric, 5)")
 
 class Tracker(Base):
     __tablename__ = 'ee_tracker_limited'
