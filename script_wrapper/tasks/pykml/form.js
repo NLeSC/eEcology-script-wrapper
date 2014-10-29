@@ -105,6 +105,9 @@ Ext.onReady(function() {
             select: function (combo, record, index) {
                 var color = record[0].data.fast;
                 combo.inputEl.setStyle('background', color);
+            },
+            focus: function(combo) {
+              combo.expand();
             }
         }
     });
@@ -145,13 +148,13 @@ Ext.onReady(function() {
 
     var getSelectedTrackersGrid = function() {
         return Ext.ComponentMgr.get('selected_trackers');
-    }
-    
+    };
+
     var getColorColumn = function() {
         var sgrid = getSelectedTrackersGrid();
         var color_column = sgrid.columns.filter(function(d) {return d.dataIndex === 'colorid';})[0];
         return color_column;
-    }
+    };
 
     var selected_trackers = {
        title: 'Selected',
@@ -189,11 +192,15 @@ Ext.onReady(function() {
    var form = Ext.create('Esc.ee.form.Panel', {
        id:'myform',
        items: [{
-           xtype: 'datetimerange'
+           xtype: 'datetimerange',
+           layout: 'hbox',
+           defaults: {
+             margin: '0 10 0 0'
+           }
        }, {
            xtype: 'radiogroup',
            fieldLabel: 'Shape',
-           columns: 2,
+           columns: 3,
            items: [{
                boxLabel: 'Circle', name: 'shape', inputValue: 'circle', checked: true
            }, {
@@ -204,6 +211,7 @@ Ext.onReady(function() {
        }, {
     	   xtype: 'radiogroup',
     	   fieldLabel: 'Size',
+         columns: 3,
     	   items: [{
     		   boxLabel: 'Small', name: 'size', inputValue: 'small'
     	   }, {
@@ -218,6 +226,7 @@ Ext.onReady(function() {
        }, {
     	   xtype: 'radiogroup',
     	   fieldLabel: 'Color based on',
+         columns: 3,
     	   items: [{
     		   boxLabel: 'One color for each tracker', name: 'colorby', inputValue: 'fixed'
     	   }, {
@@ -229,7 +238,7 @@ Ext.onReady(function() {
     		   change: function(field, value) {
     			   var colorby = value.colorby;
     			   var use_color_scheme = colorby === 'ispeed' || colorby === 'tspeed';
-				   field.up('form').down('#speedthresholds').setVisible(use_color_scheme);
+				   field.up('form').down('#speedthresholds').setDisabled(!use_color_scheme);
 				   var color_column = getColorColumn();
 				   if (use_color_scheme) {
 				       color_column.setEditor(Ext.create('My.ColorSchemePicker'));
