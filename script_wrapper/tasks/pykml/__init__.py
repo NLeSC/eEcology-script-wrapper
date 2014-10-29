@@ -1,9 +1,9 @@
 import os
 from math import ceil, log10
 from celery.utils.log import get_task_logger
-import iso8601
 import simplekml
 import colander
+from sqlalchemy import func, cast, Numeric
 from script_wrapper.tasks import PythonTask
 from script_wrapper.models import DBSession, Speed, getGPSCount
 from script_wrapper.validation import validateRange
@@ -77,6 +77,7 @@ class PyKML(PythonTask):
             alpha, altitudemode):
         self.update_state(state="RUNNING")
         db_url = self.local_db_url(db_url)
+        logger.info(db_url)
         session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])
@@ -134,10 +135,10 @@ class PyKML(PythonTask):
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
-                          # TODO switch between traject and instant speed based on style['colorby']
-                          Speed.speed,
-                          # TODO switch between traject and instant direction based on style['shape']
-                          Speed.direction,
+                          func.round(cast(Speed.speed, Numeric), 2),
+                          Speed.trajectSpeed,
+                          func.round(Speed.direction ,2),
+                          Speed.trajectDirection
                           )
         q = q.filter(tid == tracker_id)
         q = q.filter(dt.between(start.isoformat(), end.isoformat()))
@@ -168,8 +169,10 @@ class PyKML(PythonTask):
         <tr><td>Time</td><td>{dt}</td></tr>
         <tr><td>Lon, Lat (&deg;)</td><td>{lon:.3f}, {lat:.3f}</td></tr>
         <tr><td>Altitude (m)</td><td>{alt}</td></tr>
-        <tr><td>Speed (m/s)</td><td>{spd:.1f}</td></tr>
-        <tr><td>Direction (&deg;)</td><td>{dir:.1f}</td></tr>
+        <tr><td>Instantanous speed (m/s)</td><td>{ispeed:.1f}</td></tr>
+        <tr><td>Traject speed (m/s)</td><td>{tspeed}</td></tr>
+        <tr><td>Instantanous direction (&deg;)</td><td>{idir:.1f}</td></tr>
+        <tr><td>Traject direction (&deg;)</td><td>{tdir}</td></tr>
         </table>
         """
 
@@ -180,13 +183,17 @@ class PyKML(PythonTask):
         pfolder = folder.newfolder(name='points', open=0)
 
         parts = []
-        for tid, dt, lon, lat, alt, spd, dire in rows:
+        for row in rows:
+            (tid, dt, lon, lat, alt, ispeed, tspeed, idirection, tdirection) = row
+            if tdirection > 180:
+                tdirection = tdirection - 360
             parts.append((lon, lat))
             pnt = pfolder.newpoint()
-            pnt.style = self.kmlstyle4point(spd, dire, alt, style, color_scheme)
+            pnt.style = self.kmlstyle4point(ispeed, tspeed, idirection, tdirection, alt, style, color_scheme)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
-                                         spd=spd, dir=dire,
+                                         ispeed=ispeed, idir=idirection,
+                                         tspeed=tspeed, tdir=tdirection,
                                          )
             pnt.timestamp.when = dt.isoformat()
             pnt.coords = [(lon, lat, alt)]
@@ -237,7 +244,7 @@ class PyKML(PythonTask):
         # cant have log10 < 1, so clip alt to 1
         if altitude < 1:
             altitude = 1
-        
+
         if size == 'small':
             scale = 0.3 * log10(altitude) + 0.2
         elif size == 'medium':
@@ -247,9 +254,13 @@ class PyKML(PythonTask):
 
         return scale
 
-    def kmlstyle4point(self, speed, direction, altitude, style, color_scheme):
-        import sys
-
+    def kmlstyle4point(self, ispeed, tspeed, idirection, tdirection, altitude, style, color_scheme):
+        direction = idirection
+        if style['shape'] == 'tarrow':
+            direction = tdirection
+        speed = ispeed
+        if style['colorby'] == 'tspeed':
+            speed = tspeed
         scale = self.size2iconscale(style['size'], style['sizebyalt'], altitude)
         color = self.kmlcolor4point(color_scheme, style, speed)
 

@@ -206,7 +206,7 @@ Ext.onReady(function() {
            }, {
                boxLabel: 'Instantaneous directional arrow', name: 'shape', inputValue: 'iarrow'
            }, {
-               boxLabel: 'Traject directional arrow', name: 'shape', inputValue: 'tarrow', disabled: true
+               boxLabel: 'Traject directional arrow', name: 'shape', inputValue: 'tarrow'
            }]
        }, {
     	   xtype: 'radiogroup',
@@ -232,7 +232,7 @@ Ext.onReady(function() {
     	   }, {
     		   boxLabel: 'Instantaneous speed', name: 'colorby', inputValue: 'ispeed', checked: true
     	   }, {
-    		   boxLabel: 'Traject speed', name: 'colorby', inputValue: 'tspeed', disabled: true
+    		   boxLabel: 'Traject speed', name: 'colorby', inputValue: 'tspeed'
     	   }],
     	   listeners: {
     		   change: function(field, value) {

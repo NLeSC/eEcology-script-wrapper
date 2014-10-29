@@ -14,14 +14,16 @@
 
 import logging
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, text, Binary
 from sqlalchemy import create_engine
+from sqlalchemy import func, cast, Numeric
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema
+from sqlalchemy.ext.hybrid import hybrid_property
 from geoalchemy import GeometryColumn, Geometry, WKTSpatialElement
 
 Base = declarative_base()
@@ -30,13 +32,6 @@ logger = logging.getLogger('script_wrapper')
 
 GPS_SCHEMA = 'gps'
 
-class TrajectDirection(Float):
-    def column_expression(self, col):
-        return text('round(degrees(ST_Azimuth(lag(location) over (order by device_info_serial, date_time), location))::numeric, 2)')
-
-class TrajectSpeed(Float):
-    def column_expression(self, col):
-        return text("round((ST_Length_Spheroid(ST_MakeLine(location, lag(location) over (order by device_info_serial, date_time)), 'SPHEROID["WGS 84",6378137,298.257223563]')/EXTRACT(EPOCH FROM (date_time - lag(date_time) over (order by device_info_serial, date_time))))::numeric, 5)")
 
 class Tracker(Base):
     __tablename__ = 'ee_tracker_limited'
@@ -89,6 +84,8 @@ class Speed(Base):
     z_speed = Column(Float)
     speed_accuracy = Column(Float)
     location = GeometryColumn(Geometry(2))
+    # cannot use location in functions as it is wrapped by st_asbinary func as part of the geometry type
+    rawlocation = Column('location', Binary)
     vnorth = Column(Float)
     veast = Column(Float)
     vdown = Column(Float)
@@ -97,6 +94,34 @@ class Speed(Base):
     direction = Column(Float)
     userflag = Column(Integer)
 
+    @hybrid_property
+    def trajectDirection(self):
+        """traject direction of previous location and current location"""
+        azimuth = func.ST_Azimuth(func.lag(self.rawlocation).over(order_by=(self.device_info_serial, self.date_time,)), self.rawlocation)
+        return func.round(cast(func.degrees(azimuth), Numeric()), 2)
+
+    @hybrid_property
+    def trajectSpeed(self):
+        """traject speed by distance between previous and current location divided by current date_time - previous date_time
+
+        round(CAST
+        (
+            ST_Length_Spheroid(
+                ST_MakeLine(location, lag(location) over (order by device_info_serial, date_time)),
+                'SPHEROID[\"WGS 84\",6378137,298.257223563]'
+            )
+        /
+        EXTRACT(
+            EPOCH FROM (date_time - lag(date_time) over (order by device_info_serial, date_time))
+        )
+        ) AS NUMERIC, 4)
+        """
+        order_by = (self.device_info_serial, self.date_time,)
+        spheroid = 'SPHEROID["WGS 84",6378137,298.257223563]'
+        line = func.ST_MakeLine(self.rawlocation, func.lag(self.rawlocation).over(order_by=order_by))
+        distance = func.ST_Length_Spheroid(line, spheroid)
+        duration = func.extract('epoch', self.date_time - func.lag(self.date_time).over(order_by=order_by))
+        return func.round(cast(distance / duration, Numeric), 4)
 
 class Acceleration(Base):
     __tablename__ = 'ee_acceleration_limited'
@@ -291,10 +316,10 @@ def getAccelerationCount(db_url, device_info_serial, start, end):
     """Returns the number of acceleration rows for selected tracker and time range.
     """
     s = DBSession(db_url)()
-    q = s.query(Acceleration)
+    q = s.query(func.count(Acceleration.device_info_serial))
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
     q = q.filter(Acceleration.date_time.between(start.isoformat(), end.isoformat()))
-    acount = q.count()
+    acount = q.scalar()
     s.close()
     return acount
 
@@ -303,10 +328,10 @@ def getGPSCount(db_url, device_info_serial, start, end):
     """Returns the number of gps rows for selected tracker and time range.
     """
     s = DBSession(db_url)()
-    q = s.query(Speed)
+    q = s.query(func.count(Speed.device_info_serial))
     q = q.filter(Speed.device_info_serial == device_info_serial)
     q = q.filter(Speed.date_time.between(start.isoformat(), end.isoformat()))
     q = q.filter(Speed.userflag == 0)
-    gcount = q.count()
+    gcount = q.scalar()
     s.close()
     return gcount

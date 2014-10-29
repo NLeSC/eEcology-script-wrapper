@@ -1,6 +1,6 @@
 from datetime import datetime
 import unittest
-import pkgutil 
+import pkgutil
 from mock import patch
 from colander.iso8601 import UTC
 from colander import Invalid
@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         simplekml.ListStyle._id = 0
         simplekml.styleselector.StyleSelector._id = 0
         simplekml.timeprimitive.TimePrimitive._id = 0
-        
+
     def assertKml(self, testname, kml):
         self.maxDiff = None
         expected = pkgutil.get_data('script_wrapper.tests.data', testname + '.kml')
@@ -133,10 +133,12 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 8.91, 14.1, 14.2,
+                 ],
                 [355, datetime(2013, 5, 15, 8, 34, 34, tzinfo=UTC),
                  4.485608, 52.415252, 34,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -163,7 +165,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -190,7 +193,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, -5,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -217,7 +221,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 0.0, 14.1],
+                 0.0, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -245,7 +250,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -272,7 +278,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -299,7 +306,8 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
                 ]
         style = {'shape': 'iarrow',
                  'size': 'medium',
@@ -321,13 +329,41 @@ class Test(unittest.TestCase):
 
         self.assertKml('shapeiarrow', kml)
 
+    def test_trackrows2kml_shapetarrow_arrowwithheadingasicon(self):
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 8.90, 9.91, 14.1, 14.2,
+                 ],
+                ]
+        style = {'shape': 'tarrow',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'absolute',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#FFFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('shapetarrow', kml)
+
     def test_trackrows2kml_fastestspeed_fastestcolor(self):
 
         kml = simplekml.Kml()
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 28.90, 14.1],
+                 28.90, 29.91, 14.1, 14.2,],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -355,7 +391,7 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 18.90, 14.1],
+                 13.90, 19.91, 14.1, 14.2,],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -382,7 +418,7 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -409,7 +445,7 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,],
                 ]
         style = {'shape': 'circle',
                  'size': 'large',
@@ -436,7 +472,7 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 14.1],
+                 8.90, 9.91, 14.1, 14.2,],
                 ]
         style = {'shape': 'circle',
                  'size': 'small',
@@ -457,4 +493,3 @@ class Test(unittest.TestCase):
         task.trackrows2kml(kml, rows, tracker, style)
 
         self.assertKml('sizebyaltonsmallsize', kml)
-

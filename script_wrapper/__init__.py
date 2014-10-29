@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zope.interface import implementer
 from pyramid.config import Configurator
 from pyramid.interfaces import IAuthenticationPolicy
 from pyramid.authentication import RemoteUserAuthenticationPolicy
