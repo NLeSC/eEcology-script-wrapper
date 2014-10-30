@@ -127,10 +127,17 @@ class PyKML(PythonTask):
     def fetchtrack(self, session,
                    tracker_id, start, end,
                    need_traject_speed,
-                   need_traject_direction):
+                   need_traject_direction,
+                   need_elevation,
+                   ):
         """Fetch track data from db"""
         tid = Speed.device_info_serial
         dt = Speed.date_time
+        if need_elevation:
+            elev = Speed.elevation
+        else:
+            # column is ignored, but for unpacking return same number of columns
+            elev = Speed.altitude
         q = session.query(tid, dt,
                           Speed.longitude,
                           Speed.latitude,
@@ -138,7 +145,8 @@ class PyKML(PythonTask):
                           func.round(cast(Speed.speed, Numeric), 2),
                           Speed.trajectSpeed,
                           func.round(Speed.direction ,2),
-                          Speed.trajectDirection
+                          Speed.trajectDirection,
+                          elev,
                           )
         q = q.filter(tid == tracker_id)
         q = q.filter(dt.between(start.isoformat(), end.isoformat()))
@@ -154,11 +162,14 @@ class PyKML(PythonTask):
                   style):
         need_traject_speed = style['colorby'] == 'tspeed'
         need_traject_direction = style['shape'] == 'tarrow'
+        need_elevation = style['altitudemode'] == 'relativeToGround'
         tracker_id = tracker['id']
         rows = self.fetchtrack(session,
                                tracker_id, start, end,
                                need_traject_speed,
-                               need_traject_direction)
+                               need_traject_direction,
+                               need_elevation,
+                               )
 
         self.trackrows2kml(kml, rows, tracker, style)
 
@@ -184,11 +195,16 @@ class PyKML(PythonTask):
 
         parts = []
         for row in rows:
-            (tid, dt, lon, lat, alt, ispeed, tspeed, idirection, tdirection) = row
+            (tid, dt, lon, lat, alt, ispeed, tspeed, idirection, tdirection, elevation,) = row
             if tdirection > 180:
                 tdirection = tdirection - 360
             parts.append((lon, lat))
             pnt = pfolder.newpoint()
+
+            if style['altitudemode'] == 'relativeToGround':
+                # change absolute alt to relative to ground elevation
+                alt = alt - elevation
+
             pnt.style = self.kmlstyle4point(ispeed, tspeed, idirection, tdirection, alt, style, color_scheme)
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,

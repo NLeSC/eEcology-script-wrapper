@@ -228,9 +228,9 @@ Ext.onReady(function() {
     	   fieldLabel: 'Color based on',
          columns: 3,
     	   items: [{
-    		   boxLabel: 'One color for each tracker', name: 'colorby', inputValue: 'fixed'
+    		   boxLabel: 'One color for each tracker', name: 'colorby', inputValue: 'fixed', checked: true
     	   }, {
-    		   boxLabel: 'Instantaneous speed', name: 'colorby', inputValue: 'ispeed', checked: true
+    		   boxLabel: 'Instantaneous speed', name: 'colorby', inputValue: 'ispeed'
     	   }, {
     		   boxLabel: 'Traject speed', name: 'colorby', inputValue: 'tspeed'
     	   }],
@@ -238,7 +238,7 @@ Ext.onReady(function() {
     		   change: function(field, value) {
     			   var colorby = value.colorby;
     			   var use_color_scheme = colorby === 'ispeed' || colorby === 'tspeed';
-				   field.up('form').down('#speedthresholds').setDisabled(!use_color_scheme);
+				   field.up('form').down('#speedthresholds').setVisible(use_color_scheme);
 				   var color_column = getColorColumn();
 				   if (use_color_scheme) {
 				       color_column.setEditor(Ext.create('My.ColorSchemePicker'));
@@ -258,7 +258,8 @@ Ext.onReady(function() {
     	   layout: {
                type: 'hbox',
                defaultMargins: {top: 0, right: 5, bottom: 0, left: 0}
-           },
+         },
+         hidden: true,
     	   items: [{
     		   xtype: 'displayfield', value:'Slowest', fieldStyle: 'background: #FFFFE6', submitValue: false
     	   }, {
@@ -299,8 +300,7 @@ Ext.onReady(function() {
            }, {
                boxLabel: 'Relative to ground',
                name: 'altitudemode',
-               inputValue: 'relativeToGround',
-               disabled: true
+               inputValue: 'relativeToGround'
            }]
        }, {
            xtype: 'trackergridselector',

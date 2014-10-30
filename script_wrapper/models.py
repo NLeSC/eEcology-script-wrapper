@@ -25,6 +25,8 @@ from sqlalchemy.pool import NullPool
 from sqlalchemy.schema import CreateSchema
 from sqlalchemy.ext.hybrid import hybrid_property
 from geoalchemy import GeometryColumn, Geometry, WKTSpatialElement
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.sql.expression import literal_column
 
 Base = declarative_base()
 
@@ -98,7 +100,7 @@ class Speed(Base):
     def trajectDirection(self):
         """traject direction of previous location and current location"""
         azimuth = func.ST_Azimuth(func.lag(self.rawlocation).over(order_by=(self.device_info_serial, self.date_time,)), self.rawlocation)
-        return func.round(cast(func.degrees(azimuth), Numeric()), 2)
+        return func.round(cast(func.degrees(azimuth), Numeric()), 2).label('tdirection')
 
     @hybrid_property
     def trajectSpeed(self):
@@ -121,7 +123,31 @@ class Speed(Base):
         line = func.ST_MakeLine(self.rawlocation, func.lag(self.rawlocation).over(order_by=order_by))
         distance = func.ST_Length_Spheroid(line, spheroid)
         duration = func.extract('epoch', self.date_time - func.lag(self.date_time).over(order_by=order_by))
-        return func.round(cast(distance / duration, Numeric), 4)
+        return func.round(cast(distance / duration, Numeric), 4).label('tspeed')
+
+    @hybrid_property
+    def elevation(self):
+        """returns subquery Terrain elevation based on srtm3/srtm30
+
+        """
+        # Tried to write as sqlalchemy, but subquery + array + geo made it not workable
+        return literal_column("""coalesce(nullif(
+                (
+                SELECT max(the_data[floor(((st_ymax(bbox) - (st_y(location))) / abs(cellsize_y))+1)]
+                         [floor(((st_x(location)- st_xmin(bbox)) / abs(cellsize_x))+1)])::float
+                FROM elevation.srtm3
+                WHERE bbox && location
+                )
+            , -9999
+            )
+            , (
+            SELECT max(the_data[floor(((st_ymax(bbox) - (st_y(location))) / abs(cellsize_y))+1)]
+                     [floor(((st_x(location)- st_xmin(bbox)) / abs(cellsize_x))+1)])::float
+            FROM elevation.srtm30
+            WHERE bbox && location
+            )
+        )
+        """).label('elevation')
 
 class Acceleration(Base):
     __tablename__ = 'ee_acceleration_limited'
@@ -144,6 +170,30 @@ class Energy(Base):
     vbat = Column(Float)
     ssw = Column(Integer)
     temperature = Column(Float)
+
+
+class Elevation3(Base):
+    __tablename__ = 'srtm3'
+    __table_args__ = {'schema': 'elevation'}
+
+    tid = Column(Integer, primary_key=True)
+    bbox = GeometryColumn(Geometry())
+    rawbbox = Column(Binary, name='bbox')
+    cellsize_x = Column(Float)
+    cellsize_y = Column(Float)
+    the_data = Column(ARRAY(Integer, dimensions=2))
+
+
+class Elevation30(Base):
+    __tablename__ = 'srtm30'
+    __table_args__ = {'schema': 'elevation'}
+
+    tid = Column(Integer, primary_key=True)
+    bbox = GeometryColumn(Geometry())
+    rawbbox = Column(Binary, name='bbox')
+    cellsize_x = Column(Float)
+    cellsize_y = Column(Float)
+    the_data = Column(ARRAY(Integer, dimensions=2))
 
 
 def request_credentials(request):

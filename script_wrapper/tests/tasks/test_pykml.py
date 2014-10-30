@@ -134,10 +134,12 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 8.91, 14.1, 14.2,
+                 4.0,
                  ],
                 [355, datetime(2013, 5, 15, 8, 34, 34, tzinfo=UTC),
                  4.485608, 52.415252, 34,
                  8.90, 9.91, 14.1, 14.2,
+                 3.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -166,6 +168,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -194,6 +197,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, -5,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -222,6 +226,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  0.0, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -251,6 +256,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -279,6 +285,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'circle',
@@ -307,6 +314,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'iarrow',
@@ -335,6 +343,7 @@ class Test(unittest.TestCase):
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
                  8.90, 9.91, 14.1, 14.2,
+                 4.0,
                  ],
                 ]
         style = {'shape': 'tarrow',
@@ -363,7 +372,9 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 28.90, 29.91, 14.1, 14.2,],
+                 28.90, 29.91, 14.1, 14.2,
+                 4.0,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -391,7 +402,9 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 13.90, 19.91, 14.1, 14.2,],
+                 13.90, 19.91, 14.1, 14.2,
+                 4.0,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -418,7 +431,9 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 9.91, 14.1, 14.2,],
+                 8.90, 9.91, 14.1, 14.2,
+                 4.0,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'medium',
@@ -445,7 +460,9 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 9.91, 14.1, 14.2,],
+                 8.90, 9.91, 14.1, 14.2,
+                 4.0,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'large',
@@ -472,7 +489,9 @@ class Test(unittest.TestCase):
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
                  4.485608, 52.412252, 84,
-                 8.90, 9.91, 14.1, 14.2,],
+                 8.90, 9.91, 14.1, 14.2,
+                 4.0,
+                 ],
                 ]
         style = {'shape': 'circle',
                  'size': 'small',
@@ -493,3 +512,32 @@ class Test(unittest.TestCase):
         task.trackrows2kml(kml, rows, tracker, style)
 
         self.assertKml('sizebyaltonsmallsize', kml)
+
+    def test_altituderelativebyground(self):
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 8.90, 9.91, 14.1, 14.2,
+                 4.0,
+                 ],
+                ]
+        style = {'shape': 'circle',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'relativeToGround',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#FFFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('altituderelativebyground', kml)

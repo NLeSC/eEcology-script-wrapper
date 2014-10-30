@@ -76,3 +76,41 @@ class TestModels(unittest.TestCase):
         query.count.assert_called()
 
 
+class TestSpeed(unittest.TestCase):
+    def test_speedtrajectdirection_sql(self):
+        result = models.Speed.trajectDirection
+        expectedsql = 'round(CAST(degrees(ST_Azimuth(lag(gps.ee_tracking_speed_limited.location) OVER (ORDER BY gps.ee_tracking_speed_limited.device_info_serial, gps.ee_tracking_speed_limited.date_time), gps.ee_tracking_speed_limited.location)) AS NUMERIC), :round_1)'
+        self.assertEqual(str(result), expectedsql)
+        self.assertEqual(result.name, 'tdirection')
+        expectedparams = {'round_1': 2}
+        self.assertEqual(result.compile().params, expectedparams)
+
+    def test_speedtrajectspeed_sql(self):
+        result = models.Speed.trajectSpeed
+        expectedsql = 'round(CAST(ST_Length_Spheroid(ST_MakeLine(gps.ee_tracking_speed_limited.location, lag(gps.ee_tracking_speed_limited.location) OVER (ORDER BY gps.ee_tracking_speed_limited.device_info_serial, gps.ee_tracking_speed_limited.date_time)), :ST_Length_Spheroid_1) / EXTRACT(epoch FROM gps.ee_tracking_speed_limited.date_time - lag(gps.ee_tracking_speed_limited.date_time) OVER (ORDER BY gps.ee_tracking_speed_limited.device_info_serial, gps.ee_tracking_speed_limited.date_time)) AS NUMERIC), :round_1)'
+        self.assertEqual(str(result), expectedsql)
+        # TODO compare bind/params
+        self.assertEqual(result.name, 'tspeed')
+
+    def test_elevation_sql(self):
+        self.maxDiff = None
+        result = models.Speed.elevation
+        expectedsql = """coalesce(nullif(
+                (
+                SELECT max(the_data[floor(((st_ymax(bbox) - (st_y(location))) / abs(cellsize_y))+1)]
+                         [floor(((st_x(location)- st_xmin(bbox)) / abs(cellsize_x))+1)])::float
+                FROM elevation.srtm3
+                WHERE bbox && location
+                )
+            , -9999
+            )
+            , (
+            SELECT max(the_data[floor(((st_ymax(bbox) - (st_y(location))) / abs(cellsize_y))+1)]
+                     [floor(((st_x(location)- st_xmin(bbox)) / abs(cellsize_x))+1)])::float
+            FROM elevation.srtm30
+            WHERE bbox && location
+            )
+        )
+        """
+        self.assertMultiLineEqual(str(result), expectedsql)
+        self.assertEqual(result.name, 'elevation')
