@@ -300,6 +300,10 @@ class PyKML(PythonTask):
         return kmlstyle
 
     def formfields2taskargs(self, fields, db_url):
+        # form has transparency and kml requires opacity aka alpha
+        fields['alpha'] = abs(100 - fields['transparency'])
+        del(fields['transparency'])
+        
         schema = Schema()
         taskargs = schema.deserialize(fields)
 

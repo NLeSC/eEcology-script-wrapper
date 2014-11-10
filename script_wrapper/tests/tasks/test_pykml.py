@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
                       'speedthreshold1': 5,
                       'speedthreshold2': 10,
                       'speedthreshold3': 20,
-                      'alpha': 100,
+                      'transparency': 0,
                       'altitudemode': 'absolute',
                       }
         db_url = 'postgresql://localhost/eecology'
@@ -97,7 +97,7 @@ class Test(unittest.TestCase):
                       'speedthreshold1': 5,
                       'speedthreshold2': 10,
                       'speedthreshold3': 20,
-                      'alpha': 100,
+                      'transparency': 100,
                       'altitudemode': 'absolute',
                       }
         db_url = 'postgresql://localhost/eecology'
