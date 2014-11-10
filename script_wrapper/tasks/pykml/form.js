@@ -79,8 +79,11 @@ Ext.onReady(function() {
                 var color = record[0].data.fast;
                 combo.inputEl.setStyle('background', color);
             },
+            change: function(combo) {
+                combo.up().editingPlugin.completeEdit();
+            },
             focus: function(comp) {
-            	comp.expand();
+            	  comp.expand();
             }
         }
     });
@@ -106,8 +109,11 @@ Ext.onReady(function() {
                 var color = record[0].data.fast;
                 combo.inputEl.setStyle('background', color);
             },
+            change: function(combo) {
+                combo.up().editingPlugin.completeEdit();
+            },
             focus: function(combo) {
-              combo.expand();
+                combo.expand();
             }
         }
     });
