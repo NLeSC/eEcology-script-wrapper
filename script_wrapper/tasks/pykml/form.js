@@ -196,6 +196,14 @@ Ext.onReady(function() {
            xtype: 'datetimerange',
            defaults: {labelWidth: 150}
        }, {
+           xtype: 'trackergridselector',
+           buttons: ['add', 'remove'],
+           toGrid: selected_trackers
+       }, {
+           xtype: 'displayfield',
+           submitValue: false,
+           value: 'Click on color column of selected trackers to change color of the tracker.'
+       }, {
            xtype: 'fieldset',
            collapsible: true,
            collapsed: true,
@@ -230,6 +238,7 @@ Ext.onReady(function() {
            }, {
              xtype: 'radiogroup',
              fieldLabel: 'Color',
+             labelAttrTpl: 'data-qtip="Color for each tracker can be a single color or a 4 step gradient based on speed"',
              columns: 3,
              items: [{
                  boxLabel: 'Single color', name: 'colorby', inputValue: 'fixed', checked: true
@@ -307,15 +316,7 @@ Ext.onReady(function() {
                  name: 'altitudemode',
                  inputValue: 'relativeToGround'
              }]
-       }]
-       }, {
-           xtype: 'trackergridselector',
-           buttons: ['add', 'remove'],
-           toGrid: selected_trackers
-       }, {
-           xtype: 'displayfield',
-           submitValue: false,
-           value: 'Click on base color grid cell to change color of tracker.'
+         }]
        }]
    });
 });
