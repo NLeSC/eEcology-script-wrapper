@@ -30,12 +30,12 @@ Ext.onReady(function() {
         model: 'ColorScheme',
         data: [
             [1, '#FFFF50', '#FDD017', '#C68E17', '#733C00'], // OK GEEL -DONKERGEEL
-            [2, '#F7E8AA', '#F9E070', '#FCB514', '#A37F14'], // OK GEEL -GEELGROEN
             [3, '#FFA550', '#EB4100', '#FF0000', '#7D0000'], // OK ORANJE ROOD
             [4, '#5A5AFF', '#0000FF', '#0000AF', '#00004B'], // OK FEL BLAUW
             [5, '#BEFFFF', '#00FFFF', '#00B9B9', '#007373'], // OK LICHT BLAUW
             [6, '#8CFF8C', '#00FF00', '#00B900', '#004B00'], //  FEL GROEN
             [7, '#FF8CFF', '#FF00FF', '#A500A5', '#4B004B'], //  OK PAARS
+            [2, '#F7E8AA', '#F9E070', '#FCB514', '#A37F14'], // OK GEEL -GEELGROEN
             [8, '#AADD96', '#60C659', '#339E35', '#3A7728'], // OK GROEN
             [9, '#FFD3AA', '#F9BA82', '#F28411', '#BF5B00'], // OK
             [10, '#C6C699', '#AAAD75', '#6B702B', '#424716'], // OK
@@ -191,128 +191,123 @@ Ext.onReady(function() {
 
    var form = Ext.create('Esc.ee.form.Panel', {
        id:'myform',
-       defaults: {labelWidth: 200},
+       defaults: {labelWidth: 150},
        items: [{
            xtype: 'datetimerange',
-           layout: 'column',
-           defaults: {columnWidth: 0.5}
+           defaults: {labelWidth: 150}
        }, {
-           xtype: 'radiogroup',
-           fieldLabel: 'Shape',
-           columns: 3,
+           xtype: 'fieldset',
+           collapsible: true,
+           collapsed: true,
+           title: 'Advanced settings',
+           defaults: {labelWidth: 150},
            items: [{
-               boxLabel: 'Circle', name: 'shape', inputValue: 'circle', checked: true
+               xtype: 'radiogroup',
+               fieldLabel: 'Shape',
+               columns: 3,
+               items: [{
+                   boxLabel: 'Circle', name: 'shape', inputValue: 'circle', checked: true
+               }, {
+                   boxLabel: 'Instantaneous directional arrow', name: 'shape', inputValue: 'iarrow'
+               }, {
+                   boxLabel: 'Traject directional arrow', name: 'shape', inputValue: 'tarrow'
+               }]
            }, {
-               boxLabel: 'Instantaneous directional arrow', name: 'shape', inputValue: 'iarrow'
+              xtype: 'radiogroup',
+              fieldLabel: 'Size',
+              columns: 3,
+              items: [{
+                  boxLabel: 'Small', name: 'size', inputValue: 'small'
+              }, {
+                  boxLabel: 'Medium', name: 'size', inputValue: 'medium', checked: true, fieldStyle: 'font-size: 140%;'
+              }, {
+                  boxLabel: 'Large', name: 'size', inputValue: 'large', fieldStyle: 'font-size: 170%;'
+              }]
            }, {
-               boxLabel: 'Traject directional arrow', name: 'shape', inputValue: 'tarrow'
-           }]
-       }, {
-         xtype: 'fieldcontainer',
-         layout: 'column',
-         defaults: {columnWidth: 0.5},
-         items: [{
-            xtype: 'radiogroup',
-            fieldLabel: 'Size',
-            columns: 3,
-            items: [{
-                boxLabel: 'Small', name: 'size', inputValue: 'small'
-            }, {
-                boxLabel: 'Medium', name: 'size', inputValue: 'medium', checked: true, fieldStyle: 'font-size: 140%;'
-            }, {
-                boxLabel: 'Large', name: 'size', inputValue: 'large', fieldStyle: 'font-size: 170%;'
-            }]
-          }, {
-            xtype: 'checkbox',
-            boxLabel: 'Size based on altitude',
-            name: 'sizebyalt'
-         }]
-       }, {
-         xtype: 'radiogroup',
-         fieldLabel: 'Color based on',
-         columns: 3,
-         items: [{
-             boxLabel: 'One color for each tracker', name: 'colorby', inputValue: 'fixed', checked: true
-         }, {
-             boxLabel: 'Instantaneous speed', name: 'colorby', inputValue: 'ispeed'
-         }, {
-             boxLabel: 'Traject speed', name: 'colorby', inputValue: 'tspeed'
-         }],
-         listeners: {
-           change: function(field, value) {
-             var colorby = value.colorby;
-             var use_color_scheme = colorby === 'ispeed' || colorby === 'tspeed';
-             field.up('form').down('#speedthresholds').setDisabled(!use_color_scheme);
-
-             var color_column = getColorColumn();
-             if (use_color_scheme) {
-                 color_column.setEditor(Ext.create('My.ColorSchemePicker'));
-                 color_column.renderer = mycolorschemerenderer;
-             } else {
-                 color_column.setEditor(Ext.create('My.ColorPicker'));
-                 color_column.renderer = mycolorrenderer;
-             }
-             // trigger column redraw
-             getSelectedTrackersGrid().view.refresh();
-           }
-         }
-       }, {
-         xtype: 'fieldcontainer',
-         layout: 'column',
-         defaults: {columnWidth: 0.5},
-         items: [{
-             xtype: 'fieldcontainer',
-             id: 'speedthresholds',
-             fieldLabel: 'Speed thresholds (m/s)',
-             layout: {
-                 type: 'hbox',
-                 defaultMargins: {top: 0, right: 5, bottom: 0, left: 0}
-             },
-             disabled: true,
+              xtype: 'checkbox',
+              fieldLabel: 'Size based on altitude',
+              name: 'sizebyalt'
+           }, {
+             xtype: 'radiogroup',
+             fieldLabel: 'Color',
+             columns: 3,
              items: [{
-                 xtype: 'displayfield', value:'Slowest', fieldStyle: 'background: #FFFFE6', submitValue: false
+                 boxLabel: 'Single color', name: 'colorby', inputValue: 'fixed', checked: true
              }, {
-                 xtype: 'numberfield', name: 'speedthreshold1', value: 5, minValue: 0, maxValue: 100, width: 50
+                 boxLabel: 'Instantaneous speed gradient', name: 'colorby', inputValue: 'ispeed'
              }, {
-                 xtype: 'displayfield', value:'Slow', fieldStyle: 'background: #FFFFB2', submitValue: false
+                 boxLabel: 'Traject speed gradient', name: 'colorby', inputValue: 'tspeed'
+             }],
+             listeners: {
+               change: function(field, value) {
+                 var colorby = value.colorby;
+                 var use_color_scheme = colorby === 'ispeed' || colorby === 'tspeed';
+                 field.up('form').down('#speedthresholds').setDisabled(!use_color_scheme);
+
+                 var color_column = getColorColumn();
+                 if (use_color_scheme) {
+                     color_column.setEditor(Ext.create('My.ColorSchemePicker'));
+                     color_column.renderer = mycolorschemerenderer;
+                 } else {
+                     color_column.setEditor(Ext.create('My.ColorPicker'));
+                     color_column.renderer = mycolorrenderer;
+                 }
+                 // trigger column redraw
+                 getSelectedTrackersGrid().view.refresh();
+               }
+             }
+           }, {
+               xtype: 'fieldcontainer',
+               id: 'speedthresholds',
+               fieldLabel: 'Speed thresholds (m/s)',
+               layout: {
+                   type: 'hbox',
+                   defaultMargins: {top: 0, right: 5, bottom: 0, left: 0}
+               },
+               disabled: true,
+               items: [{
+                   xtype: 'displayfield', value:'Slowest', fieldStyle: 'background: #FFFFE6', submitValue: false
+               }, {
+                   xtype: 'numberfield', name: 'speedthreshold1', value: 5, minValue: 0, maxValue: 100, width: 50
+               }, {
+                   xtype: 'displayfield', value:'Slow', fieldStyle: 'background: #FFFFB2', submitValue: false
+               }, {
+                   xtype: 'numberfield', name: 'speedthreshold2', value: 10, minValue: 0, maxValue: 100, width: 50
+               }, {
+                   xtype: 'displayfield', value:'Fast', fieldStyle: 'background: #FFFF33', submitValue: false
+               }, {
+                   xtype: 'numberfield', name: 'speedthreshold3', value: 20, minValue: 0, maxValue: 100, width: 50
+               }, {
+                   xtype: 'displayfield', value:'Fastest', fieldStyle: 'background: #CCCC00', submitValue: false
+               }]
+          }, {
+               xtype: 'numberfield',
+               fieldLabel: 'Transparency (%)',
+               labelAttrTpl:'data-qtip="0% is fully opaque, 100% is fully transparent"',
+               name: 'transparency',
+               width: 205,
+               value: 0,
+               minValue: 0,
+               maxValue: 100,
+         }, {
+             xtype: 'radiogroup',
+             fieldLabel: 'Altitude',
+             columns: 3,
+             items: [{
+                 boxLabel: 'Absolute',
+                 name: 'altitudemode',
+                 inputValue: 'absolute',
+                 checked: true
              }, {
-                 xtype: 'numberfield', name: 'speedthreshold2', value: 10, minValue: 0, maxValue: 100, width: 50
+                 boxLabel: 'Clamp to ground',
+                 name: 'altitudemode',
+                 inputValue: 'clampToGround'
              }, {
-                 xtype: 'displayfield', value:'Fast', fieldStyle: 'background: #FFFF33', submitValue: false
-             }, {
-                 xtype: 'numberfield', name: 'speedthreshold3', value: 20, minValue: 0, maxValue: 100, width: 50
-             }, {
-                 xtype: 'displayfield', value:'Fastest', fieldStyle: 'background: #CCCC00', submitValue: false
+                 boxLabel: 'Relative to ground',
+                 name: 'altitudemode',
+                 inputValue: 'relativeToGround'
              }]
-        }, {
-             xtype: 'numberfield',
-             fieldLabel: 'Transparency (%)',
-             labelAttrTpl:'data-qtip="0% is fully opaque, 100% is fully transparent"',
-             name: 'transparency',
-             width: 155,
-             value: 0,
-             minValue: 0,
-             maxValue: 100,
-             width: 50
-        }]
-       }, {
-           xtype: 'radiogroup',
-           fieldLabel: 'Altitude',
-           columns: 3,
-           items: [{
-               boxLabel: 'Absolute',
-               name: 'altitudemode',
-               inputValue: 'absolute',
-               checked: true
-           }, {
-               boxLabel: 'Clamp to ground',
-               name: 'altitudemode',
-               inputValue: 'clampToGround'
-           }, {
-               boxLabel: 'Relative to ground',
-               name: 'altitudemode',
-               inputValue: 'relativeToGround'
-           }]
+       }]
        }, {
            xtype: 'trackergridselector',
            buttons: ['add', 'remove'],

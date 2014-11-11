@@ -51,9 +51,9 @@ class Schema(colander.MappingSchema):
     sizebyalt = colander.SchemaNode(colander.Boolean(), missing=False)
     colorby = colander.SchemaNode(colander.String(),
                                validator=colander.OneOf(['fixed', 'ispeed', 'tspeed']))
-    speedthreshold1 = colander.SchemaNode(colander.Int())
-    speedthreshold2 = colander.SchemaNode(colander.Int())
-    speedthreshold3 = colander.SchemaNode(colander.Int())
+    speedthreshold1 = colander.SchemaNode(colander.Int(), missing=5)
+    speedthreshold2 = colander.SchemaNode(colander.Int(), missing=10)
+    speedthreshold3 = colander.SchemaNode(colander.Int(), missing=20)
     alpha = colander.SchemaNode(colander.Int(),
                                 validator=colander.Range(0, 100))
     valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
@@ -303,7 +303,7 @@ class PyKML(PythonTask):
         # form has transparency and kml requires opacity aka alpha
         fields['alpha'] = abs(100 - fields['transparency'])
         del(fields['transparency'])
-        
+
         schema = Schema()
         taskargs = schema.deserialize(fields)
 
