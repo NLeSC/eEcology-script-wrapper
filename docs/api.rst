@@ -27,3 +27,6 @@ Web application
 
 .. automodule:: script_wrapper
     :members:
+
+.. automodule:: script_wrapper.views
+    :members:
