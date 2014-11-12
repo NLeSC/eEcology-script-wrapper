@@ -15,6 +15,7 @@ class Calendar(RTask):
     script = 'calendar.r'
     result_template = 'result.mak'
     autoregister = True
+    made_by_researcher = False
     MAX_FIX_COUNT = 1000000
 
     def run(self, db_url, tracker_id, start, end):

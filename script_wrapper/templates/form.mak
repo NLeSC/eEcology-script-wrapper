@@ -1,6 +1,10 @@
 <%inherit file="base.mak"/>
 
 <%block name="title">
+% if task.made_by_researcher:
+<a href="${request.route_path('index')}">Script Wrapper</a>
+-
+% endif
 ${task.label}
 </%block>
 

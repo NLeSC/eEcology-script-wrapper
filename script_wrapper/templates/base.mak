@@ -27,10 +27,7 @@
                 <ul id="menu-hoofdmenu" class="menu">
 <li id="menu-item-1236" class="menu-item menu-item-type-post_type current-menu-item page_item page-item-293 current_page_item menu-item-1236"><a href="http://www.uva-bits.nl/virtual-lab/">Virtual Lab</a>
 <ul>
-<li class="app-item"><a href="${request.route_path('index')}">Script Wrapper</a>
--
-<%block name="title"/>
-</li>
+<li class="app-item"><%block name="title"/></li>
 </ul>
 </li>
                 </ul>

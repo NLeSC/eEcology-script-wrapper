@@ -59,6 +59,7 @@ class PythonTask(Task):
     js_form = 'form.js'
     result_template = None
     autoregister = True  # Change to False to hide this task
+    made_by_researcher = True
 
     def output_dir(self):
         """Directory where task can put output files.

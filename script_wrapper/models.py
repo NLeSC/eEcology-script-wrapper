@@ -14,7 +14,8 @@
 
 import logging
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, text, Binary
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Integer, String, DateTime, Float, Binary
 from sqlalchemy import create_engine
 from sqlalchemy import func, cast, Numeric
 from sqlalchemy.engine.url import make_url
@@ -148,6 +149,7 @@ class Speed(Base):
             )
         )
         """).label('elevation')
+
 
 class Acceleration(Base):
     __tablename__ = 'ee_acceleration_limited'
@@ -368,7 +370,8 @@ def getAccelerationCount(db_url, device_info_serial, start, end):
     s = DBSession(db_url)()
     q = s.query(func.count(Acceleration.device_info_serial))
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
-    q = q.filter(Acceleration.date_time.between(start.isoformat(), end.isoformat()))
+    q = q.filter(Acceleration.date_time.between(start.isoformat(),
+                                                end.isoformat()))
     acount = q.scalar()
     s.close()
     return acount

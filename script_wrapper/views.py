@@ -31,22 +31,36 @@ class TaskNotReady(Exception):
 
 
 class Views(object):
+    """Container for all views of script wrapper web application"""
     def __init__(self, request):
         self.request = request
         self.celery = celery
 
     @property
     def scriptid(self):
+        """Script identifier or task name, derived from url"""
         return self.request.matchdict['script']
 
     @property
     def taskid(self):
+        """Task identifier, derived from url"""
         return self.request.matchdict['taskid']
 
-    def tasks(self):
-        """Return dict of available tasks, key is task name and value is task object"""
-        return {k: v for k, v in self.celery.tasks.iteritems()
-                    if not k.startswith('celery.')}
+    def tasks(self, made_by_researcher=None):
+        """Return dict of available tasks.
+
+        Key is task name and value is task object
+
+        Parameters:
+        made_by_researcher: boolean
+            if true then only returns tasks made by researchers
+        """
+        items = self.celery.tasks.iteritems()
+        tasks = {k: v for k, v in items if not k.startswith('celery.')}
+        if made_by_researcher:
+            # only return tasks which have been made by researchers
+            tasks = {k: v for k, v in tasks.iteritems() if v.made_by_researcher}
+        return tasks
 
     def task(self):
         """Returns current task object"""
@@ -72,33 +86,41 @@ class Views(object):
         return result
 
     def task_result_directory(self):
+        """Returns result director of current task"""
         base = self.request.registry.settings['task_output_directory']
         directory = os.path.join(base, self.taskid)
         return directory
 
     @view_config(route_name='index', renderer='index.mak')
     def index(self):
-        return {'tasks': self.tasks()}
+        """Show list of scripts made by researchers"""
+        return {'tasks': self.tasks(made_by_researcher=True)}
 
     @view_config(route_name='apply', request_method='GET', renderer='form.mak')
     def form(self):
+        """Returns html form of selected task"""
         return {'task': self.task()}
 
     @view_config(route_name='jsform')
     def jsform(self):
+        """Returns javascript form of selected task"""
         task = self.task()
         return FileResponse(task.js_form_location(), self.request)
 
     @view_config(route_name='apply', request_method='POST', renderer='json')
     def submit(self):
+        """Process task submission
+
+        The submission will be validated and submitted to the task queue.
+        """
         task = self.task()
         db_url = db_url_from_request(self.request)
         try:
             kwargs = task.formfields2taskargs(self.request.json_body, db_url)
             taskresp = task.apply_async(kwargs=kwargs)
             result_url = self.request.route_path('result',
-                                            script=self.scriptid,
-                                            taskid=taskresp.id)
+                                                 script=self.scriptid,
+                                                 taskid=taskresp.id)
             return {'success': True, 'result': result_url}
         except Invalid as e:
             return {'success': False, 'msg': e.message}
@@ -107,11 +129,26 @@ class Views(object):
                  renderer='json',
                  request_method='GET')
     def statejson(self):
+        """Returns state of current task as json
+
+        Example:
+
+        .. code-block:: javascript
+
+            {
+                "state": "PENDING",
+                "ready": False,
+                "success": False,
+                "failure": False,
+                "result": "/tool/calendar/b3c84d96-4dc7-4532-a864-3573202f202a"
+            }
+
+        """
         result = self.task_result()
         result_url = self.request.route_path('result',
-                                        script=self.scriptid,
-                                        taskid=result.id,
-                                        )
+                                             script=self.scriptid,
+                                             taskid=result.id,
+                                             )
         return {'state': result.state,
                 'success': result.successful(),
                 'failure': result.failed(),
@@ -121,6 +158,11 @@ class Views(object):
 
     @view_config(renderer='state.mak', context=TaskNotReady)
     def statehtml(self):
+        """Page shown when task is pending or running
+
+        Page refreshes automagicly.
+        Task can be canceled on page.
+        """
         response = self.statejson()
         response['task'] = self.task()
         return response
@@ -129,6 +171,7 @@ class Views(object):
                  request_method='DELETE',
                  renderer='json')
     def revoke_task(self):
+        """Cancel a pending or runnning task"""
         result = self.task_result()
         result.revoke(terminate=True)
         return {'success': True}
@@ -141,7 +184,9 @@ class Views(object):
         result_dir = self.task_result_directory()
         try:
             for filename in sorted(os.listdir(result_dir)):
-                files[filename] = self.request.route_path('result_file', script=self.scriptid,
+                files[filename] = self.request.route_path(
+                    'result_file',
+                    script=self.scriptid,
                     taskid=self.taskid,
                     filename=filename)
 
@@ -151,13 +196,19 @@ class Views(object):
 
     @view_config(route_name='result', renderer='result.mak')
     def result(self):
+        """Page with result
+
+        When task.result_template is filled then
+        returns page with rendered result_template.
+        else
+        returns page with listing of all result files.
+        """
         task = self.task()
         result = self.task_result(True)
         files = self.result_files()
         result_html = task.render_result(result, files)
 
-        data = {
-                'task': task,
+        data = {'task': task,
                 'files': files,
                 'result': result,
                 'result_html': result_html,
@@ -166,6 +217,7 @@ class Views(object):
 
     @view_config(route_name='result_file')
     def result_file(self):
+        """Returns file in result directory"""
         # results has files dict with key=base filename
         # and value is absolute path to file
         result_dir = self.task_result_directory()
@@ -175,6 +227,10 @@ class Views(object):
 
     @view_config(route_name='trackers', renderer='json')
     def trackers(self):
+        """List of trackers
+
+        Each tracker has an id, project and species field.
+        """
         Session = make_session_from_request(self.request)()
 
         q = Session.query(Tracker.device_info_serial,
@@ -195,6 +251,7 @@ class Views(object):
 
     @view_config(route_name='species', renderer='json')
     def species(self):
+        """List of species"""
         Session = make_session_from_request(self.request)()
 
         q = Session.query(Individual.species).distinct()
@@ -209,6 +266,7 @@ class Views(object):
 
     @view_config(route_name='projects', renderer='json')
     def projects(self):
+        """List of projects"""
         Session = make_session_from_request(self.request)()
 
         q = Session.query(TrackSession.key_name).distinct()
@@ -220,3 +278,18 @@ class Views(object):
         Session.close()
 
         return projects
+
+    @view_config(route_name='tools', renderer='json')
+    def tools(self):
+        """List of all tasks available in script wrapper"""
+        tools = []
+        tasks = self.tasks()
+        for task in sorted(tasks.values(), key=lambda task: task.name):
+            form_url = self.request.route_path('apply', script=task.name)
+            tools.append({
+                'label': task.label,
+                'form_url': form_url,
+                'description': task.description,
+                'made_by_researcher': task.made_by_researcher,
+            })
+        return tools

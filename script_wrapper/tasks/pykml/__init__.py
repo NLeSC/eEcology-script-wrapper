@@ -66,6 +66,7 @@ class PyKML(PythonTask):
     name = 'kmzgen'
     label = 'KMZ generator'
     description = 'Generate a KMZ file with multiple trackers.'
+    made_by_researcher = False
     autoregister = True
     MAX_FIX_COUNT = 50000
     MAX_FIX_TOTAL_COUNT = 50000

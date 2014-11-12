@@ -19,6 +19,8 @@ from pyramid.exceptions import HTTPNotFound
 from pyramid.response import FileResponse
 from celery.result import AsyncResult
 from script_wrapper.tasks import PythonTask
+from script_wrapper.tasks.gpsvis_db import GpsVisDB as TaskMadeByResearcher
+from script_wrapper.tasks.calendar import Calendar as TaskMadeByDeveloper
 from script_wrapper.validation import Invalid
 from script_wrapper.views import Views, TaskNotReady
 
@@ -26,9 +28,7 @@ from script_wrapper.views import Views, TaskNotReady
 class TestViews(unittest.TestCase):
 
     def setUp(self):
-        self.settings = {
-                           'task_output_directory': '/tmp/results',
-                           }
+        self.settings = {'task_output_directory': '/tmp/results', }
         self.config = testing.setUp(settings=self.settings)
         self.request = testing.DummyRequest()
 
@@ -40,6 +40,41 @@ class TestViews(unittest.TestCase):
         views = Views(self.request)
 
         self.assertEqual(views.scriptid, 'plot')
+
+    def test_tasks_made_by_anyone(self):
+        views = Views(self.request)
+        taskMadeByResearcher = TaskMadeByResearcher()
+        taskMadeByDeveloper = TaskMadeByDeveloper()
+        views.celery.tasks = {
+            'plot': taskMadeByResearcher,
+            'kml': taskMadeByDeveloper,
+            'celery.chain': 'celery.chain object',
+        }
+
+        tasks = views.tasks()
+
+        expected_tasks = {
+            'plot': taskMadeByResearcher,
+            'kml': taskMadeByDeveloper,
+        }
+        self.assertEqual(tasks, expected_tasks)
+
+    def test_tasks_made_by_researcher(self):
+        views = Views(self.request)
+        taskMadeByResearcher = TaskMadeByResearcher()
+        taskMadeByDeveloper = TaskMadeByDeveloper()
+        views.celery.tasks = {
+            'plot': taskMadeByResearcher,
+            'kml': taskMadeByDeveloper,
+            'celery.chain': 'celery.chain object',
+        }
+
+        tasks = views.tasks(made_by_researcher=True)
+
+        expected_tasks = {
+            'plot': taskMadeByResearcher,
+        }
+        self.assertEqual(tasks, expected_tasks)
 
     def test_task(self):
         self.request.matchdict = {'script': 'plot'}
@@ -98,11 +133,20 @@ class TestViews(unittest.TestCase):
 
     def test_index(self):
         views = Views(self.request)
-        views.celery.tasks = {'plot': 'task1'}
+        taskMadeByResearcher = TaskMadeByResearcher()
+        taskMadeByDeveloper = TaskMadeByDeveloper()
+        views.celery.tasks = {
+            'plot': taskMadeByResearcher,
+            'kml': taskMadeByDeveloper,
+            'celery.chain': 'celery.chain object',
+        }
 
         result = views.index()
 
-        self.assertEqual(result, {'tasks': {'plot': 'task1'}})
+        expected_tasks = {
+            'plot': taskMadeByResearcher,
+        }
+        self.assertEqual(result, {'tasks': expected_tasks})
 
     def test_form(self):
         self.request.matchdict['script'] = 'plot'
@@ -224,8 +268,7 @@ class TestViews(unittest.TestCase):
 
         result = views.result()
 
-        eresult = {
-                   'result': task_result,
+        eresult = {'result': task_result,
                    'files': {'stderr.txt': '/plot/mytaskid/stderr.txt',
                              'stdout.txt': '/plot/mytaskid/stdout.txt',
                              },
@@ -267,7 +310,7 @@ class TestViews(unittest.TestCase):
         task = PythonTask()
         task.render_result = Mock(return_value='mytemplate')
         views.task = Mock(return_value=task)
-        files = {'result.csv': '/plot/mytaskid/result.csv',}
+        files = {'result.csv': '/plot/mytaskid/result.csv', }
         views.result_files = Mock(return_value=files)
 
         result = views.result()
@@ -322,8 +365,8 @@ class TestViews(unittest.TestCase):
         projects = views.projects()
 
         self.assertEqual(projects, [{'id': 'Project1',
-                                    'text': 'Project1',
-                                    }])
+                                     'text': 'Project1',
+                                     }])
 
     @patch('script_wrapper.views.make_session_from_request')
     def test_trackers(self, sm):
@@ -337,10 +380,9 @@ class TestViews(unittest.TestCase):
         trackers = views.trackers()
 
         self.assertEqual(trackers, [{'id': 1,
-                                    'project': 'Project1',
-                                    'species': 'Lesser Black-backed Gull',
-                                    }])
-
+                                     'project': 'Project1',
+                                     'species': 'Lesser Black-backed Gull',
+                                     }])
 
     def test_revoke_task(self):
         self.request.matchdict['taskid'] = 'mytaskid'
@@ -355,3 +397,29 @@ class TestViews(unittest.TestCase):
         self.assertEquals(result, {'success': True})
         views.celery.AsyncResult.assert_called_with('mytaskid')
         task_result.revoke.assert_called_with(terminate=True)
+
+    def test_tools(self):
+        self.config.add_route('apply', '/tool/{script}/')
+        views = Views(self.request)
+        taskMadeByResearcher = TaskMadeByResearcher()
+        taskMadeByDeveloper = TaskMadeByDeveloper()
+        views.celery.tasks = {
+            'plot': taskMadeByResearcher,
+            'kml': taskMadeByDeveloper,
+            'celery.chain': 'celery.chain object',
+        }
+
+        result = views.tools()
+
+        expected = [{
+            'label': 'Calendar',
+            'form_url': '/tool/calendar/',
+            'description': 'Calender overview with daily statistics of GPS-tracker',
+            'made_by_researcher': False
+        }, {
+            'label': 'KMZ and Plot',
+            'form_url': '/tool/gpsvis_db/',
+            'description': 'Generate KMZ file and statistics plot',
+            'made_by_researcher': True
+        }]
+        self.assertEquals(result, expected)
