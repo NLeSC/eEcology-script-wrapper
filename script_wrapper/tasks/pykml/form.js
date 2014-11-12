@@ -202,7 +202,7 @@ Ext.onReady(function() {
        }, {
            xtype: 'displayfield',
            submitValue: false,
-           value: 'Click on color column of selected trackers to change color of the tracker.'
+           value: 'Click on color column of a tracker to change it\'s color.'
        }, {
            xtype: 'fieldset',
            collapsible: true,

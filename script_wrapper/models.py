@@ -260,6 +260,16 @@ def populate(session):
 
         # as yourself
         CREATE SCHEMA gps;
+        CREATE SCHEMA elevation;
+        -- Create elevation schema
+        GRANT USAGE ON SCHEMA elevation TO public;
+        CREATE OR REPLACE FUNCTION elevation.srtm_getvalue(IN my_point geometry, OUT altitude numeric)
+          RETURNS numeric AS
+        $BODY$
+        SELECT -9999.0
+        $BODY$
+          LANGUAGE sql IMMUTABLE STRICT
+          COST 100;
 
     In python shell::
 
@@ -280,17 +290,6 @@ def populate(session):
         GRANT SELECT ON TABLE gps.ee_tracking_speed_limited TO public;
         GRANT SELECT ON TABLE gps.ee_tracking_acceleration_limited TO public;
         GRANT SELECT ON TABLE gps.ee_energy_limited TO public;
-
-        -- Create elevation schema
-        CREATE SCHEMA elevation;
-        GRANT USAGE ON SCHEMA elevation TO public;
-        CREATE OR REPLACE FUNCTION elevation.srtm_getvalue(IN my_point geometry, OUT altitude numeric)
-          RETURNS numeric AS
-        $BODY$
-        SELECT -9999.0
-        $BODY$
-          LANGUAGE sql IMMUTABLE STRICT
-          COST 100;
 
     Or to load a dump::
 
