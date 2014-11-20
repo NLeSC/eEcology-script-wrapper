@@ -17,7 +17,7 @@
 <script type="text/javascript">
 Ext.onReady(function() {
 	var interval = 5000;
-	var template = new Ext.Template('<div>Script is in <span class="state">{0}</span> state. (this can take a several minutes)</div>');
+	var template = new Ext.Template('<div>Script is in <span class="state">{0}</span> state, this can take several minutes.</div>');
 	template.compile();
 
 	var status = Ext.create('Ext.Component', {
