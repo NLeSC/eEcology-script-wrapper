@@ -8,8 +8,8 @@ logger = get_task_logger(__name__)
 class ExampleMatlab(MatlabTask):
     name = 'examplematlab'
     label = 'Example in Matlab'
-    description = 'Example in Matlab'
-    """Perform a db query in a Matlab executable with postgresql query"""
+    title = 'Example in Matlab'
+    description = """Performs a db query in a Matlab executable with postgresql query"""
     script = 'run_dbq.sh'
     autoregister = False
     matlab_version = '2012b'

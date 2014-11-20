@@ -414,12 +414,14 @@ class TestViews(unittest.TestCase):
         expected = [{
             'label': 'Calendar',
             'form_url': '/tool/calendar/',
-            'description': 'Calender overview with daily statistics of GPS-tracker',
+            'title': 'Calendar overview with daily statistics of GPS-tracker',
+            'description': '',
             'made_by_researcher': False
         }, {
             'label': 'KMZ and Plot',
             'form_url': '/tool/gpsvis_db/',
-            'description': 'Generate KMZ file and statistics plot',
+            'title': 'Generate KMZ file and statistics plot',
+            'description': '',
             'made_by_researcher': True
         }]
         self.assertEquals(result, expected)

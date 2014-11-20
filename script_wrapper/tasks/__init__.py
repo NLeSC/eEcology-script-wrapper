@@ -37,8 +37,10 @@ class PythonTask(Task):
         but are used as the base class for new task types.
     label : string
         Human readable label of task.
+    title : string
+        Title of task. Should be a single line.
     description : string
-        Description of task.
+        Description of task. May contain html.
     autoregister : boolean
         If disabled this task won't be registered automatically.
     js_form : string
@@ -55,7 +57,8 @@ class PythonTask(Task):
     """
     abstract = True
     label = None
-    description = None
+    title = None
+    description = ''
     js_form = 'form.js'
     result_template = None
     autoregister = True  # Change to False to hide this task

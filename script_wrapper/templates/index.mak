@@ -9,7 +9,7 @@
 <ul>
 	% for task in sorted(tasks.values(), key=lambda task: task.name):
 	<li><a href="${request.route_path('apply',script=task.name)}">${task.label}</a>,
-		${task.description|n}</li>
+		${task.title|n}</li>
 	% endfor
 </ul>
 

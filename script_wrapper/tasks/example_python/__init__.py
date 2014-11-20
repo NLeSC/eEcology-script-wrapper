@@ -12,7 +12,7 @@ logger = get_task_logger(__name__)
 class ExamplePython(PythonTask):
     name = 'examplepython'
     label = 'Example in Python'
-    description = 'Example in Python'
+    title = 'Title of example in Python'
     autoregister = False
 
     def run(self, db_url, trackers, start, end):

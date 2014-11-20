@@ -65,7 +65,11 @@ class PyKML(PythonTask):
     """Generate a KMZ file with multiple trackers using simplekml package"""
     name = 'kmzgen'
     label = 'KMZ generator'
-    description = 'Generate a KMZ file with multiple trackers.'
+    title = 'Generate a KMZ file with multiple trackers.'
+    description = '''The KMZ file contains the routes one or more selected trackers travelled during the selected date range. 
+    KMZ file can be opened with <a href="https://www.google.com/earth/">Google Earth</a>.
+    The look and feel can be adjusted by choosing the tracker color and by changing the advanced settings.  
+    '''
     made_by_researcher = False
     autoregister = True
     MAX_FIX_COUNT = 50000
@@ -82,9 +86,9 @@ class PyKML(PythonTask):
         session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])
-        filename_tpl = "{start}-{end}-{trackers}.kmz"
-        filename = filename_tpl.format(start=start,
-                                       end=end,
+        filename_tpl = "t{trackers}-s{start}-e{end}-.kmz"
+        filename = filename_tpl.format(start=start.strftime('%Y%m%d%H%M'),
+                                       end=end.strftime('%Y%m%d%H%M'),
                                        trackers=trackers_list,
                                        )
         fn = os.path.join(self.output_dir(), filename)
@@ -281,9 +285,9 @@ class PyKML(PythonTask):
         scale = self.size2iconscale(style['size'], style['sizebyalt'], altitude)
         color = self.kmlcolor4point(color_scheme, style, speed)
 
-        id = self.hashcode4pointstyle(color, direction, scale, style)
-        if id in self.pointstylecache:
-            return self.pointstylecache[id]
+        style_id = self.hashcode4pointstyle(color, direction, scale, style)
+        if style_id in self.pointstylecache:
+            return self.pointstylecache[style_id]
 
         kmlstyle = simplekml.Style()
 
@@ -297,7 +301,7 @@ class PyKML(PythonTask):
         kmlstyle.iconstyle.scale = scale
         kmlstyle.iconstyle.color = color
 
-        self.pointstylecache[id] = kmlstyle
+        self.pointstylecache[style_id] = kmlstyle
         return kmlstyle
 
     def formfields2taskargs(self, fields, db_url):

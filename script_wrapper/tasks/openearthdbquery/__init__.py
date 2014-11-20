@@ -7,7 +7,7 @@ logger = get_task_logger(__name__)
 class OpenEarthDbQuery(MatlabTask):
     name = 'open_earth_db_query'
     label = "OpenEarth Database query"
-    description = """Perform a db query in a Matlab executable
+    title = """Perform a db query in a Matlab executable
                   with postgresql query using OpenEarth toolkit"""
     script = 'run_test.sh'
     autoregister = False

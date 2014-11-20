@@ -11,7 +11,7 @@ logger = get_task_logger(__name__)
 class Calendar(RTask):
     name = 'calendar'
     label = 'Calendar'
-    description = 'Calender overview with daily statistics of GPS-tracker'
+    title = 'Calendar overview with daily statistics of GPS-tracker'
     script = 'calendar.r'
     result_template = 'result.mak'
     autoregister = True

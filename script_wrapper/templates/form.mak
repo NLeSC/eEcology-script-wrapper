@@ -23,6 +23,7 @@ Ext.Loader.setConfig({
 </%block>
 
 <h2>${task.label}</h2>
+<div id="title">${task.title|n}</div>
 <div id="description">
 ${task.description|n}
 </div>

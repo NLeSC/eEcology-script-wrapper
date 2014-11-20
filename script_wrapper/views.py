@@ -289,6 +289,7 @@ class Views(object):
             tools.append({
                 'label': task.label,
                 'form_url': form_url,
+                'title': task.title,
                 'description': task.description,
                 'made_by_researcher': task.made_by_researcher,
             })

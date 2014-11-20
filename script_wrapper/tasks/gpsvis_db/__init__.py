@@ -12,7 +12,7 @@ class GpsVisDB(MatlabTask):
     """
     name = 'gpsvis_db'
     label = "KMZ and Plot"
-    description = """Generate KMZ file and statistics plot"""
+    title = """Generate KMZ file and statistics plot"""
     script = 'run_stefanoe.sh'
     matlab_version = '2012b'
     MAX_FIX_COUNT = 50000

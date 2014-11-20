@@ -7,7 +7,7 @@ logger = get_task_logger(__name__)
 class GpsOverview(MatlabTask):
     name = 'gps_overview'
     label = "GPS Overview"
-    description = """Perform something in a Matlab executable with postgresql query"""
+    title = """Perform something in a Matlab executable with postgresql query"""
     deploy_script = 'run_gps_overview.sh'
     autoregister = False
 

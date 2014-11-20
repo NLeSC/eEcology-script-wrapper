@@ -4,7 +4,7 @@ from script_wrapper.tasks import MatlabTask
 class KmzGen(MatlabTask):
     name = 'kmz_gen'
     label = "Generate KMZ file"
-    description = """Uses Matlab google earth toolkit"""
+    title = """Uses Matlab google earth toolkit"""
     script = 'run_kmz_gen.sh'
     autoregister = False
     matlab_version = '2009b'

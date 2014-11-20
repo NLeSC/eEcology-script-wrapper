@@ -8,7 +8,7 @@ logger = get_task_logger(__name__)
 class ExampleR(RTask):
     name = 'exampler'
     label = 'Example in R'
-    description = 'Example in R'
+    title = 'Title of example in R'
     script = 'dbq.r'
     autoregister = False
 

@@ -14,7 +14,7 @@ class Gpx(PythonTask):
     """Generate a GPX file for a track"""
     name = 'gpx'
     label = 'GPX file'
-    description = 'Generate a GPX file for a track. Can be used in <a href="http://www.doarama.com/">Doarama</a> visualization.'
+    title = 'Generate a GPX file for a track. Can be used in <a target="_new" href="http://www.doarama.com/">Doarama</a> visualization.'
     autoregister = True
     made_by_researcher = False
     MAX_FIX_COUNT = 50000
