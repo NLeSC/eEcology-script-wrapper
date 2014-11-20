@@ -29,7 +29,6 @@ Ext.onReady(function() {
     var colorschemes = Ext.create('Ext.data.ArrayStore', {
         model: 'ColorScheme',
         data: [
-            [1, '#FFFF50', '#FDD017', '#C68E17', '#733C00'], // OK GEEL -DONKERGEEL
             [3, '#FFA550', '#EB4100', '#FF0000', '#7D0000'], // OK ORANJE ROOD
             [4, '#5A5AFF', '#0000FF', '#0000AF', '#00004B'], // OK FEL BLAUW
             [5, '#BEFFFF', '#00FFFF', '#00B9B9', '#007373'], // OK LICHT BLAUW
@@ -39,6 +38,7 @@ Ext.onReady(function() {
             [8, '#AADD96', '#60C659', '#339E35', '#3A7728'], // OK GROEN
             [9, '#FFD3AA', '#F9BA82', '#F28411', '#BF5B00'], // OK
             [10, '#C6C699', '#AAAD75', '#6B702B', '#424716'], // OK
+            [1, '#FFFF50', '#FDD017', '#C68E17', '#733C00'], // OK GEEL -DONKERGEEL
             [11, '#E5BFC6', '#D39EAF', '#A05175', '#7F284F'], // OK  ROZE-PAARS
             [12, '#DADADA', '#C3C3C3', '#999999', '#3C3C3C'], //  VAN WIT NAAR DONKERGRIJS
             [13, '#C6B5C4', '#A893AD', '#664975', '#472B59'], // OK BLAUWPAARS
