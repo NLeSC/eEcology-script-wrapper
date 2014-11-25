@@ -24,7 +24,7 @@
 </ol>
 % endif
 % if len(files) == 1:
-<p>The output file will downloaded automatically. Problems with the download? Please use the link above.</p>
+<p>The output file will be downloaded automatically. Problems with the download? Please use the link above.</p>
 % endif
 % else:
 ${result_html|n}
