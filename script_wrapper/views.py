@@ -238,7 +238,7 @@ class Views(object):
 
         q = Session.query(Tracker.device_info_serial,
                           TrackSession.key_name,
-                          Individual.species,
+                          Individual.species_latin_name,
                           )
         q = q.join(TrackSession).join(Individual)
         q = q.order_by(Tracker.device_info_serial).distinct()
@@ -257,8 +257,8 @@ class Views(object):
         """List of species"""
         Session = make_session_from_request(self.request)()
 
-        q = Session.query(Individual.species).distinct()
-        q = q.order_by(Individual.species)
+        q = Session.query(Individual.species_latin_name).distinct()
+        q = q.order_by(Individual.species_latin_name)
         species = []
         for speci in q:
             species.append({'id': speci, 'text': speci})

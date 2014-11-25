@@ -48,7 +48,7 @@ class Individual(Base):
     __table_args__ = {'schema': GPS_SCHEMA}
 
     ring_number = Column(String, primary_key=True)
-    species = Column(String)
+    species_latin_name = Column(String)
 
 
 class TrackSession(Base):
