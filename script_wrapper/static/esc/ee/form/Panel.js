@@ -20,6 +20,9 @@ Ext.define('Esc.ee.form.Panel', {
         'Ext.data.proxy.LocalStorage',
         'Ext.grid.column.Action'
     ],
+    fieldDefaults: {
+    	msgTarget: 'under'
+    },
     initComponent : function() {
         var me = this;
         this.callParent();
@@ -141,7 +144,11 @@ Ext.define('Esc.ee.form.Panel', {
                             Ext.Msg.alert('Failure', 'Ajax communication failed');
                             break;
                         case Ext.form.action.Action.SERVER_INVALID:
-                           Ext.Msg.alert('Failure', action.result.msg);
+                        	if ('errors' in action.result) {
+                        		// errors are shown near invalid fields
+                        	} else {
+                        		Ext.Msg.alert('Failure', action.result.msg);
+                        	}
                       }
                     },
                 });

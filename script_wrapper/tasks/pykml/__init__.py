@@ -86,7 +86,7 @@ class PyKML(PythonTask):
         session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])
-        filename_tpl = "t{trackers}-s{start}-e{end}-.kmz"
+        filename_tpl = "t{trackers}-s{start}-e{end}.kmz"
         filename = filename_tpl.format(start=start.strftime('%Y%m%d%H%M'),
                                        end=end.strftime('%Y%m%d%H%M'),
                                        trackers=trackers_list,

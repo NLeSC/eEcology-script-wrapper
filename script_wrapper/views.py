@@ -15,6 +15,7 @@
 import os
 import logging
 from celery import current_app as celery
+from colander import Invalid as ColanderInvalid
 from pyramid.exceptions import HTTPNotFound
 from pyramid.response import FileResponse
 from pyramid.view import view_config
@@ -124,6 +125,8 @@ class Views(object):
             return {'success': True, 'result': result_url}
         except Invalid as e:
             return {'success': False, 'msg': e.message}
+        except ColanderInvalid as e:
+            return {'success': False, 'errors': e.asdict()}
 
     @view_config(route_name='state.json',
                  renderer='json',

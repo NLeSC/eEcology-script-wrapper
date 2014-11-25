@@ -209,6 +209,30 @@ class TestViews(unittest.TestCase):
                    'msg': 'Invalid query'}
         self.assertEqual(result, eresult)
 
+    @patch('script_wrapper.views.db_url_from_request')
+    def test_submit_InvalidQueryField(self, dr):
+        dr.return_value = 'sqlite:///'
+        self.request.matchdict['script'] = 'kmzgen'
+        self.request.json_body = {'shape': 'triangle'}
+        task = Mock(PythonTask)
+        
+        import colander
+
+        shape = colander.SchemaNode(colander.String(),
+                                    name='shape',
+                                    validator=colander.OneOf(['circle', 'iarrow', 'tarrow']))
+        exception = colander.Invalid(shape, '"triangle" is not one of circle, iarrow, tarrow')
+        task.formfields2taskargs.side_effect = exception
+        views = Views(self.request)
+        views.celery.tasks = {'kmzgen': task}
+
+        result = views.submit()
+
+        eresult = {'success': False,
+                   'errors': {'shape': '"triangle" is not one of circle, iarrow, tarrow'},
+                   }
+        self.assertEqual(result, eresult)
+
     def test_statejson(self):
         self.config.add_route('result', '/{script}/{taskid}')
         self.request.matchdict['script'] = 'plot'
