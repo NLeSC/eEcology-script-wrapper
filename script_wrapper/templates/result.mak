@@ -9,7 +9,7 @@
 </%block>
 
 <%block name="header">
-% if len(files) == 1:
+% if result_html is None and len(files) == 1:
 <meta http-equiv="refresh" content="0;URL='${files.values()[0]}'"/>  
 % endif
 </%block>
