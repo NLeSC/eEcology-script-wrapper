@@ -138,16 +138,13 @@ class PyKML(PythonTask):
         """Fetch track data from db"""
         tid = Speed.device_info_serial
         dt = Speed.date_time
-        if need_elevation:
-            elev = Speed.elevation
-        else:
-            # column is ignored, but for unpacking return same number of columns
-            elev = Speed.altitude
+        # terrain height is tracker altitude minus tracker altitude above ground level
+        elev = Speed.altitude - Speed.altitude_agl
         q = session.query(tid, dt,
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
-                          func.round(cast(Speed.speed, Numeric), 2),
+                          func.round(cast(Speed.speed_2d, Numeric), 2),
                           Speed.trajectSpeed,
                           func.round(Speed.direction ,2),
                           Speed.trajectDirection,
