@@ -1008,7 +1008,35 @@ slider = Ext.create('Ext.slider.Multi', {
             var clip_high = slider.getValue(1);
             clipped_display(selected_metric, clip_low, clip_high);
         }
-    }
+    },
+    /**
+     * Current thumb value was used as min/max instead of metric domain range
+     * Overwrote so thumb values are not adjusted 
+     */
+    setMinValue : function(val) {
+        var me = this, i;
+
+        me.minValue = val;
+        if (me.rendered) {
+            me.inputEl.dom.setAttribute('aria-valuemin', val);
+        }
+
+        me.syncThumbs();
+    },
+    /**
+     * Current thumb value was used as min/max instead of metric domain range
+     * Overwrote so thumb values are not adjusted 
+     */
+    setMaxValue : function(val) {
+        var me = this, i;
+
+        me.maxValue = val;
+        if (me.rendered) {
+            me.inputEl.dom.setAttribute('aria-valuemax', val);
+        }
+
+        me.syncThumbs();
+    },
 });
 
 function changeLowColor(picker, newColor) {
