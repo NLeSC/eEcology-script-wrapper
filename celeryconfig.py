@@ -11,5 +11,5 @@ CELERY_TASK_RESULT_EXPIRES = 7257600
 
 # TODO make host overwritable using DB_HOST environment variable
 matlab = {'location': {'2012a': '/opt/MATLAB/MATLAB_Compiler_Runtime/v717'}}
-task_output_directory = '/usr/src/app/data'
+task_output_directory = '/usr/src/app/jobs'
 

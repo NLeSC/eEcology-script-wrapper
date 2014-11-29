@@ -1,9 +1,9 @@
 FROM ubuntu:14.04
 MAINTAINER Stefan Verhoeven "s.verhoeven@esciencecenter.nl"
 ENV DB_HOST db.e-ecology.sara.nl
+# when starting celery as non-root it tries to write to /root/.egg_cache, redirect it to writeable location
 ENV PYTHON_EGG_CACHE /tmp
 EXPOSE 6543
-VOLUME /jobs
 RUN apt-get update
 RUN apt-get install -y python-dev python-virtualenv wget libpq-dev
 
@@ -11,9 +11,12 @@ RUN apt-get install -y python-dev python-virtualenv wget libpq-dev
 RUN apt-get install -y octave python-numpy python-scipy
 
 # Install Matlab runtime environment
+# remote server is very slow so download mcr outsite Dockerfile with
+# wget http://nl.mathworks.com/supportfiles/MCR_Runtime/R2012a/MCR_R2012a_glnxa64_installer.zip
+COPY MCR_R2012a_glnxa64_installer.zip /tmp/
+RUN mkdir /tmp/mcr-install && cd /tmp/mcr-install && unzip ../MCR_R2012a_glnxa64_installer.zip && ./install -mode silent -agreeToLicense yes -destinationFolder /opt/MATLAB/MATLAB_Compiler_Runtime
 
-
-# R 
+# R
 RUN apt-get install -y r-base-dev littler
 # R packages
 RUN /usr/share/doc/littler/examples/install.r DBI RPostgreSQL stringr && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
@@ -32,5 +35,4 @@ RUN cd script_wrapper/static && wget http://cdn.sencha.com/ext/gpl/ext-4.2.1-gpl
 
 RUN python setup.py develop
 
-CMD gunicorn --env DB_HOST=$DB_HOST --paste production.ini-docker
-
+CMD gunicorn --user www-data --env DB_HOST=$DB_HOST --paste production.ini-docker

@@ -51,7 +51,7 @@ Appliction configuration
   cp development.ini-dist development.ini
 
 Or
-  
+
   cp production.ini-dist production.ini
 
 And edit it to fit needs.
@@ -154,13 +154,20 @@ Docker deployment
 -----------------
 
 Script wrapper consist of 3 containers:
-- web
+- web, instance of script-wrapper image
 - redis
-- worker
-
-
+- worker, instance of script-wrapper image
 
 Orchistration is done with fig (http://fig.sh).
 
-To start script-wrapper use `fig -p script-wrapper up`.
+0. Download MCR, inside Dockerfile was too slow, so move it outside build step
 
+    wget http://nl.mathworks.com/supportfiles/MCR_Runtime/R2012a/MCR_R2012a_glnxa64_installer.zip
+
+1. Create docker image for script-wrapper
+
+    sudo docker build -t script-wrapper:2.2.1 -t script-wrapper:latest .
+
+2. Start it
+
+    fig -p script-wrapper up
