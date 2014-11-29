@@ -1,0 +1,19 @@
+redis:
+  image: redis
+web:
+  build: .
+  command: gunicorn --env DB_HOST=$DB_HOST --paste production.ini-docker
+  links: 
+   - redis
+  ports:
+   - "6543:6543"
+  volumes:
+   - data/:/usr/src/app/data
+worker:
+  build: .
+  command: celery worker --uid=www-data
+  links:
+   - redis
+  volumes:
+   - data/:/usr/src/app/data
+

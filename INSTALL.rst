@@ -150,3 +150,17 @@ Have multiple slaves with celery workers and local database. Script results will
 3.5 Redis server on master bind to all, open firewall `-A INPUT -i eth1 -j ACCEPT` for private network
 4. Stop, rename template, start several instances.
 
+Docker deployment
+-----------------
+
+Script wrapper consist of 3 containers:
+- web
+- redis
+- worker
+
+
+
+Orchistration is done with fig (http://fig.sh).
+
+To start script-wrapper use `fig -p script-wrapper up`.
+

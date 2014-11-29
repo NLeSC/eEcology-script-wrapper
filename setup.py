@@ -15,12 +15,13 @@ requires = [
     'iso8601',
     'pytz',
     'rpy2',
+    'singledispatch', # required by rpy2
     'oct2py',
     'scipy',  # required by oct2py
     'numpy',  # required by scipy
     'mock',
     'nose',  # to run tests
-    'sphinx',
+    'sphinx==1.2.3',
     'rst2pdf',  # to create PDF of documentation
     'sphinx_bootstrap_theme',  # to create nice looking html documentation
     'simplekml',  # for pykml task
