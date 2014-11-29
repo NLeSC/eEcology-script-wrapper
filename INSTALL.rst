@@ -166,6 +166,9 @@ Orchistration is done with fig (http://fig.sh).
 
 1. Create docker image for script-wrapper
 
+Docker puts images in /var/lib/docker, this can be changed by starting docker deamon with `-g <graphdir>` option.
+
+
     sudo docker build -t script-wrapper:2.2.1 -t script-wrapper:latest .
 
 2. Start it
