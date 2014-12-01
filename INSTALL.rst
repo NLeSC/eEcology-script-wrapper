@@ -161,17 +161,20 @@ Script wrapper consist of 3 container:
 Orchistration is done with fig (http://fig.sh).
 
 1. Create docker image for script-wrapper
-
-Docker puts images in /var/lib/docker, this can be changed by starting docker deamon with `-g <graphdir>` option.
+(Docker puts images in /var/lib/docker, this can be changed by starting docker deamon with `-g <graphdir>` option.)
 
     sudo docker build -t script-wrapper:2.2.1 .
     sudo docker tag script-wrapper:2.2.1 script-wrapper:latest
 
 2. Setup jobs dir
+
+    mkdir jobs
+    chown www-data jobs
+
 The script wrapper job results are shared between using the web and worker container using a host directory.
 The `fig.yml` defaults to `jobs/` directory in current working directory.
 Update `fig.yml` if jobs need to stored elsewhere.
-The jobs dir should be writable by www-data user, as both web and worker service run as www-data user.
+The jobs dir should be writable by www-data (uid=33) user, as both web and worker service run as www-data user.
 
 3. Start it
 
