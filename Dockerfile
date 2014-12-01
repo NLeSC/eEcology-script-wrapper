@@ -46,5 +46,8 @@ RUN python setup.py develop
 # one python package was installed with -rw------- permission, so service can not be started as www-data user
 #RUN chmod -R +r /usr/local/lib/python2.7/dist-packages/python_dateutil-2.2-py2.7.egg/EGG-INFO
 
+# Build html documentation
+RUN cd docs && sphinx-build -b html -d docs/_build/doctrees . ../script_wrapper/static/docs
+
 # web service command
 CMD gunicorn --user www-data --env DB_HOST=$DB_HOST --paste docker.ini
