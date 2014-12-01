@@ -178,5 +178,4 @@ Update `fig.yml` if needed.
 
 TODOS:
 
-* requirements in requirements.txt and setup.py
 * celery+app config in *ini and celeryconfig.py
