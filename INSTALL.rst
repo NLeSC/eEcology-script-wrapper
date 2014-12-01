@@ -153,24 +153,30 @@ Have multiple slaves with celery workers and local database. Script results will
 Docker deployment
 -----------------
 
-Script wrapper consist of 3 containers:
+Script wrapper consist of 3 container:
 - web, instance of script-wrapper image
 - redis
 - worker, instance of script-wrapper image
 
 Orchistration is done with fig (http://fig.sh).
 
-0. Download MCR, inside Dockerfile was too slow, so move it outside build step
-
-    wget http://nl.mathworks.com/supportfiles/MCR_Runtime/R2012a/MCR_R2012a_glnxa64_installer.zip
-
 1. Create docker image for script-wrapper
 
 Docker puts images in /var/lib/docker, this can be changed by starting docker deamon with `-g <graphdir>` option.
 
+    sudo docker build -t script-wrapper:2.2.1 .
+    sudo docker tag script-wrapper:2.2.1 script-wrapper:latest
 
-    sudo docker build -t script-wrapper:2.2.1 -t script-wrapper:latest .
+2. Adjust jobs dir.
+The script wrapper job results are shared between using the web and worker container using a host directory.
+The `fig.yml` defaults to `jobs/` directory in current working directory.
+Update `fig.yml` if needed.
 
-2. Start it
+3. Start it
 
     fig -p script-wrapper up
+
+TODOS:
+
+* requirements in requirements.txt and setup.py
+* celery+app config in *ini and celeryconfig.py

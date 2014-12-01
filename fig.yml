@@ -2,9 +2,9 @@ redis:
   image: redis
 web:
   image: script-wrapper
-  command: gunicorn --user www-data --env DB_HOST=$DB_HOST --paste production.ini-docker
   environment:
     DB_HOST: db.e-ecology.sara.nl
+  # can't put command here because DB_HOST will be past as '$DB_HOST' instead of it's value, so use Dockerfile CMD
   links:
    - redis
   ports:
@@ -13,7 +13,7 @@ web:
    - jobs/:/usr/src/app/jobs
 worker:
   image: script-wrapper
-  command: celery worker --uid=www-data
+  command: celery worker --uid=www-data --config=celeryconfig_docker
   links:
    - redis
   volumes:

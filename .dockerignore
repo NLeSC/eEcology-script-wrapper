@@ -2,3 +2,4 @@ env
 .git
 Annotation.egg-info
 data
+script_wrapper/static/ext*
