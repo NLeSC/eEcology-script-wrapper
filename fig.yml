@@ -3,8 +3,8 @@ redis:
 web:
   image: script-wrapper
   environment:
-    DB_HOST: db.e-ecology.sara.nl
-  # can't put command here because DB_HOST will be past as '$DB_HOST' instead of it's value, so use Dockerfile CMD
+    DB_HOST: db-dev.e-ecology.sara.nl
+  # can't put command here because DB_HOST will be passed as '$DB_HOST' instead of it's value, so use Dockerfile CMD
   links:
    - redis
   ports:
@@ -13,7 +13,10 @@ web:
    - jobs/:/usr/src/app/jobs
 worker:
   image: script-wrapper
-  command: celery worker --uid=www-data --config=celeryconfig_docker
+  user: www-data
+  command: pceleryd docker.ini
+  environment:
+    DB_HOST: db-dev.e-ecology.sara.nl
   links:
    - redis
   volumes:

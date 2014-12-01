@@ -47,4 +47,4 @@ RUN python setup.py develop
 #RUN chmod -R +r /usr/local/lib/python2.7/dist-packages/python_dateutil-2.2-py2.7.egg/EGG-INFO
 
 # web service command
-CMD gunicorn --user www-data --env DB_HOST=$DB_HOST --paste docker-web.ini
+CMD gunicorn --user www-data --env DB_HOST=$DB_HOST --paste docker.ini

@@ -10,7 +10,7 @@ requires = [
     'sqlalchemy==0.8.4',
     'geoalchemy',  # required for PostGIS geometry column type
     'pyramid_celery',
-    'celery',
+    'celery==3.0.25',
     'redis',
     'iso8601',
     'pytz',
