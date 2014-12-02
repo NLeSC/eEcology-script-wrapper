@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
 import unittest
-from pytz import UTC
+from mock import patch
 from script_wrapper.tasks.example_python import ExamplePython
 
 
 class TestExamplePython(unittest.TestCase):
 
-    def test_formfields2taskargs(self):
+    @patch('script_wrapper.tasks.example_python.getGPSCount')
+    def test_formfields2taskargs(self, gpscount):
+        gpscount.return_value = 400
         task = ExamplePython()
 
-        formquery = {
-                     'trackers': [1234, 5678],
+        formquery = {'tracker_id': 1234,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
                      }
@@ -32,11 +32,10 @@ class TestExamplePython(unittest.TestCase):
         taskargs = task.formfields2taskargs(formquery,
                                             'postgresql://localhost')
 
-        etaskargs = {
-                     'db_url': 'postgresql://localhost',
-                     'start': datetime(2013, 1, 1, tzinfo=UTC),
-                     'end': datetime(2013, 10, 10, tzinfo=UTC),
-                     'trackers': [1234, 5678],
+        etaskargs = {'db_url': 'postgresql://localhost',
+                     'tracker_id': 1234,
+                     'start': '2013-01-01T00:00:00',
+                     'end': '2013-10-10T00:00:00',
                      }
 
         self.assertEqual(taskargs, etaskargs)

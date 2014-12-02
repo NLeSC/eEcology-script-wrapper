@@ -15,12 +15,21 @@
 import inspect
 import os
 from celery.utils.log import get_task_logger
+import colander
 import iso8601
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.models import getAccelerationCount
 from script_wrapper.validation import validateRange
+from script_wrapper.validation import iso8601Validator
 
 logger = get_task_logger(__name__)
+
+
+class Schema(colander.MappingSchema):
+    start = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    end = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    tracker_id = colander.SchemaNode(colander.Int())
+    plot_accel = colander.SchemaNode(colander.Boolean(), missing=False)
 
 
 class Classification(MatlabTask):
@@ -33,6 +42,8 @@ class Classification(MatlabTask):
     MAX_ACC_COUNT = 50000
 
     def run(self, db_url, start, end, tracker_id, plot_accel):
+        start = iso8601.parse_date(start)
+        end = iso8601.parse_date(end)
         u = self.local_db_url(db_url)
         db_name = self.sslify_dbname(u)
 
@@ -59,17 +70,15 @@ class Classification(MatlabTask):
         return result
 
     def formfields2taskargs(self, fields, db_url):
-        start = iso8601.parse_date(fields['start'])
-        end = iso8601.parse_date(fields['end'])
-        tracker_id = fields['id']
-        plot_accel = fields['plot_accel']
+        schema = Schema()
+        taskargs = schema.deserialize(fields)
 
         # Test if selection will give results
-        validateRange(getAccelerationCount(db_url, tracker_id, start, end), 0, self.MAX_ACC_COUNT)
+        validateRange(getAccelerationCount(db_url,
+                                           taskargs['tracker_id'],
+                                           taskargs['start'],
+                                           taskargs['end'],
+                                           ), 0, self.MAX_ACC_COUNT)
 
-        return {'db_url':  db_url,
-                'start': start,
-                'end': end,
-                'tracker_id': tracker_id,
-                'plot_accel': plot_accel,
-                }
+        taskargs['db_url'] = db_url
+        return taskargs

@@ -13,7 +13,8 @@ Ext.onReady(function() {
        items: [{
            xtype: 'datetimerange'
        }, {
-           xtype: 'trackergridfield'
+           xtype: 'trackergridfield',
+           name: 'tracker_id'
        }]
    });
 });

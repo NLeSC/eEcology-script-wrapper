@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import iso8601
+import colander
+
 
 class Invalid(Exception):
     pass
@@ -40,3 +43,22 @@ def validateRange(count, minimum, maximum, tracker_id=None):
             raise Invalid('No data points selected for tracker {} for this script, '.format(tracker_id)
                           + 'please increase or shift time range')
     return True
+
+
+def colorValidator(node, value):
+    if (value[0] != '#'):
+        msg = '%r is not a color, should be #RRGGBB' % value
+        raise colander.Invalid(node, msg)
+
+    try:
+        int(value[1:], 16)
+    except ValueError:
+        msg = '%r is not a color, should be #RRGGBB' % value
+        raise colander.Invalid(node, msg)
+
+
+def iso8601Validator(node, value):
+    try:
+        iso8601.parse_date(value)
+    except iso8601.ParseError:
+        raise colander.Invalid(node, 'Invalid date')

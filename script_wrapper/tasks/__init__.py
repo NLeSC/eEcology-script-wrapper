@@ -84,16 +84,9 @@ class PythonTask(Task):
         return directory
 
     def local_db_url(self, db_url):
-        """Returns db url from local worker 'sqlalchemy.url' configuration.
-
-        Takes credentials and host from db_url and other items (database name, port, etc.) from the configuration.
-        """
+        """Convert db_url string into a :class:`~sqlalchemy.engine.url.URL`"""
         front_db_url = make_url(db_url)
-        worker_db_url = make_url(self.app.conf['sqlalchemy.url'])
-        worker_db_url.username = front_db_url.username
-        worker_db_url.password = front_db_url.password
-        worker_db_url.host = front_db_url.host
-        return worker_db_url
+        return front_db_url
 
     def task_dir(self):
         """Directory in which Task is defined
