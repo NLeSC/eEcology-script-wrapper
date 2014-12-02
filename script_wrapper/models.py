@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+from os import environ
 import logging
 import datetime
 from sqlalchemy import Column, ForeignKey
@@ -220,7 +220,7 @@ def db_url_from_request(request):
     (username, password) = request_credentials(request)
     db_url = make_url(settings['sqlalchemy.url'])
     # make db host overwritable with DB_HOST environment variable
-    db_url.host = os.environ.get('DB_HOST', db_url.host)
+    db_url.host = environ.get('DB_HOST', db_url.host)
     if username:
         db_url.username = username
     if password:
