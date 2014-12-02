@@ -1,0 +1,23 @@
+redis:
+  image: redis
+web:
+  image: sverhoeven/eecology-script-wrapper
+  environment:
+    DB_HOST: db.e-ecology.sara.nl
+  # can't put command here because DB_HOST will be passed as '$DB_HOST' instead of it's value, so use Dockerfile CMD
+  links:
+   - redis
+  ports:
+   - "6543:6543"
+  volumes:
+   - jobs/:/usr/src/app/jobs
+worker:
+  image: sverhoeven/eecology-script-wrapper
+  user: www-data
+  command: pceleryd docker.ini
+  environment:
+    DB_HOST: db.e-ecology.sara.nl
+  links:
+   - redis
+  volumes:
+   - jobs/:/usr/src/app/jobs

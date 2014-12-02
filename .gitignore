@@ -5,6 +5,7 @@ env/
 *.egg-info/
 *.pyc
 /data
+/jobs
 /build
 /.settings
 /cover

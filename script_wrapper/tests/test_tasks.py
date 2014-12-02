@@ -86,12 +86,13 @@ class TestPythonTask(unittest.TestCase):
 
     def test_local_db_url(self):
         task = tasks.PythonTask()
-        task.app.conf['sqlalchemy.url'] = 'postgresql://localhost/eecology'
-        db_url = 'postgresql://someone:somepw@somemachine/somedb'
+        task.app.conf['sqlalchemy.url'] = 'postgresql://localhost:5432/eecology?sslmode=verify-ca'
+        db_url = 'postgresql://someone:somepw@somemachine:5433/somedb?sslmode=require'
 
         result = task.local_db_url(db_url)
 
-        expected = 'postgresql://someone:somepw@localhost/eecology'
+        # user, pw and host from db_url and the rest from sqlalchemy.url
+        expected = 'postgresql://someone:somepw@somemachine:5432/eecology?sslmode=verify-ca'
         self.assertEqual(str(result), expected)
 
     def test_sslify_dbname_nossl(self):
