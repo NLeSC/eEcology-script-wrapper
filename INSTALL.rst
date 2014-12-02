@@ -163,8 +163,13 @@ Orchistration is done with fig (http://fig.sh).
 1. Create docker image for script-wrapper
 (Docker puts images in /var/lib/docker, this can be changed by starting docker deamon with `-g <graphdir>` option.)
 
-    sudo docker build -t script-wrapper:2.2.1 .
-    sudo docker tag script-wrapper:2.2.1 script-wrapper:latest
+    sudo docker build -t sverhoeven/eecology-script-wrapper:2.2.1 .
+    sudo docker tag sverhoeven/eecology-script-wrapper:2.2.1 sverhoeven/eecology-script-wrapper:latest
+    sudo docker login
+    sudo docker push sverhoeven/eecology-script-wrapper:2.2.1
+    sudo docker push sverhoeven/eecology-script-wrapper:latest
+
+Or setup automated builds in docker registry hub, pushing commit will trigger a build. Version management needs to be done inside docker hub.
 
 2. Setup jobs dir
 
@@ -176,6 +181,6 @@ The `fig.yml` defaults to `jobs/` directory in current working directory.
 Update `fig.yml` if jobs need to stored elsewhere.
 The jobs dir should be writable by www-data (uid=33) user, as both web and worker service run as www-data user.
 
-3. Start it
+3. Start it, somewhere with docker(http://docker.com) and fig (http://fig.sh) installed
 
     fig -p script-wrapper up
