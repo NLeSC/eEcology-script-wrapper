@@ -62,6 +62,10 @@ Examples of validation:
 * Prevent script from running when there is no data or too much data to work with.
 * Give hints which date range to choose.
 
+Make use of colander (http://docs.pylonsproject.org/projects/colander/en/latest/index.html) for validation.
+
+The script arguments must be JSON serializable, so don't pass objects like DateTime.
+
 5. Run script
 =============
 

@@ -1,10 +1,30 @@
+import colander
 from celery.utils.log import get_task_logger
-import iso8601
 from script_wrapper.tasks import MatlabTask
 from script_wrapper.models import getGPSCount
 from script_wrapper.validation import validateRange
+from script_wrapper.validation import iso8601Validator
 
 logger = get_task_logger(__name__)
+
+
+class Tracker(colander.MappingSchema):
+    id = colander.SchemaNode(colander.Int())
+    color = colander.SchemaNode(colander.String())
+    size = colander.SchemaNode(colander.String())
+    speed = colander.SchemaNode(colander.Int())
+
+
+class Trackers(colander.SequenceSchema):
+    tracker = Tracker()
+
+
+class Schema(colander.MappingSchema):
+    start = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    end = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    trackers = Trackers()
+    valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
+    alt = colander.SchemaNode(colander.String(), validator=colander.OneOf(valid_alt_modes))
 
 
 class GpsVisDB(MatlabTask):
@@ -43,8 +63,8 @@ class GpsVisDB(MatlabTask):
                                            db_url.host,
                                            self.list2vector_string(tracker_ids),
                                            self.list2vector_string(colors),
-                                           start.isoformat(),
-                                           end.isoformat(),
+                                           start,
+                                           end,
                                            alt,
                                            self.list2cell_array_string(sizes),
                                            self.list2vector_string(speeds),
@@ -80,22 +100,19 @@ class GpsVisDB(MatlabTask):
         return colorid
 
     def formfields2taskargs(self, fields, db_url):
-        start = iso8601.parse_date(fields['start'])
-        end = iso8601.parse_date(fields['end'])
-        trackers = fields['trackers']
+        schema = Schema()
+        taskargs = schema.deserialize(fields)
+
+        trackers = taskargs['trackers']
 
         # Test if selection will give results
         total_gps_count = 0
         for tracker in trackers:
-            gps_count = getGPSCount(db_url, tracker['id'], start, end)
+            gps_count = getGPSCount(db_url, tracker['id'], taskargs['start'], taskargs['end'])
             total_gps_count += gps_count
             validateRange(gps_count, 0, self.MAX_FIX_COUNT, tracker['id'])
             tracker['color'] = self.convert_colors(tracker)
         validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
 
-        return {'db_url':  db_url,
-                'start': start,
-                'alt': fields['alt'],
-                'end': end,
-                'trackers': trackers,
-                }
+        taskargs['db_url'] = db_url
+        return taskargs

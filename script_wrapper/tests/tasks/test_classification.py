@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
 import unittest
 from mock import patch
-from pytz import UTC
 from script_wrapper.validation import Invalid
 from script_wrapper.tasks.classification import Classification
 
@@ -31,8 +29,7 @@ class TestClassification(unittest.TestCase):
         gac.return_value = 10000
         task = Classification()
 
-        formquery = {
-                     'id': 1234,
+        formquery = {'tracker_id': 1234,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
                      'plot_accel': False,
@@ -41,10 +38,9 @@ class TestClassification(unittest.TestCase):
         taskargs = task.formfields2taskargs(formquery,
                                             'postgresql://localhost')
 
-        etaskargs = {
-                     'db_url': 'postgresql://localhost',
-                     'start': datetime(2013, 1, 1, tzinfo=UTC),
-                     'end': datetime(2013, 10, 10, tzinfo=UTC),
+        etaskargs = {'db_url': 'postgresql://localhost',
+                     'start': '2013-01-01T00:00:00',
+                     'end': '2013-10-10T00:00:00',
                      'tracker_id': 1234,
                      'plot_accel': False,
                      }
@@ -56,8 +52,7 @@ class TestClassification(unittest.TestCase):
         gac.return_value = 10000000
         task = Classification()
 
-        formquery = {
-                     'id': 1234,
+        formquery = {'tracker_id': 1234,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
                      'plot_accel': False,
