@@ -37,6 +37,10 @@ host = 0.0.0.0
 port = 6543
 workers = 4
 user = script-wrapper
+pidfile = annotation.pid
+accesslog = access.log
+# errors to stderr
+errorlog = -
 
 [composite:main]
 use = egg:Paste#urlmap
