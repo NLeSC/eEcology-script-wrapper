@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from os import environ
 import logging
 import datetime
 from sqlalchemy import Column, ForeignKey
@@ -219,6 +220,8 @@ def db_url_from_request(request):
     settings = request.registry.settings
     (username, password) = request_credentials(request)
     db_url = make_url(settings['sqlalchemy.url'])
+    # make db host overwritable with DB_HOST environment variable
+    db_url.host = environ.get('DB_HOST', db_url.host)
     if username:
         db_url.username = username
     if password:
@@ -370,8 +373,7 @@ def getAccelerationCount(db_url, device_info_serial, start, end):
     s = DBSession(db_url)()
     q = s.query(func.count(Acceleration.device_info_serial))
     q = q.filter(Acceleration.device_info_serial == device_info_serial)
-    q = q.filter(Acceleration.date_time.between(start.isoformat(),
-                                                end.isoformat()))
+    q = q.filter(Acceleration.date_time.between(start, end))
     acount = q.scalar()
     s.close()
     return acount
@@ -383,7 +385,7 @@ def getGPSCount(db_url, device_info_serial, start, end):
     s = DBSession(db_url)()
     q = s.query(func.count(Speed.device_info_serial))
     q = q.filter(Speed.device_info_serial == device_info_serial)
-    q = q.filter(Speed.date_time.between(start.isoformat(), end.isoformat()))
+    q = q.filter(Speed.date_time.between(start, end))
     q = q.filter(Speed.userflag == 0)
     gcount = q.scalar()
     s.close()

@@ -12,7 +12,7 @@ import simplekml.styleselector
 from script_wrapper.tasks.pykml import PyKML
 
 
-class Test(unittest.TestCase):
+class TestPyKML(unittest.TestCase):
 
     def setUp(self):
         # simplekml uses class counters, reset them to 0 before each test
@@ -27,7 +27,6 @@ class Test(unittest.TestCase):
         simplekml.timeprimitive.TimePrimitive._id = 0
 
     def assertKml(self, testname, kml):
-        self.maxDiff = None
         expected = pkgutil.get_data('script_wrapper.tests.data', testname + '.kml')
         self.assertMultiLineEqual(kml.kml(), expected)
 
@@ -41,8 +40,7 @@ class Test(unittest.TestCase):
                  'fast': '#C68E17',
                  'fastest': '#733C00'
                  }
-        formfields = {
-                      'start': '2013-05-14T10:11:12Z',
+        formfields = {'start': '2013-05-14T10:11:12Z',
                       'end': '2013-05-15T08:33:34Z',
                       'trackers': [{'id': 1234, 'color': color}],
                       'shape': 'circle',
@@ -63,18 +61,18 @@ class Test(unittest.TestCase):
                   'fastest': '#733C00'
                   }
         etaskargs = {'db_url': 'postgresql://localhost/eecology',
-                     'end': datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
-                     'start': datetime(2013, 5, 14, 10, 11, 12, tzinfo=UTC),
+                     'start': '2013-05-14T10:11:12Z',
+                     'end': '2013-05-15T08:33:34Z',
                      'trackers': [{'id': 1234, 'color': ecolor}],
-                      'shape': 'circle',
-                      'size': 'medium',
-                      'sizebyalt': False,
-                      'colorby': 'ispeed',
-                      'speedthreshold1': 5,
-                      'speedthreshold2': 10,
-                      'speedthreshold3': 20,
-                      'alpha': 100,
-                      'altitudemode': 'absolute',
+                     'shape': 'circle',
+                     'size': 'medium',
+                     'sizebyalt': False,
+                     'colorby': 'ispeed',
+                     'speedthreshold1': 5,
+                     'speedthreshold2': 10,
+                     'speedthreshold3': 20,
+                     'alpha': 100,
+                     'altitudemode': 'absolute',
                      }
         self.assertDictEqual(taskargs, etaskargs)
 
@@ -86,8 +84,7 @@ class Test(unittest.TestCase):
                  'fast': '#C68E17',
                  'fastest': '#733C00'
                  }
-        formfields = {
-                      'start': '2013-05-14T10:11:12Z',
+        formfields = {'start': '2013-05-14T10:11:12Z',
                       'end': '2013-05-15T08:33:34Z',
                       'trackers': [{'id': 1234, 'color': color}],
                       # wrong shape
@@ -104,8 +101,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(Invalid) as e:
             task.formfields2taskargs(formfields, db_url)
 
-        expected = {
-                    'shape': u'"square" is not one of circle, iarrow, tarrow'
+        expected = {'shape': u'"square" is not one of circle, iarrow, tarrow'
                     }
         self.assertEqual(e.exception.asdict(), expected)
 

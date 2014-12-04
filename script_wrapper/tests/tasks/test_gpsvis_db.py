@@ -63,8 +63,7 @@ class TestClassification(unittest.TestCase):
 
         trackers = [{'id': 1, 'color': 'DADADA',
                      'size': 'small', 'speed': 1}]
-        formquery = {
-                     'trackers': trackers,
+        formquery = {'trackers': trackers,
                      'start': '2013-01-01T00:00:00',
                      'end': '2013-10-10T00:00:00',
                      'alt': 'clampToGround',
@@ -75,10 +74,9 @@ class TestClassification(unittest.TestCase):
 
         etrackers = [{'id': 1, 'color': 12,
                       'size': 'small', 'speed': 1}]
-        etaskargs = {
-                     'db_url': 'postgresql://localhost',
-                     'start': datetime(2013, 1, 1, tzinfo=UTC),
-                     'end': datetime(2013, 10, 10, tzinfo=UTC),
+        etaskargs = {'db_url': 'postgresql://localhost',
+                     'start': '2013-01-01T00:00:00',
+                     'end': '2013-10-10T00:00:00',
                      'alt': 'clampToGround',
                      'trackers': etrackers,
                      }

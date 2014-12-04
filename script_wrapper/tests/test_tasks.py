@@ -85,14 +85,22 @@ class TestPythonTask(unittest.TestCase):
             task.output_dir()
 
     def test_local_db_url(self):
+        from sqlalchemy.engine.url import URL
         task = tasks.PythonTask()
-        task.app.conf['sqlalchemy.url'] = 'postgresql://localhost/eecology'
-        db_url = 'postgresql://someone:somepw@somemachine/somedb'
+        db_url = 'postgresql://someone:somepw@somemachine:5433/somedb?sslmode=require'
 
         result = task.local_db_url(db_url)
 
-        expected = 'postgresql://someone:somepw@localhost/eecology'
-        self.assertEqual(str(result), expected)
+        # user, pw and host from db_url and the rest from sqlalchemy.url
+        expected = URL('postgresql',
+                       username='someone',
+                       password='somepw',
+                       host='somemachine',
+                       port=5433,
+                       database='somedb',
+                       query={'sslmode': 'require'}
+                       )
+        self.assertEqual(result, expected)
 
     def test_sslify_dbname_nossl(self):
         task = tasks.PythonTask()

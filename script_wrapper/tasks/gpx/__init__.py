@@ -1,13 +1,20 @@
 import os
 from celery.utils.log import get_task_logger
+import colander
 import iso8601
-import simplekml
+import gpxdata
 from script_wrapper.tasks import PythonTask
 from script_wrapper.models import DBSession, Speed, getGPSCount
 from script_wrapper.validation import validateRange
-import gpxdata
+from script_wrapper.validation import iso8601Validator
 
 logger = get_task_logger(__name__)
+
+
+class Schema(colander.MappingSchema):
+    start = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    end = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    tracker_id = colander.SchemaNode(colander.Int())
 
 
 class Gpx(PythonTask):
@@ -21,18 +28,16 @@ class Gpx(PythonTask):
 
     def run(self, db_url, tracker_id, start, end):
         self.update_state(state="RUNNING")
+        start = iso8601.parse_date(start)
+        end = iso8601.parse_date(end)
         db_url = self.local_db_url(db_url)
         session = DBSession(db_url)()
 
-        filename_tpl = "{start}-{end}-{id}.gpx"
-        filename = filename_tpl.format(start=start,
-                                       end=end,
-                                       id=tracker_id,
-                                       )
-        fn = os.path.join(self.output_dir(), filename)
-        doc = gpxdata.Document([], 'eEcology')
-        self.track2gpx(doc, session, tracker_id, start, end)
+        rows = self.query2rows(session, tracker_id, start, end)
+        doc = self.track2gpx(tracker_id, rows)
+        fn = self.getOutputFileName(tracker_id, start, end)
         doc.writeGPX(fn)
+
         session.close()
 
         result = {}
@@ -42,11 +47,11 @@ class Gpx(PythonTask):
                            }
         return result
 
-    def track2gpx(self, doc, session, tracker_id, start, end):
+    def query2rows(self, session, tracker_id, start, end):
         # Perform a database query
         tid_col = Speed.device_info_serial
         dt_col = Speed.date_time
-        q = session.query(tid_col, dt_col,
+        q = session.query(dt_col,
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
@@ -56,24 +61,36 @@ class Gpx(PythonTask):
         q = q.filter(Speed.longitude != None)
         q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt_col)
+        return q
 
+    def track2gpx(self, tracker_id, rows):
+        doc = gpxdata.Document([], 'eEcology')
         track = gpxdata.Track("Tracker " + str(tracker_id))
         trkseg = gpxdata.TrackSegment()
-        for tid, dt, lon, lat, alt in q.all():
+        for dt, lon, lat, alt in rows:
             point = gpxdata.Point(lat, lon, alt, dt)
             trkseg.append(point)
         track.append(trkseg)
         doc.append(track)
+        return doc
+
+    def getOutputFileName(self, tracker_id, start, end):
+        filename_tpl = "s{start}-e{end}-t{id}.gpx"
+        filename = filename_tpl.format(start=start.strftime('%Y%m%d%H%M'),
+                                       end=end.strftime('%Y%m%d%H%M'),
+                                       id=tracker_id,
+                                       )
+        fn = os.path.join(self.output_dir(), filename)
+        return fn
 
     def formfields2taskargs(self, fields, db_url):
-        start = iso8601.parse_date(fields['start'])
-        end = iso8601.parse_date(fields['end'])
-        tracker_id = fields['id']
+        schema = Schema()
+        taskargs = schema.deserialize(fields)
 
+        start = taskargs['start']
+        end = taskargs['end']
+        tracker_id = taskargs['tracker_id']
         validateRange(getGPSCount(db_url, tracker_id, start, end), 0, self.MAX_FIX_COUNT)
 
-        return {'db_url':  db_url,
-                'start': start,
-                'end': end,
-                'tracker_id': tracker_id,
-                }
+        taskargs['db_url'] = db_url
+        return taskargs

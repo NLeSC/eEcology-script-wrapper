@@ -9,7 +9,8 @@ Ext.onReady(function() {
         items: [{
             xtype: 'datetimerange'
         }, {
-            xtype: 'trackercombo'
+            xtype: 'trackercombo',
+            name: 'tracker_id'
         }]
     });
 });

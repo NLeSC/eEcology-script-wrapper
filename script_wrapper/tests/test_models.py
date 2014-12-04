@@ -50,19 +50,32 @@ class TestModels(unittest.TestCase):
 
     def test_db_url_from_request(self):
         req = DummyRequest()
-        odb_url = 'postgresql://localhost?ssl=true'
+        odb_url = 'postgresql://localhost/db1?ssl=true'
         req.registry.settings = {}
         req.registry.settings['sqlalchemy.url'] = odb_url
         req.environ['HTTP_AUTHORIZATION'] = 'Basic bWU6cGFzc3dvcmQ=\n'
 
         db_url = models.db_url_from_request(req)
 
-        edb_url = 'postgresql://me:password@localhost?ssl=true'
+        edb_url = 'postgresql://me:password@localhost/db1?ssl=true'
         self.assertEqual(db_url, edb_url)
+
+    def test_db_url_from_request_overwritehostfromenv(self):
+        req = DummyRequest()
+        odb_url = 'postgresql://localhost/db1?ssl=true'
+        req.registry.settings = {}
+        req.registry.settings['sqlalchemy.url'] = odb_url
+        req.environ['HTTP_AUTHORIZATION'] = 'Basic bWU6cGFzc3dvcmQ=\n'
+
+        env = {'DB_HOST': 'somemachine'}
+        with patch.dict('script_wrapper.models.environ', env):
+            db_url = models.db_url_from_request(req)
+            edb_url = 'postgresql://me:password@somemachine/db1?ssl=true'
+            self.assertEqual(db_url, edb_url)
 
     @patch('script_wrapper.models.DBSession')
     def test_getAccelerationCount(self, dbsession):
-        db_url = 'postgresql://localhost?ssl=true'
+        db_url = 'postgresql://localhost/db1?ssl=true'
         device_info_serial = 1234
         start = datetime(2013, 1, 1, tzinfo=UTC)
         end = datetime(2013, 12, 12, tzinfo=UTC)

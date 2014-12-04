@@ -20,7 +20,8 @@ Ext.onReady(function() {
            fieldLabel: 'Plot',
            boxLabel: 'Make accelerometer charts inside kml popup'
        }, {
-           xtype: 'trackergridfield'
+           xtype: 'trackergridfield',
+           name: 'tracker_id'
        }, {xtype: 'displayfield', value:'Example 355 on 2010-06-28'}]
    });
 });

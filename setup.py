@@ -10,17 +10,18 @@ requires = [
     'sqlalchemy==0.8.4',
     'geoalchemy',  # required for PostGIS geometry column type
     'pyramid_celery',
-    'celery',
+    'celery==3.0.25',
     'redis',
     'iso8601',
     'pytz',
     'rpy2',
+    'singledispatch', # required by rpy2
     'oct2py',
     'scipy',  # required by oct2py
     'numpy',  # required by scipy
     'mock',
     'nose',  # to run tests
-    'sphinx',
+    'sphinx==1.2.3',
     'rst2pdf',  # to create PDF of documentation
     'sphinx_bootstrap_theme',  # to create nice looking html documentation
     'simplekml',  # for pykml task

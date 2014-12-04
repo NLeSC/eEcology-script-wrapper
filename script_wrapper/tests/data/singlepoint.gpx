@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<gpx creator="" version="1.1" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <name>Tracker 1234</name>
+    <trkseg>
+      <trkpt lat="52.412252" lon="4.485608">
+        <ele>84</ele>
+        <time>2013-05-15T08:33:34Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

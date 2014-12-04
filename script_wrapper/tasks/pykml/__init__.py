@@ -1,4 +1,5 @@
 import os
+import iso8601
 from math import ceil, log10
 from celery.utils.log import get_task_logger
 import simplekml
@@ -7,28 +8,17 @@ from sqlalchemy import func, cast, Numeric
 from script_wrapper.tasks import PythonTask
 from script_wrapper.models import DBSession, Speed, getGPSCount
 from script_wrapper.validation import validateRange
+from script_wrapper.validation import iso8601Validator, colorValidator
 
 
 logger = get_task_logger(__name__)
 
 
-def colorValidator(node, value):
-    if (value[0] != '#'):
-        raise colander.Invalid(node,
-              '%r is not a color, should be #RRGGBB' % value)
-
-    if int('000000', 16) <= int(value[1:], 16) <= int('FFFFFF', 16):
-        pass
-    else:
-        raise colander.Invalid(node,
-              '%r is not a color, should be #RRGGBB' % value)
-
-
 class Color(colander.MappingSchema):
-    slowest = colander.SchemaNode(colander.String())
-    slow = colander.SchemaNode(colander.String())
-    fast = colander.SchemaNode(colander.String())
-    fastest = colander.SchemaNode(colander.String())
+    slowest = colander.SchemaNode(colander.String(), validator=colorValidator)
+    slow = colander.SchemaNode(colander.String(), validator=colorValidator)
+    fast = colander.SchemaNode(colander.String(), validator=colorValidator)
+    fastest = colander.SchemaNode(colander.String(), validator=colorValidator)
 
 
 class Tracker(colander.MappingSchema):
@@ -41,8 +31,8 @@ class Trackers(colander.SequenceSchema):
 
 
 class Schema(colander.MappingSchema):
-    start = colander.SchemaNode(colander.DateTime())
-    end = colander.SchemaNode(colander.DateTime())
+    start = colander.SchemaNode(colander.String(), validator=iso8601Validator)
+    end = colander.SchemaNode(colander.String(), validator=iso8601Validator)
     trackers = Trackers()
     shape = colander.SchemaNode(colander.String(),
                                 validator=colander.OneOf(['circle', 'iarrow', 'tarrow']))
@@ -66,9 +56,9 @@ class PyKML(PythonTask):
     name = 'kmzgen'
     label = 'KMZ generator'
     title = 'Generate a KMZ file with multiple trackers.'
-    description = '''The KMZ file contains the routes one or more selected trackers travelled during the selected date range. 
+    description = '''The KMZ file contains the routes one or more selected trackers travelled during the selected date range.
     KMZ file can be opened with <a href="https://www.google.com/earth/">Google Earth</a>.
-    The look and feel can be adjusted by choosing the tracker color and by changing the advanced settings.  
+    The look and feel can be adjusted by choosing the tracker color and by changing the advanced settings.
     '''
     made_by_researcher = False
     autoregister = True
@@ -81,8 +71,9 @@ class PyKML(PythonTask):
             speedthreshold1, speedthreshold2, speedthreshold3,
             alpha, altitudemode):
         self.update_state(state="RUNNING")
+        start = iso8601.parse_date(start)
+        end = iso8601.parse_date(end)
         db_url = self.local_db_url(db_url)
-        logger.info(db_url)
         session = DBSession(db_url)()
 
         trackers_list = "_".join([str(t['id']) for t in trackers])
@@ -100,8 +91,9 @@ class PyKML(PythonTask):
                  'sizebyalt': sizebyalt,
                  'colorby': colorby,
                  'speedthresholds': [speedthreshold1,
-                                    speedthreshold2,
-                                    speedthreshold3],
+                                     speedthreshold2,
+                                     speedthreshold3,
+                                     ],
                  'alpha': alpha,
                  'altitudemode': altitudemode,
                  }
@@ -146,7 +138,7 @@ class PyKML(PythonTask):
                           Speed.altitude,
                           func.round(cast(Speed.speed_2d, Numeric), 2),
                           Speed.trajectSpeed,
-                          func.round(Speed.direction ,2),
+                          func.round(Speed.direction, 2),
                           Speed.trajectDirection,
                           elev,
                           )
@@ -312,8 +304,11 @@ class PyKML(PythonTask):
         # Test if selection will give results
         total_gps_count = 0
         for tracker in taskargs['trackers']:
-            gps_count = getGPSCount(db_url, tracker['id'],
-                                    taskargs['start'], taskargs['end'])
+            gps_count = getGPSCount(db_url,
+                                    tracker['id'],
+                                    taskargs['start'],
+                                    taskargs['end'],
+                                    )
             total_gps_count += gps_count
             validateRange(gps_count, 0, self.MAX_FIX_COUNT, tracker['id'])
         validateRange(total_gps_count, 0, self.MAX_FIX_TOTAL_COUNT)
