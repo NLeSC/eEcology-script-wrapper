@@ -41,7 +41,12 @@ select {
 
 <div>
   <div>GPS-tracker: ${query['tracker_id']}, </div>
-  <div>Time range: ${query['start'].strftime('%Y-%m-%d %H:%M:%S')} - ${query['end'].strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
+  <%
+  import iso8601
+  start = iso8601.parse_date(query['start']).strftime('%Y-%m-%d %H:%M:%S')
+  end = iso8601.parse_date(query['end']).strftime('%Y-%m-%d %H:%M:%S')
+  %>
+  <div>Time range: ${start} - ${end} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
   <div>Metric:
   <select>
     <option value="fixes">Nr. of GPS measurements</option>
