@@ -1,5 +1,4 @@
 import colander
-import iso8601
 from celery.utils.log import get_task_logger
 from script_wrapper.models import getGPSCount
 from script_wrapper.tasks import RTask
@@ -27,8 +26,8 @@ class Calendar(RTask):
 
     def run(self, db_url, tracker_id, start, end):
         self.update_state(state="RUNNING")
-        query = {'query': {'start': iso8601.parse_date(start),
-                           'end': iso8601.parse_date(end),
+        query = {'query': {'start': start,
+                           'end': end,
                            'tracker_id': tracker_id,
                            }
                  }

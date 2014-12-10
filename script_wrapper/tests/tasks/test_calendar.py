@@ -1,6 +1,4 @@
-from datetime import datetime
 import unittest
-from colander.iso8601 import UTC
 from mock import Mock, patch
 from script_wrapper.tasks.calendar import Calendar
 
@@ -21,8 +19,8 @@ class TestCalendar(unittest.TestCase):
         end = '2013-05-15T08:33:34Z'
         result = task.run(db_url, tracker_id, start, end)
 
-        expected = {'query': {'start': datetime(2013, 5, 14, 10, 11, 12, tzinfo=UTC),
-                              'end': datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+        expected = {'query': {'start': '2013-05-14T10:11:12Z',
+                              'end': '2013-05-15T08:33:34Z',
                               'tracker_id': tracker_id,
                               }
                     }
