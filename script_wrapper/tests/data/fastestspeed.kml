@@ -33,9 +33,9 @@
         &lt;tr&gt;&lt;td&gt;Lon, Lat (&amp;deg;)&lt;/td&gt;&lt;td&gt;4.486, 52.412&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;84&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Instantanous speed (m/s)&lt;/td&gt;&lt;td&gt;28.9&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Traject speed (m/s)&lt;/td&gt;&lt;td&gt;29.91&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;29.91&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Instantanous direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.1&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Traject direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.2&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.2&lt;/td&gt;&lt;/tr&gt;
         &lt;/table&gt;
         </description>
                     <TimeStamp id="time_0">
