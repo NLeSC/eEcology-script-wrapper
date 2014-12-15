@@ -46,7 +46,11 @@ class Schema(colander.MappingSchema):
     speedthreshold3 = colander.SchemaNode(colander.Float(), missing=20.0)
     alpha = colander.SchemaNode(colander.Int(),
                                 validator=colander.Range(0, 100))
-    valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
+    valid_alt_modes = ['absolute',
+                       'absoluteClampBelowGround', 
+                       'clampToGround', 
+                       'relativeToGround',
+                       ]
     altitudemode = colander.SchemaNode(colander.String(),
                                        validator=colander.OneOf(valid_alt_modes))
 
@@ -130,11 +134,7 @@ class PyKML(PythonTask):
         """Fetch track data from db"""
         tid = Speed.device_info_serial
         dt = Speed.date_time
-        if need_elevation:
-            elev = Speed.elevation
-        else:
-            # column is ignored, but for unpacking return same number of columns
-            elev = Speed.altitude
+        elev = Speed.elevation
         q = session.query(tid, dt,
                           Speed.longitude,
                           Speed.latitude,
@@ -218,6 +218,11 @@ class PyKML(PythonTask):
             pnt.extrude = 1
 
             pnt.altitudemode = style['altitudemode']
+            if style['altitudemode'] == 'absoluteClampBelowGround':
+                if alt < elevation:
+                    pnt.altitudemode = simplekml.AltitudeMode.clamptoground
+                else:
+                    pnt.altitudemode = simplekml.AltitudeMode.absolute
             if (style['altitudemode'] == 'absolute' and alt < 10):
                 # Don't put point under ground
                 pnt.altitudemode = simplekml.AltitudeMode.clamptoground
