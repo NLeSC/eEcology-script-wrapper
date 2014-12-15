@@ -41,9 +41,9 @@ class Schema(colander.MappingSchema):
     sizebyalt = colander.SchemaNode(colander.Boolean(), missing=False)
     colorby = colander.SchemaNode(colander.String(),
                                validator=colander.OneOf(['fixed', 'ispeed', 'tspeed']))
-    speedthreshold1 = colander.SchemaNode(colander.Int(), missing=5)
-    speedthreshold2 = colander.SchemaNode(colander.Int(), missing=10)
-    speedthreshold3 = colander.SchemaNode(colander.Int(), missing=20)
+    speedthreshold1 = colander.SchemaNode(colander.Float(), missing=5.0)
+    speedthreshold2 = colander.SchemaNode(colander.Float(), missing=10.0)
+    speedthreshold3 = colander.SchemaNode(colander.Float(), missing=20.0)
     alpha = colander.SchemaNode(colander.Int(),
                                 validator=colander.Range(0, 100))
     valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']

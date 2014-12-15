@@ -413,6 +413,36 @@ class TestPyKML(unittest.TestCase):
 
         self.assertKml('fastspeed', kml)
 
+    def test_trackrows2kml_slowestspeed_slowestcolor(self):
+        self.maxDiff = None
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 0.13, 0.19, 29.91, 14.2,
+                 4.0,
+                 ],
+                ]
+        style = {'shape': 'circle',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [0.5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'absolute',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#EEFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('slowestspeed', kml)        
+
     def test_trackrows2kml_sizebyalton_iconsizebig(self):
         kml = simplekml.Kml()
         task = PyKML()
