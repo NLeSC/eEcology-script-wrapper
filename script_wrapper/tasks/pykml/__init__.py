@@ -41,12 +41,16 @@ class Schema(colander.MappingSchema):
     sizebyalt = colander.SchemaNode(colander.Boolean(), missing=False)
     colorby = colander.SchemaNode(colander.String(),
                                validator=colander.OneOf(['fixed', 'ispeed', 'tspeed']))
-    speedthreshold1 = colander.SchemaNode(colander.Int(), missing=5)
-    speedthreshold2 = colander.SchemaNode(colander.Int(), missing=10)
-    speedthreshold3 = colander.SchemaNode(colander.Int(), missing=20)
+    speedthreshold1 = colander.SchemaNode(colander.Float(), missing=5.0)
+    speedthreshold2 = colander.SchemaNode(colander.Float(), missing=10.0)
+    speedthreshold3 = colander.SchemaNode(colander.Float(), missing=20.0)
     alpha = colander.SchemaNode(colander.Int(),
                                 validator=colander.Range(0, 100))
-    valid_alt_modes = ['absolute', 'clampToGround', 'relativeToGround']
+    valid_alt_modes = ['absolute',
+                       'absoluteClampBelowGround', 
+                       'clampToGround', 
+                       'relativeToGround',
+                       ]
     altitudemode = colander.SchemaNode(colander.String(),
                                        validator=colander.OneOf(valid_alt_modes))
 
@@ -97,7 +101,7 @@ class PyKML(PythonTask):
                  'alpha': alpha,
                  'altitudemode': altitudemode,
                  }
-        self.addIcon2kml(kml, style)
+        self.addIcons2kml(kml)
         for tracker in trackers:
             self.track2kml(kml, session,
                            start, end,
@@ -115,11 +119,11 @@ class PyKML(PythonTask):
                            }
         return result
 
-    def addIcon2kml(self, kml, style):
-        if style['shape'] == 'circle':
-            return kml.addfile(os.path.join(self.task_dir(), 'circle.png'))
-        else:
-            return kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
+    def addIcons2kml(self, kml):
+        """Adds circle and arrow icon images to kml"""
+        circlepath = kml.addfile(os.path.join(self.task_dir(), 'circle.png'))
+        arrowpath = kml.addfile(os.path.join(self.task_dir(), 'arrow.png'))
+        return [circlepath, arrowpath]
 
     def fetchtrack(self, session,
                    tracker_id, start, end,
@@ -137,15 +141,14 @@ class PyKML(PythonTask):
                           Speed.latitude,
                           Speed.altitude,
                           func.round(cast(Speed.speed_2d, Numeric), 2),
-                          Speed.trajectSpeed,
+                          func.round(Speed.trajectSpeed, 2),
                           func.round(Speed.direction, 2),
-                          Speed.trajectDirection,
+                          func.round(Speed.trajectDirection, 2),
                           elev,
                           )
         q = q.filter(tid == tracker_id)
         q = q.filter(dt.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.longitude != None)
-        q = q.filter(Speed.direction != None)
         q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt)
         return q
@@ -174,10 +177,10 @@ class PyKML(PythonTask):
         <tr><td>Time</td><td>{dt}</td></tr>
         <tr><td>Lon, Lat (&deg;)</td><td>{lon:.3f}, {lat:.3f}</td></tr>
         <tr><td>Altitude (m)</td><td>{alt}</td></tr>
-        <tr><td>Instantanous speed (m/s)</td><td>{ispeed:.1f}</td></tr>
-        <tr><td>Traject speed (m/s)</td><td>{tspeed}</td></tr>
-        <tr><td>Instantanous direction (&deg;)</td><td>{idir:.1f}</td></tr>
-        <tr><td>Traject direction (&deg;)</td><td>{tdir}</td></tr>
+        <tr><td>Instantanous speed (m/s)</td><td>{ispeed}</td></tr>
+        <tr><td>Trajectory speed (m/s)</td><td>{tspeed}</td></tr>
+        <tr><td>Instantanous direction (&deg;)</td><td>{idir}</td></tr>
+        <tr><td>Trajectory direction (&deg;)</td><td>{tdir}</td></tr>
         </table>
         """
 
@@ -200,6 +203,12 @@ class PyKML(PythonTask):
                 alt = alt - elevation
 
             pnt.style = self.kmlstyle4point(ispeed, tspeed, idirection, tdirection, alt, style, color_scheme)
+
+            if ispeed is None:
+                ispeed = 'NA'
+            if idirection is None:
+                idirection = 'NA'
+
             pnt.description = tpl.format(tid=tid, dt=dt,
                                          lon=lon, lat=lat, alt=alt,
                                          ispeed=ispeed, idir=idirection,
@@ -210,6 +219,11 @@ class PyKML(PythonTask):
             pnt.extrude = 1
 
             pnt.altitudemode = style['altitudemode']
+            if style['altitudemode'] == 'absoluteClampBelowGround':
+                if alt < elevation:
+                    pnt.altitudemode = simplekml.AltitudeMode.clamptoground
+                else:
+                    pnt.altitudemode = simplekml.AltitudeMode.absolute
             if (style['altitudemode'] == 'absolute' and alt < 10):
                 # Don't put point under ground
                 pnt.altitudemode = simplekml.AltitudeMode.clamptoground
@@ -280,7 +294,7 @@ class PyKML(PythonTask):
 
         kmlstyle = simplekml.Style()
 
-        if style['shape'] in ('iarrow', 'tarrow'):
+        if style['shape'] in ('iarrow', 'tarrow') and direction is not None:
             kmlstyle.iconstyle.icon.href = 'files/arrow.png'
             kmlstyle.iconstyle.heading = direction
         else:

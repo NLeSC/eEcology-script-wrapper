@@ -105,26 +105,16 @@ class TestPyKML(unittest.TestCase):
                     }
         self.assertEqual(e.exception.asdict(), expected)
 
-    def test_addIcon2kml_circlepngadded(self):
+    def test_addIcons2kml_circlepngarrowpngadded(self):
         kml = simplekml.Kml()
         task = PyKML()
-        style = {'shape': 'circle'}
 
-        path = task.addIcon2kml(kml, style)
+        path = task.addIcons2kml(kml)
 
-        self.assertEqual(path, 'files/circle.png')
-
-    def test_addIcon2kml_arrowpngadded(self):
-        kml = simplekml.Kml()
-        task = PyKML()
-        style = {'shape': 'iarrow'}
-
-        path = task.addIcon2kml(kml, style)
-
-        self.assertEqual(path, 'files/arrow.png')
+        self.assertIn('files/arrow.png', path)
+        self.assertIn('files/circle.png', path)
 
     def test_trackrows2kml_2pointswithdefaultstyle(self):
-
         kml = simplekml.Kml()
         task = PyKML()
         rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
@@ -422,6 +412,36 @@ class TestPyKML(unittest.TestCase):
 
         self.assertKml('fastspeed', kml)
 
+    def test_trackrows2kml_slowestspeed_slowestcolor(self):
+        self.maxDiff = None
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 0.13, 0.19, 29.91, 14.2,
+                 4.0,
+                 ],
+                ]
+        style = {'shape': 'circle',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [0.5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'absolute',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#EEFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('slowestspeed', kml)        
+
     def test_trackrows2kml_sizebyalton_iconsizebig(self):
         kml = simplekml.Kml()
         task = PyKML()
@@ -537,3 +557,68 @@ class TestPyKML(unittest.TestCase):
         task.trackrows2kml(kml, rows, tracker, style)
 
         self.assertKml('altituderelativebyground', kml)
+
+    def test_trackrows2kml_idirectionnoneispeednone(self):
+        self.maxDiff = None
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 None, 9.91, None, 14.2,
+                 4.0,
+                 ],
+                ]
+        style = {'shape': 'iarrow',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'absolute',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#FFFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('directionnone', kml)
+        
+    def test_trackrows2kml_absoluteClampBelowGround(self):
+        self.maxDiff = None
+        kml = simplekml.Kml()
+        task = PyKML()
+        rows = [[355, datetime(2013, 5, 15, 8, 33, 34, tzinfo=UTC),
+                 4.485608, 52.412252, 84,
+                 8.90, 8.91, 14.1, 14.2,
+                 50,
+                 ],
+                [355, datetime(2013, 5, 15, 8, 34, 34, tzinfo=UTC),
+                 4.485608, 52.415252, 34,
+                 8.90, 9.91, 14.1, 14.2,
+                 50,
+                 ],
+                ]
+        style = {'shape': 'circle',
+                 'size': 'medium',
+                 'sizebyalt': False,
+                 'colorby': 'ispeed',
+                 'speedthresholds': [5, 10, 20],
+                 'alpha': 100,
+                 'altitudemode': 'absoluteClampBelowGround',
+                 }
+        tracker = {'id': 355,
+                   'color': {'slowest': '#FFFF50',
+                             'slow': '#FDD017',
+                             'fast': '#C68E17',
+                             'fastest': '#733C00'
+                             }
+                   }
+
+        task.trackrows2kml(kml, rows, tracker, style)
+
+        self.assertKml('absoluteclampbelowground', kml)

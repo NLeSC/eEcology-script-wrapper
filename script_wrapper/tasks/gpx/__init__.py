@@ -1,3 +1,4 @@
+import mimetypes
 import os
 from celery.utils.log import get_task_logger
 import colander
@@ -9,7 +10,8 @@ from script_wrapper.validation import validateRange
 from script_wrapper.validation import iso8601Validator
 
 logger = get_task_logger(__name__)
-
+# gpx is not known by mimetypes library, this will cause IE11 browser to open it, instead of save it
+mimetypes.add_type('application/gpx+xml', '.gpx')
 
 class Schema(colander.MappingSchema):
     start = colander.SchemaNode(colander.String(), validator=iso8601Validator)

@@ -301,12 +301,16 @@ Ext.onReady(function() {
          }, {
              xtype: 'radiogroup',
              fieldLabel: 'Altitude',
-             columns: 3,
+             columns: [0.15,0.30,0.25,0.25],
              items: [{
                  boxLabel: 'Absolute',
                  name: 'altitudemode',
                  inputValue: 'absolute',
                  checked: true
+             }, {
+                 boxLabel: 'Absolute, but clamp below ground',
+                 name: 'altitudemode',
+                 inputValue: 'absoluteClampBelowGround'
              }, {
                  boxLabel: 'Clamp to ground',
                  name: 'altitudemode',

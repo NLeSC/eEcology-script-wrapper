@@ -41,7 +41,12 @@ select {
 
 <div>
   <div>GPS-tracker: ${query['tracker_id']}, </div>
-  <div>Time range: ${query['start'].strftime('%Y-%m-%d %H:%M:%S')} - ${query['end'].strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
+  <%
+  import iso8601
+  start = iso8601.parse_date(query['start'])
+  end = iso8601.parse_date(query['end'])
+  %>
+  <div>Time range: ${start.strftime('%Y-%m-%d %H:%M:%S')} - ${end.strftime('%Y-%m-%d %H:%M:%S')} (Timezone is <a href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time">UTC</a>)</div>
   <div>Metric:
   <select>
     <option value="fixes">Nr. of GPS measurements</option>
@@ -761,7 +766,7 @@ var day = d3.time.format("%w"),
     selected_metric = 'fixes',
     metric_ranges = {};
 
-var year_range = d3.range(${query['start'].year}, ${query['end'].year}+1);
+var year_range = d3.range(${start.year}, ${end.year}+1);
 
 var svg = d3.select("#years").selectAll(".year")
     .data(year_range)

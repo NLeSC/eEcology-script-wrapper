@@ -31,9 +31,9 @@
         &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt;&lt;td&gt;355&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Time&lt;/td&gt;&lt;td&gt;2013-05-15 08:33:34+00:00&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Lon, Lat (&amp;deg;)&lt;/td&gt;&lt;td&gt;4.486, 52.412&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;80.0&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;84&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Instantanous speed (m/s)&lt;/td&gt;&lt;td&gt;8.9&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;9.91&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;8.91&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Instantanous direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.1&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Trajectory direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.2&lt;/td&gt;&lt;/tr&gt;
         &lt;/table&gt;
@@ -43,16 +43,39 @@
                     </TimeStamp>
                     <styleUrl>#stylesel_0</styleUrl>
                     <Point id="geom_0">
-                        <coordinates>4.485608,52.412252,80.0</coordinates>
+                        <coordinates>4.485608,52.412252,84</coordinates>
                         <extrude>1</extrude>
-                        <altitudeMode>relativeToGround</altitudeMode>
+                        <altitudeMode>absolute</altitudeMode>
+                    </Point>
+                </Placemark>
+                <Placemark id="feat_5">
+                    <description>
+        &lt;table border=&quot;0&quot;&gt;
+        &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt;&lt;td&gt;355&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Time&lt;/td&gt;&lt;td&gt;2013-05-15 08:34:34+00:00&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Lon, Lat (&amp;deg;)&lt;/td&gt;&lt;td&gt;4.486, 52.415&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;34&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Instantanous speed (m/s)&lt;/td&gt;&lt;td&gt;8.9&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;9.91&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Instantanous direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.1&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.2&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;
+        </description>
+                    <TimeStamp id="time_1">
+                        <when>2013-05-15T08:34:34+00:00</when>
+                    </TimeStamp>
+                    <styleUrl>#stylesel_0</styleUrl>
+                    <Point id="geom_1">
+                        <coordinates>4.485608,52.415252,34</coordinates>
+                        <extrude>1</extrude>
+                        <altitudeMode>clampToGround</altitudeMode>
                     </Point>
                 </Placemark>
             </Folder>
-            <Placemark id="feat_5">
+            <Placemark id="feat_6">
                 <styleUrl>#stylesel_1</styleUrl>
-                <LineString id="geom_1">
-                    <coordinates>4.485608,52.412252,0.0</coordinates>
+                <LineString id="geom_2">
+                    <coordinates>4.485608,52.412252,0.0 4.485608,52.415252,0.0</coordinates>
                 </LineString>
             </Placemark>
         </Folder>

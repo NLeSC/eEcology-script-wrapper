@@ -14,7 +14,7 @@
             <Folder id="feat_3">
                 <Style id="stylesel_0">
                     <IconStyle id="substyle_0">
-                        <color>ff17d0fd</color>
+                        <color>ff50ffee</color>
                         <colorMode>normal</colorMode>
                         <scale>0.35</scale>
                         <heading>0</heading>
@@ -31,10 +31,10 @@
         &lt;tr&gt;&lt;td&gt;ID&lt;/td&gt;&lt;td&gt;355&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Time&lt;/td&gt;&lt;td&gt;2013-05-15 08:33:34+00:00&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Lon, Lat (&amp;deg;)&lt;/td&gt;&lt;td&gt;4.486, 52.412&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;80.0&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Instantanous speed (m/s)&lt;/td&gt;&lt;td&gt;8.9&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;9.91&lt;/td&gt;&lt;/tr&gt;
-        &lt;tr&gt;&lt;td&gt;Instantanous direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.1&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Altitude (m)&lt;/td&gt;&lt;td&gt;84&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Instantanous speed (m/s)&lt;/td&gt;&lt;td&gt;0.13&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Trajectory speed (m/s)&lt;/td&gt;&lt;td&gt;0.19&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Instantanous direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;29.91&lt;/td&gt;&lt;/tr&gt;
         &lt;tr&gt;&lt;td&gt;Trajectory direction (&amp;deg;)&lt;/td&gt;&lt;td&gt;14.2&lt;/td&gt;&lt;/tr&gt;
         &lt;/table&gt;
         </description>
@@ -43,9 +43,9 @@
                     </TimeStamp>
                     <styleUrl>#stylesel_0</styleUrl>
                     <Point id="geom_0">
-                        <coordinates>4.485608,52.412252,80.0</coordinates>
+                        <coordinates>4.485608,52.412252,84</coordinates>
                         <extrude>1</extrude>
-                        <altitudeMode>relativeToGround</altitudeMode>
+                        <altitudeMode>absolute</altitudeMode>
                     </Point>
                 </Placemark>
             </Folder>

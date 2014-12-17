@@ -1,4 +1,5 @@
 from datetime import datetime
+from mimetypes import guess_type
 from unittest import TestCase
 import pkgutil
 from colander.iso8601 import UTC
@@ -9,6 +10,11 @@ from script_wrapper.tasks.gpx import Gpx
 class TestGpx(TestCase):
     def setUp(self):
         self.task = Gpx()
+
+    def test_mimetype_registered(self):
+        result = guess_type('somefile.gpx')[0]
+        expected = 'application/gpx+xml'
+        self.assertEqual(result, expected)
 
     @patch('script_wrapper.tasks.gpx.getGPSCount')
     def test_formfields2taskargs(self, gpscount):
