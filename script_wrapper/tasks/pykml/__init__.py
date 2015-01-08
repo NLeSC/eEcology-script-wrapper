@@ -148,6 +148,7 @@ class PyKML(PythonTask):
         q = q.filter(tid == tracker_id)
         q = q.filter(dt.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.longitude != None)
+        q = q.filter(Speed.latitude != None)
         q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt)
         return q

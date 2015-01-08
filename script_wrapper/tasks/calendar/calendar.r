@@ -22,7 +22,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         # Make sure locations are ordered by date_time, see http://postgis.refractions.net/documentation/manual-1.5/ST_MakeLine.html
         "  FROM (SELECT * FROM gps.ee_tracking_speed_limited ",
         "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
-        "  AND longitude IS NOT NULL AND userflag<>1 ORDER BY date_time ) tr",
+        "  AND longitude IS NOT NULL AND latitude IS NOT NULL AND userflag<>1 ORDER BY date_time ) tr",
         "  GROUP BY date(date_time) ",
         ") t ",
         # Add energy
@@ -38,7 +38,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "  FROM gps.ee_tracking_speed_limited ",
         "  JOIN gps.ee_acceleration_limited USING (device_info_serial, date_time) ",
         "  WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
-        "  AND longitude IS NOT NULL AND userflag<>1 ",
+        "  AND longitude IS NOT NULL AND latitude IS NOT NULL AND userflag<>1 ",
         "  GROUP BY date(date_time) ",
         ") a USING (date) ",
         # Add intervals
@@ -49,7 +49,7 @@ calendar <- function(dbUsername, dbPassword, dbName, databaseHost, TrackerIdenti
         "    SELECT date_time, date_time - lag(date_time) over (order by device_info_serial, date_time) as gpsinterval ",
         "    FROM gps.ee_tracking_speed_limited ",
         "    WHERE device_info_serial=%s AND date_time BETWEEN '%s' AND '%s' ",
-        "    AND longitude IS NOT NULL AND userflag<>1 ",
+        "    AND longitude IS NOT NULL AND latitude IS NOT NULL AND userflag<>1 ",
         "  ) ti ",
         "  GROUP BY date(date_time) ",
         " ) i USING (date) ",
