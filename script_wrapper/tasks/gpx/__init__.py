@@ -61,6 +61,7 @@ class Gpx(PythonTask):
         q = q.filter(tid_col == tracker_id)
         q = q.filter(dt_col.between(start.isoformat(), end.isoformat()))
         q = q.filter(Speed.longitude != None)
+        q = q.filter(Speed.latitude != None)
         q = q.filter(Speed.userflag == 0)
         q = q.order_by(dt_col)
         return q
