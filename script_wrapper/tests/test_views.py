@@ -215,7 +215,7 @@ class TestViews(unittest.TestCase):
         self.request.matchdict['script'] = 'kmzgen'
         self.request.json_body = {'shape': 'triangle'}
         task = Mock(PythonTask)
-        
+
         import colander
 
         shape = colander.SchemaNode(colander.String(),
@@ -439,7 +439,7 @@ class TestViews(unittest.TestCase):
             'label': 'Calendar',
             'form_url': '/tool/calendar/',
             'title': 'Calendar overview with daily statistics of GPS-tracker',
-            'description': '',
+            'description': '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Calendar">here</a>.''',
             'made_by_researcher': False
         }, {
             'label': 'KMZ and Plot',

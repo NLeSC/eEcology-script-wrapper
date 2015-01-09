@@ -24,6 +24,7 @@ class Gpx(PythonTask):
     name = 'gpx'
     label = 'GPX file'
     title = 'Generate a GPX file for a track. Can be used in <a target="_new" href="http://www.doarama.com/">Doarama</a> visualization.'
+    description = '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/GPX">here</a>.'''
     autoregister = True
     made_by_researcher = False
     MAX_FIX_COUNT = 50000
