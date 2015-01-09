@@ -47,8 +47,8 @@ class Schema(colander.MappingSchema):
     alpha = colander.SchemaNode(colander.Int(),
                                 validator=colander.Range(0, 100))
     valid_alt_modes = ['absolute',
-                       'absoluteClampBelowGround', 
-                       'clampToGround', 
+                       'absoluteClampBelowGround',
+                       'clampToGround',
                        'relativeToGround',
                        ]
     altitudemode = colander.SchemaNode(colander.String(),
@@ -63,6 +63,7 @@ class PyKML(PythonTask):
     description = '''The KMZ file contains the routes one or more selected trackers travelled during the selected date range.
     KMZ file can be opened with <a href="https://www.google.com/earth/">Google Earth</a>.
     The look and feel can be adjusted by choosing the tracker color and by changing the advanced settings.
+    More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/KMZ_Generator2">here</a>.
     '''
     made_by_researcher = False
     autoregister = True
