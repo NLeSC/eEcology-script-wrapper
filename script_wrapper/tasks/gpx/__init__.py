@@ -22,7 +22,7 @@ class Schema(colander.MappingSchema):
 class Gpx(PythonTask):
     """Generate a GPX file for a track"""
     name = 'gpx'
-    label = 'GPX file'
+    label = 'Flight Generator'
     title = 'Generate a GPX file for a track. Can be used in <a target="_new" href="http://www.doarama.com/">Doarama</a> visualization.'
     description = '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Flight_Generator">here</a>.'''
     autoregister = True

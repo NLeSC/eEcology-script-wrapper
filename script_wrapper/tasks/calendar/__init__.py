@@ -16,7 +16,7 @@ class Schema(colander.MappingSchema):
 
 class Calendar(RTask):
     name = 'calendar'
-    label = 'Calendar'
+    label = 'Tracker Calendar'
     title = 'Calendar overview with daily statistics of GPS-tracker'
     description = '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Tracker_Calendar">here</a>.'''
     script = 'calendar.r'
