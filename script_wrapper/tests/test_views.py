@@ -436,10 +436,10 @@ class TestViews(unittest.TestCase):
         result = views.tools()
 
         expected = [{
-            'label': 'Calendar',
+            'label': 'Tracker Calendar',
             'form_url': '/tool/calendar/',
             'title': 'Calendar overview with daily statistics of GPS-tracker',
-            'description': '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Calendar">here</a>.''',
+            'description': '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Tracker_Calendar">here</a>.''',
             'made_by_researcher': False
         }, {
             'label': 'KMZ and Plot',
