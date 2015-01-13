@@ -18,7 +18,7 @@ class Calendar(RTask):
     name = 'calendar'
     label = 'Tracker Calendar'
     title = 'Calendar overview with daily statistics of GPS-tracker'
-    description = '''More information can be found <a target="_blank" href="https://services.e-ecology.sara.nl/wiki/index.php/Tracker_Calendar">here</a>.'''
+    description = '''More information can be found <a target="_blank" href="https://public.e-ecology.sara.nl/wiki/index.php/Tracker_Calendar">here</a>.'''
     script = 'calendar.r'
     result_template = 'result.mak'
     autoregister = True
