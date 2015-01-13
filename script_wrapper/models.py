@@ -49,7 +49,7 @@ class Individual(Base):
     __table_args__ = {'schema': GPS_SCHEMA}
 
     ring_number = Column(String, primary_key=True)
-    species = Column(String)
+    species_latin_name = Column(String)
 
 
 class TrackSession(Base):
@@ -93,10 +93,11 @@ class Speed(Base):
     vnorth = Column(Float)
     veast = Column(Float)
     vdown = Column(Float)
-    speed = Column(Float)
-    speed3d = Column(Float)
+    speed_2d = Column(Float)
+    speed_3d = Column(Float)
     direction = Column(Float)
     userflag = Column(Integer)
+    altitude_agl = Column(Float)
 
     @hybrid_property
     def trajectDirection(self):

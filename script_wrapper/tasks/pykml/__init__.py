@@ -135,12 +135,13 @@ class PyKML(PythonTask):
         """Fetch track data from db"""
         tid = Speed.device_info_serial
         dt = Speed.date_time
-        elev = Speed.elevation
+        # terrain height is tracker altitude minus tracker altitude above ground level
+        elev = Speed.altitude - Speed.altitude_agl
         q = session.query(tid, dt,
                           Speed.longitude,
                           Speed.latitude,
                           Speed.altitude,
-                          func.round(cast(Speed.speed, Numeric), 2),
+                          func.round(cast(Speed.speed_2d, Numeric), 2),
                           func.round(Speed.trajectSpeed, 2),
                           func.round(Speed.direction, 2),
                           func.round(Speed.trajectDirection, 2),
