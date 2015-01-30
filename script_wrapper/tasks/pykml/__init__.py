@@ -128,9 +128,6 @@ class PyKML(PythonTask):
 
     def fetchtrack(self, session,
                    tracker_id, start, end,
-                   need_traject_speed,
-                   need_traject_direction,
-                   need_elevation,
                    ):
         """Fetch track data from db"""
         tid = Speed.device_info_serial
@@ -159,15 +156,9 @@ class PyKML(PythonTask):
                   start, end,
                   tracker,
                   style):
-        need_traject_speed = style['colorby'] == 'tspeed'
-        need_traject_direction = style['shape'] == 'tarrow'
-        need_elevation = style['altitudemode'] == 'relativeToGround'
         tracker_id = tracker['id']
         rows = self.fetchtrack(session,
                                tracker_id, start, end,
-                               need_traject_speed,
-                               need_traject_direction,
-                               need_elevation,
                                )
 
         self.trackrows2kml(kml, rows, tracker, style)
