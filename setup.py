@@ -9,8 +9,8 @@ requires = [
     'psycopg2',  # eecology is Postresql
     'sqlalchemy==0.8.4',
     'geoalchemy',  # required for PostGIS geometry column type
-    'pyramid_celery',
-    'celery==3.0.25',
+    'pyramid_celery==1.4',
+    'celery',
     'redis',
     'iso8601',
     'pytz',
