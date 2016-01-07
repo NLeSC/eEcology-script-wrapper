@@ -26,6 +26,8 @@ CELERYD_CONCURRENCY = 2
 CELERY_TASK_SERIALIZER = json
 CELERY_RESULT_SERIALIZER = json
 CELERY_ACCEPT_CONTENT=['json']
+# task should be killed if running longer than 1 hour
+CELERYD_TASK_TIME_LIMIT = 3600 
 
 sqlalchemy.url = postgresql://db.e-ecology.sara.nl/eecology?sslmode=require
 matlab.location.2012a = /opt/MATLAB/MATLAB_Compiler_Runtime/v717
