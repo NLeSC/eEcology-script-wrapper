@@ -31,8 +31,8 @@ RUN mkdir mcr-install && \
 
 # Install ExtJS
 RUN wget http://cdn.sencha.com/ext/gpl/ext-${EXTJS_VERSION}-gpl.zip && \
-    unzip ext-4.2.1-gpl.zip && \
-    rm -f ext-4.2.1-gpl.zip
+    unzip ext-${EXTJS_VERSION}-gpl.zip && \
+    rm -f ext-${EXTJS_VERSION}-gpl.zip
 
 # Install app
 RUN mkdir -p /usr/src/app
