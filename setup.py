@@ -14,7 +14,7 @@ requires = [
     'redis',
     'iso8601',
     'pytz',
-    'rpy2',
+    'rpy2==2.5.6',
     'singledispatch', # required by rpy2
     'oct2py',
     'scipy',  # required by oct2py
