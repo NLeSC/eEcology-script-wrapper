@@ -9,6 +9,6 @@ authors:
   family-names: Verhoeven
   affiliation: Nederlands eScience Center
 version: 2.2.7
-date-released: '2015-01-13'
+date-released: 2015-01-13
 repository-code: https://github.com/NLeSC/eEcology-script-wrapper
 license: Apache-2.0
